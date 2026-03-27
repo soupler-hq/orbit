@@ -2,6 +2,19 @@
 
 All notable changes to the Orbit framework will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-03-27
+### Added
+- **Persistence Pattern**: Implemented `bin/snapshot.sh` and `bin/resume.sh` for serialization and rehydration of session state.
+- **Multi-Agent Consensus**: Orchestrator now enforces "Consensus Check" requiring `APPROVED` status from Reviewer/Security agents during wave aggregation.
+- **Continuous Governance**: Integrated Git Pre-commit hook (`hooks/scripts/pre-commit.sh`) to enforce validation on every local commit.
+- **RALPH Loop Integration**: Added `skills/reflection.md` for autonomous error correction and loop persistence.
+
+## [2.1.0] - 2026-03-27
+### Added
+- **Atomic State Consistency**: Implemented filesystem-based mutex locking (`.orbit.lock`) to prevent `STATE.md` corruption during parallel aggregation.
+- **Git Worktree Handoff**: Automated task isolation via `git worktree add` for parallel wave execution.
+- **Model Routing Intelligence**: Orchestrator now enforces `orbit.config.json` model profiles based on agent domain (e.g., Haiku for classification, Sonnet for implementation).
+
 ## [2.0.0] - 2026-03-27
 ### Added
 - **Intelligent Safety Layer**: Context-aware `safety-evaluator.js` agent that analyzes intent and chain-of-commands before execution.

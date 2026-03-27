@@ -42,7 +42,7 @@
       "file": "agents/engineer.md",
       "domains": ["ENGINEERING"],
       "triggers": ["implement", "build", "debug", "refactor"],
-      "skills": ["skills/tdd.md", "skills/debugging.md"],
+      "skills": ["skills/tdd.md", "skills/debugging.md", "skills/reflection.md"],
       "outputs": ["source files", "tests", "SUMMARY.md", "atomic commit"]
     },
     {
@@ -58,7 +58,7 @@
       "file": "agents/reviewer.md",
       "domains": ["REVIEW"],
       "triggers": ["review", "audit", "quality gate", "ship gate"],
-      "skills": ["skills/review.md"],
+      "skills": ["skills/review.md", "skills/reflection.md"],
       "outputs": ["review report with severity ranking"]
     },
     {
@@ -130,7 +130,7 @@
       "file": "agents/safety-evaluator.md",
       "domains": ["REVIEW", "RESEARCH"],
       "triggers": ["pre-tool-use", "risky command", "security audit"],
-      "skills": ["skills/security.md", "skills/prompt-safety.md", "skills/architecture.md"],
+      "skills": ["skills/security.md", "skills/prompt-safety.md", "skills/architecture.md", "skills/reflection.md"],
       "outputs": ["risk score", "verdict", "rationale"]
     },
     {
@@ -159,7 +159,8 @@
     { "name": "scalability", "file": "skills/scalability.md", "purpose": "capacity planning", "loaded_by": ["architect", "data-engineer"] },
     { "name": "identity", "file": "skills/identity.md", "purpose": "auth and tenancy", "loaded_by": ["architect", "security-engineer"] },
     { "name": "ai-systems", "file": "skills/ai-systems.md", "purpose": "agent systems and routing", "loaded_by": ["forge", "architect"] },
-    { "name": "ecommerce", "file": "skills/ecommerce.md", "purpose": "commerce systems", "loaded_by": ["architect", "engineer"] }
+    { "name": "ecommerce", "file": "skills/ecommerce.md", "purpose": "commerce systems", "loaded_by": ["architect", "engineer"] },
+    { "name": "reflection", "file": "skills/reflection.md", "purpose": "autonomous self-correction (RALPH loop)", "loaded_by": ["reviewer", "engineer", "safety-evaluator"] }
   ],
   "workflows": [
     {

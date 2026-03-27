@@ -1,6 +1,6 @@
 {
   "$schema": "./orbit.config.schema.json",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "project": {
     "name": "",
     "org": "soupler",
@@ -37,7 +37,7 @@
     "options": ["none", "task", "phase", "milestone"],
     "atomic_commits": true,
     "conventional_commits": true,
-    "worktree_per_task": false
+    "worktree_per_task": true
   },
   "skills": {
     "auto_load": true,

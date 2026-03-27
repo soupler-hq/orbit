@@ -1,0 +1,14 @@
+# Orbit Ignore
+.orbit/state/*
+!.orbit/state/.gitkeep
+.orbit/hooks/*
+!.orbit/hooks/.gitkeep
+
+# Git Worktrees
+.worktrees/
+
+# OS/Node
+node_modules/
+.DS_Store
+*.log
+.orbit.lock
