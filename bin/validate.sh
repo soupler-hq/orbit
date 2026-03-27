@@ -118,14 +118,42 @@ if (!fs.existsSync(evalCommandPath)) {
 }
 
 for (const agent of registry.agents || []) {
-  if (!fs.existsSync(path.join(root, agent.file))) {
+  const agentPath = path.join(root, agent.file);
+  if (!fs.existsSync(agentPath)) {
     throw new Error(`Missing agent file referenced in registry: ${agent.file}`);
+  }
+  // Semantic Check: Agent should have TRIGGERS ON, DOMAIN EXPERTISE, OPERATING RULES, SKILLS LOADED, OUTPUT FORMAT
+  const agentContent = fs.readFileSync(agentPath, 'utf8');
+  const requiredSections = ['TRIGGERS ON', 'DOMAIN EXPERTISE', 'OPERATING RULES', 'SKILLS LOADED', 'OUTPUT FORMAT'];
+  for (const section of requiredSections) {
+    if (!agentContent.includes(`## ${section}`)) {
+      throw new Error(`Agent ${agent.name} missing required section: ${section}`);
+    }
+  }
+  // Dependency Check: Skills mentioned in registry should be in the agent file
+  for (const skillName of agent.skills || []) {
+    const skill = registry.skills.find(s => s.name === (skillName.startsWith('skills/') ? skillName.split('/')[1].replace('.md', '') : skillName));
+    if (!skill) {
+      throw new Error(`Agent ${agent.name} references unknown skill in registry: ${skillName}`);
+    }
+    if (!agentContent.toLowerCase().includes(skillName.toLowerCase())) {
+       console.warn(`⚠️  Agent ${agent.name} references skill ${skillName} in registry but not mentioned in ${agent.file}`);
+    }
   }
 }
 
 for (const skill of registry.skills || []) {
-  if (!fs.existsSync(path.join(root, skill.file))) {
+  const skillPath = path.join(root, skill.file);
+  if (!fs.existsSync(skillPath)) {
     throw new Error(`Missing skill file referenced in registry: ${skill.file}`);
+  }
+  // Semantic Check: Skill should have ACTIVATION, CORE PRINCIPLES, PATTERNS, CHECKLISTS, ANTI-PATTERNS, VERIFICATION WORKFLOW
+  const skillContent = fs.readFileSync(skillPath, 'utf8');
+  const requiredSections = ['ACTIVATION', 'CORE PRINCIPLES', 'PATTERNS', 'CHECKLISTS', 'ANTI-PATTERNS', 'VERIFICATION WORKFLOW'];
+  for (const section of requiredSections) {
+    if (!skillContent.includes(`## ${section}`)) {
+      throw new Error(`Skill ${skill.name} missing required section: ${section}`);
+    }
   }
 }
 

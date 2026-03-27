@@ -4,55 +4,44 @@
 ## ACTIVATION
 Auto-loaded when building any e-commerce, marketplace, payments, or ordering system.
 
-## CORE DOMAIN MODEL
-```
-Catalog: Product → Variant → PriceList → Inventory
-Commerce: Cart → Order → Fulfillment → Return
-Payments: PaymentIntent → Transaction → Refund → Ledger
-Identity: Customer → Address → PaymentMethod
-```
+## CORE PRINCIPLES
+1. **Financial Integrity**: Never store raw payment data (card numbers); use tokenization providers only.
+2. **Idempotency**: Every financial operation must be idempotent to prevent double-charging on retries.
+3. **Optimistic Inventory**: Use versioned pessimistic or optimistic locking to prevent overselling items.
+4. **Strict State Transitions**: Orders must follow a non-skippable state machine from creation to fulfillment.
+5. **Full Auditability**: Every change to price, stock, or order status must be logged with a timestamp and actor.
+6. **Separation of Concerns**: Keep localized concerns like Tax and Shipping as separate services from core order logic.
 
-## NON-NEGOTIABLES
-1. **Payment processing**: Never store raw card numbers — use Stripe/Braintree/Adyen tokenization
-2. **Idempotency**: Every payment operation must be idempotent — retries must not double-charge
-3. **Inventory**: Optimistic locking on inventory changes — prevent overselling
-4. **Order state machine**: Orders follow a strict state machine (created → confirmed → processing → shipped → delivered → returned) — never skip states
-5. **Audit trail**: Every price change, order state change, inventory change is logged with timestamp and actor
-6. **Tax**: Tax calculation is a separate service concern — never bake it into order total logic
+## PATTERNS
 
-## PAYMENT INTEGRATION PATTERN
-```typescript
-// Idempotent payment intent creation
-const intent = await stripe.paymentIntents.create({
-  amount: orderTotal,
-  currency: 'usd',
-  idempotencyKey: `order-${orderId}-payment`,  // crucial
-  metadata: { orderId, customerId },
-});
+### Core Domain Mapping
+- **Catalog**: Products → Variants → PriceLists → Inventory.
+- **Commerce**: Carts → Orders → Fulfillment → Returns.
+- **Identity**: Customers → Addresses → PaymentMethods.
 
-// Webhook-driven status updates (not polling)
-// stripe listen → PaymentIntent.succeeded → update order status
-```
+### Operational Patterns
+- **Idempotent Payments**: Passing `idempotency_key` (e.g., `order-{id}-payment`) to payment gateways.
+- **Inventory Locking**: SQL `UPDATE ... WHERE quantity >= :requested AND version = :expected`.
+- **Webhook Updates**: Asynchronous, reliable status synchronization via provider webhooks.
 
-## INVENTORY PATTERNS
-```sql
--- Optimistic lock pattern — prevents overselling
-UPDATE inventory
-SET quantity = quantity - :requested, version = version + 1
-WHERE product_id = :id
-  AND quantity >= :requested
-  AND version = :expectedVersion;
+## CHECKLISTS
 
--- If 0 rows affected → retry or fail with "out of stock"
-```
+### Checkout Readiness
+- [ ] Cart validated for current pricing and stock availability
+- [ ] Shipping address validated before tax/rate calculation
+- [ ] Payment intent created with unique idempotency key
+- [ ] Inventory reserved on checkout start and decremented on success
+- [ ] Confirmation emails triggered via background queue (async)
+- [ ] Webhook handlers verified for idempotency and signature security
 
-## CHECKOUT FLOW CHECKLIST
-- [ ] Cart validation at checkout start (prices current, items available)
-- [ ] Address validation before shipping rate calculation
-- [ ] Tax calculation after shipping address confirmed
-- [ ] Payment intent created with idempotency key
-- [ ] Inventory reserved (not decremented) on checkout start
-- [ ] Inventory decremented only on payment success
-- [ ] Inventory released on payment failure or timeout
-- [ ] Order confirmation email sent via queue (not inline)
-- [ ] Webhook handler for payment events (idempotent)
+## ANTI-PATTERNS
+- **Big Ledger Logic**: Calculating totals in the database instead of a dedicated service.
+- **PCI Compliance Violations**: Logging card data or raw PII in plaintext logs.
+- **Direct Inventory Decay**: blindly decrementing stock without checking availability or version.
+- **Synchronous Webhooks**: Processing external callbacks inline, blocking the listener.
+- **Status Jumping**: Moving an order from "Pending" to "Shipped" without "Processing" or "Paid" checks.
+
+## VERIFICATION WORKFLOW
+1.  **Logical Consistency**: Ensure the skill's core principles align with the current architecture.
+2.  **Output Integrity**: Verify that any artifacts generated follow the template and fulfill all requirements.
+3.  **Traceability**: Ensure that all decisions made during this skill's use are logged in the task state.

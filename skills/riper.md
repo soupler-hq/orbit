@@ -1,150 +1,47 @@
 # Skill: RIPER Workflow
 > Structured 5-mode thinking framework — prevents premature execution
 
-## When to Activate
-- Before starting any non-trivial task ("before you code, think")
-- When user says "think through this", "explore options", "research before building"
-- When requirements are ambiguous
-- When the task involves an unfamiliar domain
-- `/orbit:riper` command or explicit mention of RIPER
+## ACTIVATION
+- Before starting any non-trivial task ("before you code, think").
+- When requirements are ambiguous or the domain is unfamiliar.
+- `/orbit:riper` command or explicit mention of RIPER.
 
-## The 5 Modes
+## CORE PRINCIPLES
+1. **Understand Before Acting**: Mode 1 (Research) is mandatory and must establish context BEFORE any solutions are proposed.
+2. **Options over Opinions**: Mode 2 (Innovate) requires multiple viable approaches to prevent "single-path" bias.
+3. **Plan the Work, Work the Plan**: Mode 3 (Plan) must be complete before any code is written.
+4. **Zero Deviance**: Mode 4 (Execute) must strictly follow the plan; any discovered issues must trigger a return to Phase 3.
+5. **Evidence-Based Completion**: Mode 5 (Review) requires documented proof (tests, audits) before declaring a task finished.
 
-RIPER forces sequential mode transitions. You cannot skip modes. Each mode has a declaration format.
+## PATTERNS
 
----
+### The 5-Phase RIPER Workflow
+1. **Research**: Knowledge extraction, dependency mapping, and unknown discovery.
+2. **Innovate**: Generation of 3+ distinct approaches with trade-off analysis.
+3. **Plan**: Wave-based task breakdown and test definition.
+4. **Execute**: Atomic implementation, TDD discipline, and commit tracing.
+5. **Review**: Verification against success criteria and security auditing.
 
-### MODE 1: RESEARCH
-> Understand before acting
+### RIPER Lite (Quick Tasks)
+For low-complexity, familiar tasks: Research (what I know) → Plan (3 tasks) → Execute → Verify.
 
-**Declaration**: `[RIPER: RESEARCH]`
+## CHECKLISTS
 
-**What to do**:
-- Read all relevant files, docs, and context
-- Identify: what exists, what's broken, what's missing
-- Map dependencies: what does this touch?
-- Identify constraints: performance, security, backwards compat
-- Surface unknowns: what do I not know that could block me?
+### RIPER Maturity
+- [ ] All modes declared sequentially (no skipping)
+- [ ] Research phase identified ≥1 non-obvious constraint or unknown
+- [ ] Innovate phase documented trade-offs for ≥3 viable options
+- [ ] Plan phase is detailed enough for an external agent to execute
+- [ ] Review phase includes passing tests and a security scan
 
-**Output**: Bullet-point findings. No solutions yet.
+## ANTI-PATTERNS
+- **Mode Skipping**: Jumping straight to Code (Execute) without Research or Planning.
+- **Single-Option Trap**: Moving from Research to Planning with only one approach analyzed.
+- **Silent Pivot**: Changing the implementation strategy during Execute without updating the Plan.
+- **Subjective Review**: Declaring a task done based on "testing it manually" without evidence.
+- **Endless Research**: Collecting information without moving to the Innovate/Plan phases.
 
-**Forbidden**: Proposing solutions, writing code, making assumptions
-
-**Exit criteria**: You can answer: "What is the exact problem and what context exists?"
-
----
-
-### MODE 2: INNOVATE
-> Generate options without committing
-
-**Declaration**: `[RIPER: INNOVATE]`
-
-**What to do**:
-- Generate 3-5 distinct approaches
-- For each: describe the approach in 1-2 sentences
-- For each: list pros/cons/trade-offs
-- For each: estimate implementation complexity (S/M/L/XL)
-- For each: identify risks
-
-**Output**: Options table. No recommendation yet.
-
-**Forbidden**: Picking a solution, writing code, dismissing options without analysis
-
-**Exit criteria**: You have ≥3 viable options with explicit trade-offs documented
-
----
-
-### MODE 3: PLAN
-> Design the solution in detail
-
-**Declaration**: `[RIPER: PLAN]`
-
-**What to do**:
-- Select one option (state rationale explicitly)
-- Break into atomic tasks (each independently testable)
-- Define wave structure (which tasks are parallel, which sequential)
-- Identify files that will change
-- Define tests that will verify completion
-- Surface risks and mitigations
-
-**Output**: XML task plan (Orbit format)
-
-**Forbidden**: Writing implementation code (pseudocode is ok), skipping test definition
-
-**Exit criteria**: Plan is detailed enough for a junior engineer to execute without questions
-
----
-
-### MODE 4: EXECUTE
-> Implement exactly as planned
-
-**Declaration**: `[RIPER: EXECUTE]`
-
-**What to do**:
-- Implement precisely what the plan specifies
-- TDD: write tests first (RED), then implementation (GREEN), then refactor
-- Atomic commits per task
-- No scope creep — if you discover a new problem, add it to the plan, don't fix it inline
-
-**Output**: Working code + passing tests + commit
-
-**Forbidden**: Deviating from the plan without declaring a plan update, adding unplanned features
-
-**Exit criteria**: All planned tasks complete, all tests passing, code committed
-
----
-
-### MODE 5: REVIEW
-> Verify completeness and quality
-
-**Declaration**: `[RIPER: REVIEW]`
-
-**What to do**:
-- Verify every planned task is complete
-- Run all tests (unit, integration, e2e if applicable)
-- Check against original requirements
-- Security scan (at minimum: no secrets, input validated, auth correct)
-- Document what was built and why decisions were made
-
-**Output**: REVIEW.md with completion checklist
-
-**Forbidden**: Declaring done without evidence, skipping tests, skipping requirement check
-
-**Exit criteria**: All tasks complete, all tests passing, no unresolved findings
-
----
-
-## Mode Transition Rules
-
-```
-RESEARCH → INNOVATE: Only after findings are documented
-INNOVATE → PLAN:     Only after ≥3 options analyzed
-PLAN → EXECUTE:      Only after plan is reviewed (by human in collaborative mode)
-EXECUTE → REVIEW:    Only after all tasks committed
-REVIEW → done:       Only after all checks pass
-```
-
-## Shortcut: RIPER Lite (for QUICK tasks)
-When complexity is QUICK and domain is familiar:
-```
-[RIPER-LITE]
-Research:  (2-3 bullets — what I know)
-Plan:      (1-3 tasks)
-Execute:   (do it)
-Verify:    (confirm it works)
-```
-
-## Anti-Patterns RIPER Prevents
-- **Jump to code** — skipping research → wrong solution, rework
-- **Analysis paralysis** — stuck in research → INNOVATE forces generation
-- **Scope creep** — discovery in EXECUTE → must go back to PLAN
-- **Declare done without evidence** — REVIEW is mandatory, not optional
-- **Single option thinking** — INNOVATE requires ≥3 options
-
-## Integration with Orbit
-```
-/orbit:new-project  → always starts with RIPER RESEARCH phase
-/orbit:plan         → produces RIPER PLAN output (XML tasks)
-/orbit:quick        → uses RIPER-LITE
-/orbit:debug        → RESEARCH → PLAN (skip INNOVATE for bugs) → EXECUTE → REVIEW
-```
+## VERIFICATION WORKFLOW
+1.  **Logical Consistency**: Ensure the skill's core principles align with the current architecture.
+2.  **Output Integrity**: Verify that any artifacts generated follow the template and fulfill all requirements.
+3.  **Traceability**: Ensure that all decisions made during this skill's use are logged in the task state.

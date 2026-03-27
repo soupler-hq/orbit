@@ -1,0 +1,36 @@
+# Orbit Changelog
+
+All notable changes to the Orbit framework will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.0] - 2026-03-27
+### Added
+- **Intelligent Safety Layer**: Context-aware `safety-evaluator.js` agent that analyzes intent and chain-of-commands before execution.
+- **Wave Orchestration**: Automated parallel subagent management via `bin/orchestrator.js`.
+- **Structural Validation**: Upgraded `bin/validate.sh` with Semantic & Logical consistency checks.
+- **Verification Suite**: `bin/test-safety.sh` for automated adversarial and injection testing.
+- **Consistency Enforcement**: Mandatory `VERIFICATION WORKFLOW` in all 17+ core skills.
+- **Context Synthesis**: Automated retrieval and aggregation of subagent outputs into single `SUMMARY.md`.
+
+### Changed
+- Refactored `pre-tool-use.sh` into a multi-layered defense-in-depth hook.
+- Standardized all `agents/*.md` and `skills/*.md` with mandatory uppercase semantic headers.
+- Harmonized `orbit.registry.json` with direct skill-dependency mapping.
+
+### Fixed
+- Fixed "Logical Consistency" weakness where the Forge could build a skill without a test path.
+- Fixed vulnerability to Base64-obfuscated payloads and shell command chaining bypasses.
+- Corrected path-resolution issues in the orchestration control plane.
+
+## [1.0.0] - 2026-03-10
+### Added
+- **Orbit Orchestrator**: Initial release of the agent framework.
+- **Agent Forge**: Basic autonomous agent/skill generation protocol.
+- **Agent Registry**: Centralized control plane for identity management.
+- **Basic Hooks**: Initial pre/post tool hooks for command interception.
+
+### Changed
+- Initial directory structure for `agents/`, `skills/`, and `hooks/`.
+- Basic JSON schema for `orbit.registry.json`.
+
+---
+*Orbit: Standardizing the future of agentic orchestration.*

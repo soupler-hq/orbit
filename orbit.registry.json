@@ -126,6 +126,14 @@
       "outputs": ["Go review report"]
     },
     {
+      "name": "safety-evaluator",
+      "file": "agents/safety-evaluator.md",
+      "domains": ["REVIEW", "RESEARCH"],
+      "triggers": ["pre-tool-use", "risky command", "security audit"],
+      "skills": ["skills/security.md", "skills/prompt-safety.md", "skills/architecture.md"],
+      "outputs": ["risk score", "verdict", "rationale"]
+    },
+    {
       "name": "forge",
       "file": "agents/forge.md",
       "domains": ["SYNTHESIS"],
@@ -136,15 +144,15 @@
   ],
   "skills": [
     { "name": "tdd", "file": "skills/tdd.md", "purpose": "code change discipline", "loaded_by": ["engineer", "reviewer", "security-engineer", "data-engineer"] },
-    { "name": "architecture", "file": "skills/architecture.md", "purpose": "system design", "loaded_by": ["architect", "data-engineer"] },
+    { "name": "architecture", "file": "skills/architecture.md", "purpose": "system design", "loaded_by": ["architect", "data-engineer", "safety-evaluator"] },
     { "name": "planning", "file": "skills/planning.md", "purpose": "phase planning", "loaded_by": ["strategist"] },
     { "name": "brainstorming", "file": "skills/brainstorming.md", "purpose": "spec extraction", "loaded_by": ["strategist", "researcher", "designer"] },
     { "name": "debugging", "file": "skills/debugging.md", "purpose": "root cause analysis", "loaded_by": ["engineer"] },
     { "name": "review", "file": "skills/review.md", "purpose": "quality review", "loaded_by": ["reviewer", "security-engineer", "typescript-reviewer", "python-reviewer", "go-reviewer"] },
     { "name": "deployment", "file": "skills/deployment.md", "purpose": "ship safety", "loaded_by": ["devops"] },
     { "name": "observability", "file": "skills/observability.md", "purpose": "logs metrics tracing", "loaded_by": ["devops", "data-engineer"] },
-    { "name": "security", "file": "skills/security.md", "purpose": "auth and validation", "loaded_by": ["architect", "security-engineer", "typescript-reviewer", "python-reviewer", "go-reviewer"] },
-    { "name": "prompt-safety", "file": "skills/prompt-safety.md", "purpose": "prompt injection defense", "loaded_by": ["architect", "security-engineer"] },
+    { "name": "security", "file": "skills/security.md", "purpose": "auth and validation", "loaded_by": ["architect", "security-engineer", "typescript-reviewer", "python-reviewer", "go-reviewer", "safety-evaluator"] },
+    { "name": "prompt-safety", "file": "skills/prompt-safety.md", "purpose": "prompt injection defense", "loaded_by": ["architect", "security-engineer", "safety-evaluator"] },
     { "name": "context-management", "file": "skills/context-management.md", "purpose": "session and token control", "loaded_by": ["all"] },
     { "name": "riper", "file": "skills/riper.md", "purpose": "structured reasoning", "loaded_by": ["all"] },
     { "name": "git-worktree", "file": "skills/git-worktree.md", "purpose": "parallel development", "loaded_by": ["engineer", "strategist"] },

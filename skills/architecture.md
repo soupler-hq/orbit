@@ -4,7 +4,15 @@
 ## ACTIVATION
 Auto-loaded when designing any system, subsystem, or making technology choices.
 
-## ARCHITECTURE DECISION RECORD (ADR) FORMAT
+## CORE PRINCIPLES
+1. **Separation of Concerns**: Each component has a single, well-defined responsibility.
+2. **Design for Failure**: Assume everything will break; design the recovery path.
+3. **Contracts over Code**: Define the interface and data model before implementation.
+4. **Simplification**: Solve for today's needs with tomorrow's scalability in mind.
+
+## PATTERNS
+
+### ADR-{N}: {Title}
 Every significant decision gets an ADR. Significant = would take >1 day to reverse.
 
 ```markdown
@@ -47,7 +55,19 @@ What do we need to monitor or revisit?
 When should this decision be revisited? (e.g., "when monthly active users exceed 100k")
 ```
 
-## SYSTEM DESIGN CHECKLIST
+### COMMON ARCHITECTURE PATTERNS (with when to use)
+
+| Pattern | Use When |
+|---------|----------|
+| Monolith | Team <10 engineers, domain well understood, shipping speed critical |
+| Modular Monolith | Growing team, want service isolation without distributed systems complexity |
+| Microservices | Teams are scaling independently, need independent deployment, clear domain boundaries |
+| Event-Driven | Decoupling producers/consumers, audit trail needed, multiple consumers of same event |
+| CQRS | Read and write models diverge significantly, high read:write ratio |
+| Saga | Distributed transactions across services, eventual consistency acceptable |
+| BFF (Backend for Frontend) | Multiple frontends with different data shape needs |
+
+## CHECKLISTS
 
 ### Boundaries & Ownership
 - [ ] Every component has a single owner (team or service)
@@ -83,18 +103,13 @@ When should this decision be revisited? (e.g., "when monthly active users exceed
 - [ ] Alerting thresholds defined before go-live
 - [ ] Runbook for every alert
 
-## TECHNOLOGY SELECTION FRAMEWORK
-Score each candidate on: fit for requirements (1-5), team familiarity (1-5), ecosystem maturity (1-5), operational burden (1-5, higher = less burden), licensing (pass/fail).
-Choose highest total score. Document it in ADR.
+## ANTI-PATTERNS
+- **Golden Hammer**: Forcing every problem into a single technology or pattern.
+- **Premature Optimization**: Solving for 1M users when you have 10.
+- **Spaghetti Architecture**: Service boundaries so fuzzy that every change requires touching 5 services.
+- **Tightly Coupled Secrets**: Sharing secret management across environments (staging vs prod).
 
-## COMMON ARCHITECTURE PATTERNS (with when to use)
-
-| Pattern | Use When |
-|---------|----------|
-| Monolith | Team <10 engineers, domain well understood, shipping speed critical |
-| Modular Monolith | Growing team, want service isolation without distributed systems complexity |
-| Microservices | Teams are scaling independently, need independent deployment, clear domain boundaries |
-| Event-Driven | Decoupling producers/consumers, audit trail needed, multiple consumers of same event |
-| CQRS | Read and write models diverge significantly, high read:write ratio |
-| Saga | Distributed transactions across services, eventual consistency acceptable |
-| BFF (Backend for Frontend) | Multiple frontends with different data shape needs |
+## VERIFICATION WORKFLOW
+1.  **Logical Consistency**: Ensure the skill's core principles align with the current architecture.
+2.  **Output Integrity**: Verify that any artifacts generated follow the template and fulfill all requirements.
+3.  **Traceability**: Ensure that all decisions made during this skill's use are logged in the task state.

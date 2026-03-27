@@ -4,7 +4,14 @@
 ## ACTIVATION
 Auto-loaded for all architecture design, API design, and authentication/authorization tasks.
 
-## AUTHENTICATION PATTERNS
+## CORE PRINCIPLES
+1. **Deny by Default**: Access is only granted when explicitly allowed.
+2. **Defense in Depth**: Multiple layers of security (auth, input validation, encryption).
+3. **Least Privilege**: Users and systems have only the minimum access needed.
+4. **Assume Breach**: Design for the compromise of any single component.
+5. **Fail Safely**: When security checks fail, they must fail closed (deny).
+
+## PATTERNS
 
 ### JWT Best Practices
 ```typescript
@@ -38,8 +45,7 @@ res.cookie('session', token, {
 });
 ```
 
-## AUTHORIZATION: RBAC + ABAC
-
+### Authorization: RBAC + ABAC
 ```typescript
 // Role-based access control
 const can = (user: User, action: string, resource: Resource): boolean => {
@@ -53,17 +59,9 @@ const can = (user: User, action: string, resource: Resource): boolean => {
   
   return true;
 };
-
-// Use as middleware
-const authorize = (action: string) => (req, res, next) => {
-  if (!can(req.user, action, req.resource)) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
-  next();
-};
 ```
 
-## INPUT VALIDATION (every external input)
+### Input Validation
 ```typescript
 import { z } from 'zod';
 
@@ -74,19 +72,11 @@ const CreateOrderSchema = z.object({
   })).min(1).max(50),
   shippingAddressId: z.string().uuid(),
 });
-
-// Use in route handler
-app.post('/orders', async (req, res) => {
-  const result = CreateOrderSchema.safeParse(req.body);
-  if (!result.success) {
-    return res.status(400).json({ error: result.error.format() });
-  }
-  // proceed with result.data — types guaranteed
-});
 ```
 
-## OWASP TOP 10 CHECKLIST
+## CHECKLISTS
 
+### OWASP TOP 10
 | # | Vulnerability | Mitigation |
 |---|--------------|-----------|
 | A01 | Broken Access Control | RBAC middleware on every route, deny by default |
@@ -100,49 +90,14 @@ app.post('/orders', async (req, res) => {
 | A09 | Logging Failures | Log every auth event, never log passwords/tokens |
 | A10 | SSRF | Whitelist allowed external URLs, block metadata endpoints |
 
-## SECRETS MANAGEMENT
-```bash
-# NEVER in code or .env committed to git
-DATABASE_URL=postgres://...
-JWT_SECRET=...
-STRIPE_SECRET_KEY=...
+## ANTI-PATTERNS
+- **Hardcoded Secrets**: Storing credentials in source code or unencrypted .env files.
+- **Trusting the Client**: Passing security-critical decisions (e.g., price, ID) from the client without server validation.
+- **Verbose Errors**: Exposing stack traces or internal system details to users.
+- **Missing Rate Limits**: Leaving endpoints vulnerable to brute force or DoS.
+- **Schemaless Inputs**: Accepting unvalidated JSON payloads directly into logic or DB.
 
-# Use secret managers:
-# AWS: aws secretsmanager get-secret-value
-# GCP: gcloud secrets versions access latest
-# HashiCorp Vault: vault kv get secret/myapp
-# Doppler, 1Password Secrets Automation
-```
-
-## SECURITY HEADERS (every HTTP response)
-```typescript
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", 'data:', 'https:'],
-    },
-  },
-  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-}));
-```
-
-## RATE LIMITING (every public endpoint)
-```typescript
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,                  // per IP
-  standardHeaders: true,
-  legacyHeaders: false,
-  handler: (req, res) => {
-    logger.warn('rate.limit.exceeded', { ip: req.ip, path: req.path });
-    res.status(429).json({ error: 'Too many requests' });
-  },
-});
-
-// Stricter limits for auth endpoints
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
-```
+## VERIFICATION WORKFLOW
+1.  **Logical Consistency**: Ensure the skill's core principles align with the current architecture.
+2.  **Output Integrity**: Verify that any artifacts generated follow the template and fulfill all requirements.
+3.  **Traceability**: Ensure that all decisions made during this skill's use are logged in the task state.

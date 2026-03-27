@@ -1,9 +1,6 @@
 # Orbit - AI Agent Orchestration Framework
 
-> Orbit is a repo-native control plane for agentic software delivery
-> **v1.0** | Enterprise-ready
-
----
+Orbit is a repo-native control plane for agentic software delivery
 
 ## What is Orbit?
 
