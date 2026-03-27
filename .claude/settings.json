@@ -1,0 +1,59 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(bash .orbit/hooks/*)",
+      "Bash(bash hooks/scripts/*)"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/nexus/hooks/pre-tool-use.sh\" 2>/dev/null || bash \".orbit/hooks/pre-tool-use.sh\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/nexus/hooks/post-tool-use.sh\" 2>/dev/null || bash \".orbit/hooks/post-tool-use.sh\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/nexus/hooks/pre-compact.sh\" 2>/dev/null || bash \".orbit/hooks/pre-compact.sh\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$HOME/.claude/nexus/hooks/stop.sh\" 2>/dev/null || bash \".orbit/hooks/stop.sh\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,277 @@
+#!/usr/bin/env bash
+# Orbit Installation Script v2.0.0
+# Soupler Engineering Standard — agentic framework
+set -e
+
+FRAMEWORK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INSTALL_MODE="local"
+TOOL="claude"
+PROJECT_DIR="${PWD}"
+GREEN='\033[0;32m'; BLUE='\033[0;34m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BOLD='\033[1m'; NC='\033[0m'
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --global|-g) INSTALL_MODE="global"; shift ;;
+    --local|-l)  INSTALL_MODE="local";  shift ;;
+    --tool)      TOOL="$2"; shift 2 ;;
+    --all)       TOOL="all"; shift ;;
+    --hooks-only) INSTALL_HOOKS_ONLY=1; shift ;;
+    *) echo "Unknown option: $1"; exit 1 ;;
+  esac
+done
+
+if [[ "$INSTALL_MODE" == "global" ]]; then
+  CLAUDE_DIR="$HOME/.claude"
+else
+  CLAUDE_DIR="$PROJECT_DIR/.claude"
+fi
+
+echo -e "${BOLD}"
+echo "╔════════════════════════════════════════╗"
+echo "║   Orbit Installer v2.0.0   ║"
+echo "║   Soupler AI Engineering Standard      ║"
+echo "╚════════════════════════════════════════╝"
+echo -e "${NC}"
+
+# ─── Install for Claude Code ──────────────────────────────────────────────────
+install_for_claude() {
+  echo -e "${YELLOW}▶ Installing for Claude Code...${NC}"
+
+  # Core directories
+  mkdir -p \
+    "$CLAUDE_DIR/commands/orbit" \
+    "$CLAUDE_DIR/agents" \
+    "$CLAUDE_DIR/skills" \
+    "$CLAUDE_DIR/state" \
+    "$CLAUDE_DIR/orbit/hooks"
+
+  # ── Orchestrator ──────────────────────────────────────────────────────────
+  cp "$FRAMEWORK_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+  echo "  ✓ CLAUDE.md (orchestrator v2.0)"
+
+  # ── Control Plane ─────────────────────────────────────────────────────────
+  cp "$FRAMEWORK_DIR/AGENTS.md" "$CLAUDE_DIR/AGENTS.md"
+  cp "$FRAMEWORK_DIR/INSTRUCTIONS.md" "$CLAUDE_DIR/INSTRUCTIONS.md"
+  cp "$FRAMEWORK_DIR/SKILLS.md" "$CLAUDE_DIR/SKILLS.md"
+  cp "$FRAMEWORK_DIR/WORKFLOWS.md" "$CLAUDE_DIR/WORKFLOWS.md"
+  cp "$FRAMEWORK_DIR/orbit.registry.json" "$CLAUDE_DIR/orbit.registry.json"
+  cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$CLAUDE_DIR/orbit.config.schema.json"
+  echo "  ✓ control plane docs + registry + schema"
+
+  # ── Core Agents ───────────────────────────────────────────────────────────
+  for f in "$FRAMEWORK_DIR"/agents/*.md; do
+    name=$(basename "$f")
+    cp "$f" "$CLAUDE_DIR/agents/$name"
+    echo "  ✓ agents/$name"
+  done
+
+  # ── Forged Specialist Agents ───────────────────────────────────────────────
+  if [[ -d "$FRAMEWORK_DIR/forge" ]]; then
+    mkdir -p "$CLAUDE_DIR/agents/forge"
+    for f in "$FRAMEWORK_DIR"/forge/*.md; do
+      name=$(basename "$f")
+      cp "$f" "$CLAUDE_DIR/agents/forge/$name"
+      echo "  ✓ agents/forge/$name"
+    done
+  fi
+
+  # ── Skills ────────────────────────────────────────────────────────────────
+  for f in "$FRAMEWORK_DIR"/skills/*.md; do
+    name=$(basename "$f")
+    cp "$f" "$CLAUDE_DIR/skills/$name"
+    echo "  ✓ skills/$name"
+  done
+
+  # ── Commands ──────────────────────────────────────────────────────────────
+  cp "$FRAMEWORK_DIR/commands/commands.md" "$CLAUDE_DIR/commands/orbit/commands.md"
+  echo "  ✓ commands/orbit/commands.md"
+
+  # Generate individual command files
+  local commands=(
+    new-project plan build verify ship next quick forge review audit
+    monitor debug map-codebase progress resume deploy rollback
+    riper worktree cost
+  )
+  for cmd in "${commands[@]}"; do
+    cat > "$CLAUDE_DIR/commands/orbit/${cmd}.md" << CMDEOF
+---
+description: "Orbit /orbit:${cmd} — AI agent orchestration"
+allowed-tools: all
+---
+Read \$CLAUDE_DIR/CLAUDE.md to load Orbit context.
+Read \$CLAUDE_DIR/commands/orbit/commands.md for this command's exact process specification.
+If STATE.md exists at .orbit/state/STATE.md, read it for project context.
+Execute: /orbit:${cmd} \$ARGUMENTS — follow the exact process defined, no shortcuts.
+CMDEOF
+    echo "  ✓ /orbit:${cmd}"
+  done
+
+  # ── State Template ────────────────────────────────────────────────────────
+  cp "$FRAMEWORK_DIR/state/STATE.template.md" "$CLAUDE_DIR/state/STATE.template.md"
+  echo "  ✓ state/STATE.template.md"
+
+  # ── Hook Scripts ──────────────────────────────────────────────────────────
+  echo ""
+  echo -e "${YELLOW}▶ Installing lifecycle hooks...${NC}"
+  for f in "$FRAMEWORK_DIR"/hooks/scripts/*.sh; do
+    name=$(basename "$f")
+    cp "$f" "$CLAUDE_DIR/orbit/hooks/$name"
+    chmod +x "$CLAUDE_DIR/orbit/hooks/$name"
+    echo "  ✓ hooks/$name"
+  done
+
+  # ── Claude Code Settings (hooks registration) ─────────────────────────────
+  echo ""
+  echo -e "${YELLOW}▶ Configuring Claude Code settings...${NC}"
+  install_claude_settings
+
+  echo -e "${GREEN}  ✅ Claude Code installation complete${NC}"
+}
+
+# ─── Write Claude Code settings.json with hooks ───────────────────────────────
+install_claude_settings() {
+  local settings_file="$CLAUDE_DIR/settings.json"
+  local hooks_dir
+
+  if [[ "$INSTALL_MODE" == "global" ]]; then
+    hooks_dir="\$HOME/.claude/orbit/hooks"
+  else
+    hooks_dir=".orbit/hooks"
+  fi
+
+  # Merge with existing settings if present, otherwise create new
+  if [[ -f "$settings_file" ]] && command -v jq &>/dev/null; then
+    echo "  Found existing settings.json — merging hooks..."
+    local tmp_settings
+    tmp_settings=$(mktemp)
+    jq --arg hdir "$HOME/.claude/orbit/hooks" '
+      .hooks = {
+        "PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/pre-tool-use.sh\" 2>/dev/null || true")}]}],
+        "PostToolUse": [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/post-tool-use.sh\" 2>/dev/null || true")}]}],
+        "PreCompact":  [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/pre-compact.sh\" 2>/dev/null || true")}]}],
+        "Stop":        [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/stop.sh\" 2>/dev/null || true")}]}]
+      }
+    ' "$settings_file" > "$tmp_settings" && mv "$tmp_settings" "$settings_file"
+  else
+    # Write fresh settings
+    local HOOK_BASE="$HOME/.claude/orbit/hooks"
+    cat > "$settings_file" << SETTINGS_EOF
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{"type": "command", "command": "bash \"${HOOK_BASE}/pre-tool-use.sh\" 2>/dev/null || true"}]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [{"type": "command", "command": "bash \"${HOOK_BASE}/post-tool-use.sh\" 2>/dev/null || true"}]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": ".*",
+        "hooks": [{"type": "command", "command": "bash \"${HOOK_BASE}/pre-compact.sh\" 2>/dev/null || true"}]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [{"type": "command", "command": "bash \"${HOOK_BASE}/stop.sh\" 2>/dev/null || true"}]
+      }
+    ]
+  }
+}
+SETTINGS_EOF
+  fi
+  echo "  ✓ settings.json (hooks: PreToolUse, PostToolUse, PreCompact, Stop)"
+}
+
+# ─── Initialize project state directory ───────────────────────────────────────
+init_project_state() {
+  echo ""
+  echo -e "${YELLOW}▶ Initializing project state...${NC}"
+
+  local state_dir="$PROJECT_DIR/.orbit/state"
+  local hooks_dir="$PROJECT_DIR/.orbit/hooks"
+
+  mkdir -p "$state_dir" "$hooks_dir" "$PROJECT_DIR/.orbit/errors"
+
+  # Copy STATE template if no STATE.md yet
+  if [[ ! -f "$state_dir/STATE.md" ]]; then
+    cp "$FRAMEWORK_DIR/state/STATE.template.md" "$state_dir/STATE.md"
+    echo "  ✓ .orbit/state/STATE.md (from template)"
+  else
+    echo "  ✓ .orbit/state/STATE.md (already exists — preserved)"
+  fi
+
+  # Copy hook scripts to project-local .orbit/hooks/
+  for f in "$FRAMEWORK_DIR"/hooks/scripts/*.sh; do
+    name=$(basename "$f")
+    cp "$f" "$hooks_dir/$name"
+    chmod +x "$hooks_dir/$name"
+  done
+  echo "  ✓ .orbit/hooks/ (lifecycle scripts)"
+
+  # Copy config if not present
+  if [[ ! -f "$PROJECT_DIR/orbit.config.json" ]]; then
+    cp "$FRAMEWORK_DIR/orbit.config.json" "$PROJECT_DIR/orbit.config.json"
+    echo "  ✓ orbit.config.json (framework configuration)"
+  fi
+
+  # Add Orbit state dirs to .gitignore
+  local gitignore="$PROJECT_DIR/.gitignore"
+  if [[ -f "$gitignore" ]]; then
+    if ! grep -q "\.orbit/errors" "$gitignore" 2>/dev/null; then
+      cat >> "$gitignore" << GITIGNORE_EOF
+
+# Orbit
+.orbit/errors/
+.orbit/state/sessions.log
+.orbit/state/tool-usage.log
+.orbit/state/compact.log
+.worktrees/
+GITIGNORE_EOF
+      echo "  ✓ .gitignore (Orbit entries added)"
+    fi
+  fi
+
+  echo -e "${GREEN}  ✅ Project state initialized${NC}"
+}
+
+# ─── Main ────────────────────────────────────────────────────────────────────
+if [[ "$INSTALL_MODE" == "local" ]]; then
+  init_project_state
+fi
+
+case "$TOOL" in
+  claude|all) install_for_claude ;;
+esac
+
+# ─── Summary ─────────────────────────────────────────────────────────────────
+echo ""
+echo -e "${BOLD}Installation complete!${NC}"
+echo ""
+echo -e "Installed to: ${BLUE}$CLAUDE_DIR${NC}"
+echo ""
+echo -e "Framework:"
+echo -e "  Agents:  $(ls "$FRAMEWORK_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ') core + $(ls "$FRAMEWORK_DIR/forge/"*.md 2>/dev/null | wc -l | tr -d ' ') forged"
+echo -e "  Skills:  $(ls "$FRAMEWORK_DIR/skills/"*.md 2>/dev/null | wc -l | tr -d ' ') skills loaded"
+echo -e "  Hooks:   PreToolUse, PostToolUse, PreCompact, Stop"
+echo ""
+echo -e "Start with:"
+echo -e "  ${BLUE}/orbit:new-project${NC}   — start a new project from scratch"
+echo -e "  ${BLUE}/orbit:map-codebase${NC}  — analyze an existing repo before planning"
+echo -e "  ${BLUE}/orbit:resume${NC}        — continue from last session"
+echo ""
+echo -e "${YELLOW}Docs: https://github.com/soupler/orbit${NC}"

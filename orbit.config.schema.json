@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://soupler.dev/schemas/orbit.config.schema.json",
+  "title": "Orbit Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "project", "mode", "models", "agents", "git", "skills", "hooks", "security", "notifications", "mcp"],
+  "properties": {
+    "version": { "type": "string" },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "org", "state_dir", "hooks_dir"],
+      "properties": {
+        "name": { "type": "string" },
+        "org": { "type": "string" },
+        "state_dir": { "type": "string" },
+        "hooks_dir": { "type": "string" }
+      }
+    },
+    "mode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default", "options", "description"],
+      "properties": {
+        "default": { "type": "string", "enum": ["autonomous", "collaborative", "audit"] },
+        "options": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["autonomous", "collaborative", "audit"] },
+          "minItems": 3,
+          "uniqueItems": true
+        },
+        "description": { "type": "string" }
+      }
+    },
+    "models": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["routing", "profiles", "cost_guard"],
+      "properties": {
+        "routing": { "type": "string" },
+        "profiles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["model", "max_tokens", "use_for"],
+            "properties": {
+              "model": { "type": "string" },
+              "max_tokens": { "type": "integer", "minimum": 1 },
+              "use_for": {
+                "type": "array",
+                "items": { "type": "string" },
+                "minItems": 1
+              }
+            }
+          }
+        },
+        "cost_guard": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["warn_at_tokens", "hard_limit_tokens", "auto_resume_on_compact"],
+          "properties": {
+            "warn_at_tokens": { "type": "integer", "minimum": 1 },
+            "hard_limit_tokens": { "type": "integer", "minimum": 1 },
+            "auto_resume_on_compact": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "agents": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["forge_threshold", "max_parallel", "context_per_subagent", "auto_register_forged"],
+      "properties": {
+        "forge_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "max_parallel": { "type": "integer", "minimum": 1 },
+        "context_per_subagent": { "type": "integer", "minimum": 1 },
+        "auto_register_forged": { "type": "boolean" }
+      }
+    },
+    "git": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "options", "atomic_commits", "conventional_commits", "worktree_per_task"],
+      "properties": {
+        "strategy": { "type": "string" },
+        "options": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "atomic_commits": { "type": "boolean" },
+        "conventional_commits": { "type": "boolean" },
+        "worktree_per_task": { "type": "boolean" }
+      }
+    },
+    "skills": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["auto_load", "lazy_load", "cache_loaded"],
+      "properties": {
+        "auto_load": { "type": "boolean" },
+        "lazy_load": { "type": "boolean" },
+        "cache_loaded": { "type": "boolean" }
+      }
+    },
+    "hooks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pre_compact", "stop", "pre_tool_use", "post_tool_use", "on_error"],
+      "properties": {
+        "pre_compact": { "type": "boolean" },
+        "stop": { "type": "boolean" },
+        "pre_tool_use": { "type": "boolean" },
+        "post_tool_use": { "type": "boolean" },
+        "on_error": { "type": "boolean" }
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prompt_injection_detection", "secret_scan_on_commit", "destructive_command_guard", "identity_separation"],
+      "properties": {
+        "prompt_injection_detection": { "type": "boolean" },
+        "secret_scan_on_commit": { "type": "boolean" },
+        "destructive_command_guard": { "type": "boolean" },
+        "identity_separation": { "type": "boolean" }
+      }
+    },
+    "notifications": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slack_webhook_url", "on_phase_complete", "on_deploy", "on_error"],
+      "properties": {
+        "slack_webhook_url": { "type": "string" },
+        "on_phase_complete": { "type": "boolean" },
+        "on_deploy": { "type": "boolean" },
+        "on_error": { "type": "boolean" }
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_active_tools", "recommended", "avoid_in_production"],
+      "properties": {
+        "max_active_tools": { "type": "integer", "minimum": 1 },
+        "recommended": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "avoid_in_production": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

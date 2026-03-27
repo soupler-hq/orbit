@@ -1,0 +1,59 @@
+{
+  "name": "orbit",
+  "version": "1.0.0",
+  "description": "Production-grade Orbit framework — design, build, deploy, and monitor any kind of work",
+  "main": "bin/install.js",
+  "bin": {
+    "orbit": "bin/install.js"
+  },
+  "scripts": {
+    "install-local": "bash install.sh --local --tool claude",
+    "install-global": "bash install.sh --global --tool claude",
+    "install-all": "bash install.sh --global --all",
+    "validate": "bash bin/validate.sh",
+    "eval": "bash bin/eval.sh"
+  },
+  "keywords": [
+    "ai-agents",
+    "claude",
+    "claude-code",
+    "llm",
+    "orchestration",
+    "agentic",
+    "skills",
+    "tdd",
+    "devops",
+    "automation"
+  ],
+  "author": "Orbit",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourorg/orbit"
+  },
+  "files": [
+    "CLAUDE.md",
+    "AGENTS.md",
+    "README.md",
+    "INSTRUCTIONS.md",
+    "SKILLS.md",
+    "WORKFLOWS.md",
+    "orbit.registry.json",
+    "orbit.config.schema.json",
+    "install.sh",
+    "agents/",
+    "skills/",
+    "commands/",
+    "state/",
+    "hooks/",
+    "forge/",
+    "docs/",
+    "docs/runtime-adapters.md",
+    "docs/evals.md",
+    "bin/",
+    "bin/eval.sh"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
