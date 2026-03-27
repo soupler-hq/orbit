@@ -1,7 +1,7 @@
 # Orbit - AI Agent Orchestration Framework
 
-> Production-grade agentic system for designing, building, deploying, and monitoring any kind of work
-> **v1.0** | Soupler Engineering Standard | Enterprise-ready
+> Orbit is a repo-native control plane for agentic software delivery
+> **v1.0** | Enterprise-ready
 
 ---
 
@@ -339,7 +339,7 @@ Orbit is designed from the ground up to minimize token consumption:
 | ---------------------- | ---------------------------------------------------------------------------- |
 | Model routing          | Haiku for classify/extract, Sonnet for implement, Opus for complex reasoning |
 | Lazy skill loading     | Only load SKILL.md relevant to current task - not all skills                 |
-| Subagent isolation     | Fresh context per task - no accumulated conversation history                |
+| Subagent isolation     | Fresh context per task - no accumulated conversation history                 |
 | XML structured prompts | Claude processes XML task definitions with higher fidelity and fewer tokens  |
 | Targeted file loading  | Only load files directly referenced in the task - never full codebase        |
 | STATE.md as memory     | Cross-session memory without bloating context                                |
