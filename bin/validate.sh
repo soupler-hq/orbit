@@ -7,8 +7,8 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 required_files=(
-  "AGENTS.md"
   "CLAUDE.md"
+  "templates/orbit.base.md"
   "README.md"
   "INSTRUCTIONS.md"
   "SKILLS.md"

@@ -1,6 +1,6 @@
 {
   "name": "@soupler-hq/orbit",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Production-grade Orbit framework — design, build, deploy, and monitor any kind of work",
   "main": "bin/install.js",
   "bin": {
@@ -24,7 +24,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "promote": "bash bin/promote.sh"
+    "promote": "bash bin/promote.sh",
+    "generate": "node bin/generate-instructions.js --runtime claude --output CLAUDE.md"
   },
   "keywords": [
     "ai-agents",
@@ -50,8 +51,8 @@
   "homepage": "https://github.com/soupler-hq/orbit#readme",
   "files": [
     "CLAUDE.md",
-    "AGENTS.md",
     "README.md",
+    "templates/",
     "INSTRUCTIONS.md",
     "SKILLS.md",
     "WORKFLOWS.md",
