@@ -72,13 +72,6 @@ The registry below mirrors `orbit.registry.json`. Keep both in sync.
 | `security-engineer` | Security audits, threat modeling, OWASP, `/orbit:audit` |
 | `data-engineer` | ETL/ELT pipelines, dbt, Kafka, Spark, warehousing |
 
-### Forged Agents (pre-built for common domains)
-| Agent | Triggers On |
-|-------|------------|
-| `ml-engineer` | ML pipelines, model training/serving, MLOps |
-| `blockchain-engineer` | Smart contracts, Solana/Ethereum, web3 |
-| `mobile-engineer` | iOS/Android, React Native, Flutter |
-
 ### Selection Logic
 ```
 Single clear match → dispatch that agent

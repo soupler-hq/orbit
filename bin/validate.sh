@@ -36,10 +36,10 @@ required_dirs=(
   "hooks/scripts"
   "docs"
   "examples"
-  "forge"
   "state"
   "bin"
 )
+# forge/ is optional — it is userland (created on demand), not kernel
 
 missing=()
 
@@ -160,6 +160,26 @@ for (const skill of registry.skills || []) {
 for (const workflow of registry.workflows || []) {
   if (typeof workflow.command !== 'string' || !workflow.command.startsWith('/orbit:')) {
     throw new Error(`Invalid workflow command in registry: ${workflow.name || 'unknown'}`);
+  }
+}
+
+// ── Forge agent structural validation (userland — not in registry) ─────────
+// forge/ agents are created on demand per project. If any exist in the
+// framework repo, they must meet the same structural contract as core agents.
+const forgeDir = path.join(root, 'forge');
+if (fs.existsSync(forgeDir)) {
+  const forgeFiles = fs.readdirSync(forgeDir).filter(f => f.endsWith('.md'));
+  const requiredAgentSections = ['TRIGGERS ON', 'DOMAIN EXPERTISE', 'OPERATING RULES', 'SKILLS LOADED', 'OUTPUT FORMAT'];
+  for (const file of forgeFiles) {
+    const content = fs.readFileSync(path.join(forgeDir, file), 'utf8');
+    for (const section of requiredAgentSections) {
+      if (!content.includes(`## ${section}`)) {
+        throw new Error(`forge/${file} missing required section: ${section}`);
+      }
+    }
+  }
+  if (forgeFiles.length > 0) {
+    console.log(`  ✓ forge/ agents validated (${forgeFiles.length} files)`);
   }
 }
 NODE

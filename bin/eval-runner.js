@@ -177,13 +177,45 @@ for (const wf of registry.workflows) {
   });
 }
 
-// ── Metric 4: Portability ──────────────────────────────────────────────────
+// ── Metric 4: Forge Integrity ─────────────────────────────────────────────
+// forge/ is userland — agents are created on demand, NOT added to the registry.
+// If forge/ exists, any .md files there must meet the core agent structural contract.
+
+const forgeDir = path.join(ROOT, 'forge');
+const forgeIntegrityResults = [];
+if (fs.existsSync(forgeDir)) {
+  const forgeFiles = fs.readdirSync(forgeDir).filter((f) => f.endsWith('.md'));
+  const required = [
+    'TRIGGERS ON',
+    'DOMAIN EXPERTISE',
+    'OPERATING RULES',
+    'SKILLS LOADED',
+    'OUTPUT FORMAT',
+  ];
+  for (const file of forgeFiles) {
+    const content = fs.readFileSync(path.join(forgeDir, file), 'utf8');
+    for (const section of required) {
+      const pass = content.includes(`## ${section}`);
+      forgeIntegrityResults.push({
+        check: `forge/${file}: ## ${section}`,
+        pass,
+        reason: pass ? 'ok' : `forge/${file} missing section: ## ${section}`,
+      });
+    }
+  }
+}
+// If forge/ is absent or empty, treat as pass (no forge agents = valid state)
+if (forgeIntegrityResults.length === 0) {
+  forgeIntegrityResults.push({ check: 'forge/ (no agents — valid)', pass: true, reason: 'ok' });
+}
+
+// ── Metric 5: Portability ──────────────────────────────────────────────────
 // Claude (native), Codex (stable), Antigravity (experimental or better) are all documented.
 
 const REQUIRED_RUNTIMES = [
-  { name: 'claude', minSupport: 'native', adapterKeyword: 'claude' },
-  { name: 'codex', minSupport: 'stable', adapterKeyword: 'codex' },
-  { name: 'antigravity', minSupport: 'experimental', adapterKeyword: 'antigravity' },
+  { name: 'claude', adapterKeyword: 'claude' },
+  { name: 'codex', adapterKeyword: 'codex' },
+  { name: 'antigravity', adapterKeyword: 'antigravity' },
 ];
 
 const portabilityResults = REQUIRED_RUNTIMES.map((req) => {
@@ -222,6 +254,7 @@ const metrics = {
   routing: score(routingResults),
   workflow: score(workflowResults),
   registry: score(integrityResults),
+  forge: score(forgeIntegrityResults),
   portability: score(portabilityResults),
 };
 
@@ -229,6 +262,7 @@ const allResults = [
   ...routingResults,
   ...workflowResults,
   ...integrityResults,
+  ...forgeIntegrityResults,
   ...portabilityResults,
 ];
 const overall = score(allResults);
@@ -245,6 +279,7 @@ const report = {
     routing: { ...metrics.routing, score: (metrics.routing.pct * 100).toFixed(1) + '%' },
     workflow: { ...metrics.workflow, score: (metrics.workflow.pct * 100).toFixed(1) + '%' },
     registry: { ...metrics.registry, score: (metrics.registry.pct * 100).toFixed(1) + '%' },
+    forge: { ...metrics.forge, score: (metrics.forge.pct * 100).toFixed(1) + '%' },
     portability: {
       ...metrics.portability,
       score: (metrics.portability.pct * 100).toFixed(1) + '%',
@@ -255,6 +290,7 @@ const report = {
     routing: routingResults,
     workflow: workflowResults,
     registry: integrityResults,
+    forge: forgeIntegrityResults,
     portability: portabilityResults,
   },
 };
@@ -281,6 +317,7 @@ if (JSON_OUT) {
   console.log(
     `  Registry integrity  ${bar(metrics.registry).padEnd(30)}  ${pct(metrics.registry)}`
   );
+  console.log(`  Forge integrity     ${bar(metrics.forge).padEnd(30)}  ${pct(metrics.forge)}`);
   console.log(
     `  Portability         ${bar(metrics.portability).padEnd(30)}  ${pct(metrics.portability)}`
   );

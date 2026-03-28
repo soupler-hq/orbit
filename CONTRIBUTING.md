@@ -137,6 +137,27 @@ chore(scope): short description
 
 ---
 
+## Promoting a Forged Agent or Skill
+
+If you have built a domain-specific agent or skill in your project using `/orbit:forge` and believe it would benefit the broader community, you can propose it for inclusion in the Orbit core.
+
+**Rules:**
+- Forged agents live in your project — they are **not** added to `orbit.registry.json` by default (that is the kernel; forged agents are userland).
+- A forged agent becomes a promotion candidate when it is genuinely generalizable — useful across projects, not just your domain.
+
+**How to promote:**
+
+```bash
+# Validate your forged agent meets the structural contract
+npm run promote -- agents/my-agent.md --dry-run
+
+# If validation passes, follow the PR instructions printed above
+```
+
+The promote script checks for all required sections (`TRIGGERS ON`, `DOMAIN EXPERTISE`, `OPERATING RULES`, `SKILLS LOADED`, `OUTPUT FORMAT`) and prints a ready-to-use PR title and body. Open the PR against `soupler-hq/orbit` targeting `develop`.
+
+---
+
 ## Maintainer Review SLA
 
 - Maintainers aim to triage new PRs within **5 business days**.
