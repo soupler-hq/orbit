@@ -198,12 +198,16 @@ Rule: if STATE.md missing → create before doing anything else.
    ```
 3. Never commit directly to `main` or `develop`. No exceptions.
 
-**After work is done and committed on the feature branch:**
+**After work is done and committed on the feature branch — mandatory sequence:**
 ```
-git push -u origin <branch>
-gh pr create --base develop --title "..." --body "..."
+1. /orbit:review          ← run reviewer agent on all changed files
+2. address CRITICAL/HIGH  ← fix findings, commit fixes on same branch
+3. git push -u origin <branch>
+4. gh pr create --base develop --title "..." --body "..."
+                          ← include ship decision + findings in PR body
 ```
 The PR goes through Sentinel CI before merging. Code does not exist until it is reviewed.
+`/orbit:review` is not optional. If skipped, the PR template will be missing the ship decision and the reviewer will flag it.
 
 ### Commit format
 Every task → atomic commit immediately on completion:
