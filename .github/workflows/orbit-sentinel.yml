@@ -96,3 +96,16 @@ jobs:
         run: npm install
       - name: 🔒 Safety & Adversarial Audit
         run: bash bin/test-safety.sh
+
+  sca:
+    name: sca
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install
+      - name: 🔍 npm audit (high+critical)
+        run: npm audit --audit-level=high
