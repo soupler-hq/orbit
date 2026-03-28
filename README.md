@@ -238,6 +238,9 @@ The repository is organized as a control plane:
 - `state/` and `examples/` show how long-running work is persisted and resumed
 - `docs/` contains supporting guidance for token optimization, MCP usage, and playbooks
 - `install.sh` wires the framework into a target project
+- `tests/` unit test suite (Vitest) — `npm test` to run
+- `eslint.config.mjs` and `.prettierrc` define code quality rules — `npm run lint`, `npm run format:check`
+- `SECURITY.md` vulnerability reporting and threat model
 
 ---
 

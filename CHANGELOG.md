@@ -2,6 +2,22 @@
 
 All notable changes to the Orbit framework will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-03-28
+### Added
+- **Security Policy**: `SECURITY.md` with threat model, responsible disclosure process, supported versions table, and consumer best practices for hook verification.
+- **Test Harness**: Vitest test framework (`vitest.config.js`, `tests/`) with 49 unit tests and 85% branch coverage on `bin/orchestrator.js`.
+- **Code Quality**: ESLint (`eslint.config.mjs`) and Prettier (`.prettierrc`) configured for `bin/`. `lint`, `lint:fix`, `format:check`, `format:write` npm scripts added.
+
+### Changed
+- **CI Pipeline**: `orbit-sentinel.yml` upgraded with `lint` and `test` jobs (blocking gates before `validate` and `compliance`). All actions upgraded from v3 → v4. Node.js bumped to 22.
+- **Package metadata**: Corrected `repository.url` from placeholder `yourorg/orbit` to `soupler-hq/orbit`. Added `bugs.url` and `homepage`.
+- **`.gitignore`**: Added `coverage/`, `package-lock.json`, and `.claude/settings.local.json`.
+
+### Fixed
+- Removed hardcoded contributor filesystem paths (`/Users/sunnysrivastava/...`) from `README.md` and `docs/evals.md`.
+- Fixed `eval.sh` compliance check to match emoji-prefixed README heading `## 🌌 What is Orbit?`.
+- Fixed PII scan step in Sentinel CI self-matching its own grep pattern in the workflow file.
+
 ## [2.4.0] - 2026-03-28
 ### Added
 - **Hardened Branch Protection**: Implemented mandatory status checks locked to GitHub Actions App ID (`15368`).
