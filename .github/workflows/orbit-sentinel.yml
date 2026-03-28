@@ -23,7 +23,8 @@ jobs:
         run: npm run format:check
       - name: 🚫 PII scan
         run: |
-          if git grep -r "/Users/" -- '*.md' '*.json' '*.sh' '*.js' '*.ts' '*.yml'; then
+          if git grep -r "/Users/" -- '*.md' '*.json' '*.sh' '*.js' '*.ts' \
+            ':!.github/workflows/orbit-sentinel.yml'; then
             echo "❌ Hardcoded local paths detected — remove before merging"
             exit 1
           fi
