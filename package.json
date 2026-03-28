@@ -1,10 +1,13 @@
 {
-  "name": "orbit",
+  "name": "@soupler-hq/orbit",
   "version": "2.3.0",
   "description": "Production-grade Orbit framework — design, build, deploy, and monitor any kind of work",
   "main": "bin/install.js",
   "bin": {
     "orbit": "bin/install.js"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
     "install-local": "bash install.sh --local --tool claude",
