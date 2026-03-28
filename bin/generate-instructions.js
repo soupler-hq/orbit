@@ -45,10 +45,14 @@ if (!runtime) {
 }
 
 // ── Load config ───────────────────────────────────────────────────────────────
+// Framework files (config, template) are resolved relative to this script's
+// directory so the generator works correctly regardless of cwd — whether
+// invoked from install.sh (cwd = project dir) or via `npm run generate`
+// (cwd = framework dir).
 
-const root = process.cwd();
-const configPath = path.join(root, 'orbit.config.json');
-const templatePath = path.join(root, 'templates', 'orbit.base.md');
+const frameworkRoot = path.join(__dirname, '..');
+const configPath = path.join(frameworkRoot, 'orbit.config.json');
+const templatePath = path.join(frameworkRoot, 'templates', 'orbit.base.md');
 
 if (!fs.existsSync(configPath)) {
   console.error('❌ orbit.config.json not found');
