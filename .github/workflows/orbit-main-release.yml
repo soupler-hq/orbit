@@ -186,8 +186,23 @@ jobs:
             agents/*.md skills/*.md hooks/scripts/*.sh \
             > SHASUM256.txt
 
-      - name: 🚀 Publish to GitHub Packages
+      - name: 🔍 Check if package version already published
         if: steps.tag_check.outputs.exists == 'false'
+        id: pkg_check
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          if npm view @soupler-hq/orbit@$VERSION version \
+               --registry https://npm.pkg.github.com/ 2>/dev/null | grep -q "$VERSION"; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "⏭️ @soupler-hq/orbit@$VERSION already published — skipping"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚀 Publish to GitHub Packages
+        if: steps.tag_check.outputs.exists == 'false' && steps.pkg_check.outputs.published == 'false'
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
