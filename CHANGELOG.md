@@ -15,6 +15,13 @@ All notable changes to the Orbit framework will be documented in this file. The 
 - **Git Worktree Handoff**: Automated task isolation via `git worktree add` for parallel wave execution.
 - **Model Routing Intelligence**: Orchestrator now enforces `orbit.config.json` model profiles based on agent domain (e.g., Haiku for classification, Sonnet for implementation).
 
+## [2.3.0] - 2026-03-28
+### Added
+- **Nexus SOTA Architecture**: Support for logical workspace meta-orchestration across multiple repositories.
+- **Auto-Discovery CLI**: New `orbit nexus init` and `orbit nexus sync` commands in `bin/install.js`.
+- **Workspace Consciousness**: Enhanced `orchestrator.js` to resolve cross-repo paths and manage global state.
+- **Nexus Skill**: New `skills/nexus.md` encoding multi-repo coordination principles.
+
 ## [2.0.0] - 2026-03-27
 ### Added
 - **Intelligent Safety Layer**: Context-aware `safety-evaluator.js` agent that analyzes intent and chain-of-commands before execution.

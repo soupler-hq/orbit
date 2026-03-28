@@ -61,6 +61,7 @@ The registry below mirrors `orbit.registry.json`. Keep both in sync.
 | `researcher` | Domain research, feasibility, competitive analysis, tech eval |
 | `designer` | UX flows, information architecture, component specs |
 | `forge` | **Dynamic agent creation** — when no agent fits |
+| `pedagogue` | Educational delivery, concept explanation, masterclass |
 
 ### Specialist Agents (dispatch directly for precision)
 | Agent | Triggers On |

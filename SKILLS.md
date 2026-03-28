@@ -19,6 +19,8 @@
 - `skills/identity.md` - Authentication, authorization, SSO, and multi-tenancy.
 - `skills/ai-systems.md` - Agent systems, routing, and model economics.
 - `skills/ecommerce.md` - Checkout, payments, inventory, and order state machines.
+- `skills/instructor.md` - Educational delivery, analogy-first explanations, and Socratic discovery.
+- `skills/sota-architecture.md` - Kernel vs. Userland management, agent promotion, and bloat prevention.
 
 ## Registry Discipline
 - Skill metadata lives in `orbit.registry.json`.
@@ -36,6 +38,8 @@
 - `security-engineer` loads security, identity, and review skills.
 - `data-engineer` loads architecture, observability, TDD, and scalability skills.
 - `forge` loads the forge skill and any domain-specific skills it creates.
+- `pedagogue` loads the instructor skill.
+- `nexus` loads the nexus skill for multi-repo orchestration.
 
 ## Loading Policy
 - Load skills lazily.

@@ -18,8 +18,9 @@ Orbit is a repo-native agent orchestration framework. It routes work to speciali
 3. Forge a new agent if coverage is below the fit threshold.
 4. Plan with RIPER before executing non-trivial work.
 5. Dispatch with fresh subagent context.
-6. Verify every deliverable before declaring success.
-7. Commit atomically and update state before ending a session.
+6. **Verify** every deliverable before marking complete
+7. **Commit** atomically with full traceability
+8. **Document** every logic change or new feature in `README.md` and `CHANGELOG.md` immediately. Undocumented code is "Silent Code"—it does not exist in the framework's mental model.
 
 ## Routing Rules
 - Use `architect` for system design, boundaries, and technical decisions.

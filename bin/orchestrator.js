@@ -20,6 +20,11 @@ class OrbitOrchestrator {
     this.config = fs.existsSync(this.configPath) 
       ? JSON.parse(fs.readFileSync(this.configPath, 'utf8')) 
       : { models: { routing: 'auto' }, git: { worktree_per_task: false } };
+
+    // Nexus Consciousness (Task 2.3)
+    this.nexusPath = path.join(projectRoot, 'orbit.nexus.json');
+    this.isNexus = fs.existsSync(this.nexusPath);
+    this.nexus = this.isNexus ? JSON.parse(fs.readFileSync(this.nexusPath, 'utf8')) : null;
   }
 
   /**
@@ -67,6 +72,16 @@ class OrbitOrchestrator {
       console.warn(`⚠️  Worktree failed (maybe branch exists?), falling back to root: ${e.message}`);
       return this.projectRoot;
     }
+  }
+
+  /**
+   * Resolves a path across the Nexus workspace.
+   */
+  resolveNexusPath(repoName, relativePath) {
+    if (!this.isNexus) return path.join(this.projectRoot, relativePath);
+    const repo = this.nexus.repos.find(r => r.name === repoName);
+    if (!repo) throw new Error(`Repo ${repoName} not found in Nexus registry`);
+    return path.resolve(this.projectRoot, repo.path, relativePath);
   }
 
   /**

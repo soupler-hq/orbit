@@ -1,6 +1,6 @@
 {
   "name": "orbit",
-  "version": "1.0.0",
+  "version": "2.3.0",
   "description": "Production-grade Orbit framework — design, build, deploy, and monitor any kind of work",
   "main": "bin/install.js",
   "bin": {
@@ -10,6 +10,8 @@
     "install-local": "bash install.sh --local --tool claude",
     "install-global": "bash install.sh --global --tool claude",
     "install-all": "bash install.sh --global --all",
+    "nexus-init": "node bin/install.js nexus init",
+    "nexus-sync": "node bin/install.js nexus sync",
     "validate": "bash bin/validate.sh",
     "eval": "bash bin/eval.sh"
   },

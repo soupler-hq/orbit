@@ -140,6 +140,14 @@
       "triggers": ["no matching agent", "forge new agent"],
       "skills": ["skills/ai-systems.md", "skills/brainstorming.md"],
       "outputs": ["new agent spec", "registry update"]
+    },
+    {
+      "name": "pedagogue",
+      "file": "agents/pedagogue.md",
+      "domains": ["SYNTHESIS", "RESEARCH"],
+      "triggers": ["explain", "teach", "masterclass", "how it works", "why do we need"],
+      "skills": ["skills/instructor.md", "skills/brainstorming.md"],
+      "outputs": ["educational report", "walkthrough", "analogy map"]
     }
   ],
   "skills": [
@@ -160,7 +168,8 @@
     { "name": "identity", "file": "skills/identity.md", "purpose": "auth and tenancy", "loaded_by": ["architect", "security-engineer"] },
     { "name": "ai-systems", "file": "skills/ai-systems.md", "purpose": "agent systems and routing", "loaded_by": ["forge", "architect"] },
     { "name": "ecommerce", "file": "skills/ecommerce.md", "purpose": "commerce systems", "loaded_by": ["architect", "engineer"] },
-    { "name": "reflection", "file": "skills/reflection.md", "purpose": "autonomous self-correction (RALPH loop)", "loaded_by": ["reviewer", "engineer", "safety-evaluator"] }
+    { "name": "reflection", "file": "skills/reflection.md", "purpose": "autonomous self-correction (RALPH loop)", "loaded_by": ["reviewer", "engineer", "safety-evaluator"] },
+    { "name": "instructor", "file": "skills/instructor.md", "purpose": "educational delivery and concept explanation", "loaded_by": ["pedagogue", "architect", "engineer"] }
   ],
   "workflows": [
     {

@@ -1,0 +1,37 @@
+name: Orbit Sentinel (SOTA Governance)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: 🛡️ Semantic Validation
+        run: bash bin/validate.sh
+
+      - name: 🏅 SOTA Compliance Check
+        run: bash bin/eval.sh
+
+      - name: 🔒 Safety & Adversarial Audit
+        run: bash bin/test-safety.sh
+
+      - name: 📝 Changelog Verification
+        run: |
+          if ! grep -q "## \[$(cat package.json | jq -r .version)\]" CHANGELOG.md; then
+            echo "❌ Version mismatch: Current version in package.json is not documented in CHANGELOG.md"
+            exit 1
+          fi

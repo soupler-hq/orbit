@@ -4,6 +4,8 @@ Orbit is a repo-native control plane for agentic software delivery
 
 ## What is Orbit?
 
+> **The Mental Model**: Imagine a massive construction site. You have hundreds of workers (the Agent models). Without a **Site Manager** and a **Blueprint** (Orbit), every worker might try to build the kitchen in a different spot. Orbit is the site office—providing the specific blueprints, safety protocols, and coordination needed to build a skyscraper instead of a pile of bricks.
+
 Orbit is a tool-agnostic, production-grade control plane for agent-driven development. It helps any compatible coding agent behave like a coordinated engineering team with specialized roles for architecture, implementation, strategy, review, security, DevOps, data engineering, and research.
 
 It is designed to work across runtimes, not just one assistant. Claude, Codex, and Antigravity can all use the same repository-level instructions, skills, workflows, hooks, and registry.
@@ -64,6 +66,13 @@ flowchart TB
     R --- W
 ```
 
+#### 🧭 Architecture Narrated
+1. **The User** (top) sends a request to the **Runtime Agent** (Claude Code, Antigravity, etc.).
+2. **The Runtime** pulls its "DNA" from the **Registry** (`orbit.registry.json`) and **Instructions**.
+3. **Intent Classification** determines which **Specialist Agent** should handle the work.
+4. **Safety Gates** are enforced via **Hooks** (H) before any tools are touched.
+5. **Persistence** ensures that even if the session ends, the **STATE.md** (M) allows the next agent to resume exactly where the last one finished.
+
 ### Flow Diagram
 
 ```mermaid
@@ -79,6 +88,14 @@ flowchart LR
 
     Request --> Classify --> Route --> Plan --> Execute --> Verify --> Persist --> Ship
 ```
+
+#### 🌊 The Execution Wave (Step-by-Step)
+- **Classify**: Orbit maps your request to a `Domain` (e.g. ENGINEERING) and `Mode` (e.g. AUTONOMOUS).
+- **Route**: If a specialist exists, it is dispatched. If not, **Agent Forge** builds a new one.
+- **Plan**: Work is split into parallel **Waves** using `skills/planning.md`.
+- **Execute**: Subagents spin up in fresh contexts—no "context rot" from old conversations.
+- **Verify**: The **RALPH** self-correction loop (`skills/reflection.md`) catches errors before they reach you.
+- **Persist**: The final state is burned into **STATE.md** and committed as an atomic unit.
 
 ### Component Diagram
 
@@ -124,6 +141,15 @@ flowchart TB
     STATE --> SNAP
     STATE --> GIT
 ```
+
+#### 🏗️ The Three Pillars of Orbit
+Orbit is architected around three fundamental layers that ensure stability and scalability:
+
+| Pillar | Responsibility | Core Files |
+| :--- | :--- | :--- |
+| **1. Control Plane** | The "Rules of the House." Governs routing, safety, and agent roles. | `orbit.registry.json`, `CLAUDE.md`, `INSTRUCTIONS.md` |
+| **2. Execution Layer** | The "Workers." Specialized agents and reusable skills that perform the actual work. | `agents/`, `skills/`, `forge/` |
+| **3. Persistence Layer** | The "Memory." Ensures long-running tasks are resumable and every change is traceable. | `STATE.md`, `hooks/`, `Git History` |
 
 ### Tool-Agnostic Control Plane
 
@@ -412,6 +438,63 @@ Then register it in `CLAUDE.md` under "SKILLS AUTO-LOADING".
 
 ---
 
+## Orbit Nexus Mode (Multi-Repo Orchestration)
+
+Orbit's **Nexus Mode** allows it to act as a meta-orchestrator for an entire organization. It bridges the intelligence gap between independent repositories (e.g., `api`, `frontend`, `standards`).
+
+### Nexus Architecture
+
+```mermaid
+graph TD
+    subgraph NexusRoot[Logical Root: soupler-hq]
+        NREG[orbit.nexus.json]
+        NST[NEXUS-STATE.md]
+    end
+
+    NexusRoot --> R1[Repo: engineering-standards]
+    NexusRoot --> R2[Repo: soupler-marketing]
+    NexusRoot --> R3[Repo: orbit]
+
+    R1 --- R1_Agents[IDP Agents]
+    R2 --- R2_Agents[UI Agents]
+```
+
+### Nexus Flow Example: Cross-Repo Consistency
+1. **Initiate**: `node orbit/bin/install.js nexus init` in the workspace root.
+2. **Synchronize**: `node orbit/bin/install.js nexus sync` auto-discovers and indexes all sub-repos.
+3. **Query**: Ask the orchestrator: *"Does our central IDP support the new Auth requirements in the Marketing repo?"*
+4. **Wave Execution**:
+   - **Wave 1**: Orchestrator spawns a subagent in `engineering-standards` to extract IDP specs.
+   - **Wave 2**: Orchestrator spawns a subagent in `soupler-marketing` to extract React Auth demands.
+   - **Wave 3**: The **Nexus Architect** performs gap analysis.
+5. **Persistence**: Findings are burned into `workspace/NEXUS-STATE.md`.
+
+---
+
+## Architecture: Kernel vs. Userland
+
+Orbit v2.3.0 enforces a **"Lean Kernel"** design to prevent framework bloat.
+
+- **Orbit Kernel**: Fundamental "Pillar" agents (`Architect`, `Engineer`, `Forge`, etc.) and core skills.
+- **Project Userland**: Specialized specialists created via `agent-forge` live in the project's `.orbit/` directory.
+
+### Knowledge Propagation: `/orbit:promote`
+When a project-local agent or skill discovers a generalizable pattern, use `/orbit:promote` to push it back to the Core.
+
+1. **Tag**: Add `promotion_candidate: true` to the agent/skill frontmatter.
+2. **Promote**: Run `node bin/install.js promote`.
+3. **Merge**: Orbit Sentinel validates the change and prepares it for a Core release.
+
+## Sentinel CI/CD: Automated Sovereignty
+
+Every commit to the Orbit core is guarded by the **Orbit Sentinel** (`.github/workflows/orbit-sentinel.yml`):
+
+- **Semantic Linting**: Validates registry and agent consistency.
+- **SOTA Compliance**: Ensures the framework meets the Soupler Engineering Standard.
+- **Safety Audit**: Automated adversarial testing against prompt injections.
+
+---
+
 ## Philosophy
 
 - Systematic over ad-hoc - process beats guessing every time
@@ -425,9 +508,21 @@ Then register it in `CLAUDE.md` under "SKILLS AUTO-LOADING".
 
 ---
 
-## License
+---
 
-MIT - use freely, contribute back if it helps you.
+## 🤔 Anticipatory FAQ
+
+**Q: Is Orbit a new LLM or Model?**
+> **A:** No. Orbit is a **Control Plane** that sits on top of your existing models (like Claude 3.5 Sonnet or GPT-4o). It provides the "Operating System" that guides those models to work together.
+
+**Q: This repo seems complex. Do I need to learn all these files?**
+> **A:** No. As a developer, Orbit handles the complexity for you. You just use `/orbit:` commands. The files in this repo are the "Internal Logic" that the AI uses to keep your project high-quality.
+
+**Q: How do I add a new agent?**
+> **A:** You can use `/orbit:forge "description of agent"` to have the framework build it for you, or manually add a new `.md` file to `agents/` and register it in `orbit.registry.json`.
+
+**Q: What if the AI makes a mistake during a Wave?**
+> **A:** The **RALPH Loop** (`skills/reflection.md`) is designed to catch these mistakes. The AI will "Reflect" on the error, try an alternative "Action," and only interrupt you if it stays stuck after 3 attempts.
 
 ---
 
