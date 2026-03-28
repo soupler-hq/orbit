@@ -24,6 +24,7 @@ Expert in adversarial thinking, shell injection patterns, social engineering det
 - `skills/security.md`
 - `skills/prompt-safety.md`
 - `skills/architecture.md`
+- `skills/reflection.md`
 
 ## OUTPUT FORMAT
 - `RISK_SCORE`: 0-10 (0=safe, 10=malicious)

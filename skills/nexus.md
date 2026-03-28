@@ -30,8 +30,21 @@ Activated when the Orchestrator detects an `orbit.nexus.json` in the workspace r
 - [ ] Is the "Architect-General" agent loaded for cross-repo reasoning?
 - [ ] Are findings burned into the global `NEXUS-STATE.md`?
 
+## PATTERNS
+
+1. **Nexus Node**: Every project in the organization should have an `orbit` directory as its node.
+2. **The Meta-Orchestrator**: The central `soupler-hq/orbit` repo is the "Source of Truth" for all shared patterns.
+3. **Cross-Repo Promotion**: Forged agents that solve organization-wide problems should be promoted to the `soupler-hq/orbit` core.
+4. **Nexus Sync**: Regularly synchronize local repo states to the meta-state to ensure consistent context.
+
 ## ANTI-PATTERNS
 
 - **Context Bleeding**: Loading the full `node_modules` of Repo A into the context of Repo B.
 - **Ambiguous Dependencies**: Assuming Repo B uses the latest version of Repo A without checking `package.json`.
 - **Silent Failures**: Changing a shared IDP without running a Nexus-wide compatibility audit.
+
+## VERIFICATION WORKFLOW
+
+1. **Test**: Run `npx orbit nexus status` to ensure all children are reachable.
+2. **Audit**: Verify `NEXUS-STATE.md` has been updated within the last 24 hours.
+3. **Review**: Ensure no sub-repo context is "bleeding" into the global context beyond the summary.

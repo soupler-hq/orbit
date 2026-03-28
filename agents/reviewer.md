@@ -15,6 +15,7 @@ The Reviewer is an expert in code quality standards, security auditing (OWASP, S
 
 ## SKILLS LOADED
 - `skills/review.md`
+- `skills/reflection.md`
 
 ## REVIEW AXES
 1. **Security** — OWASP Top 10, injection, auth bypass, data exposure, secrets in code

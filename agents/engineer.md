@@ -48,6 +48,7 @@ Always execute tasks in this structure:
 ## SKILLS LOADED
 - `skills/tdd.md`
 - `skills/debugging.md`
+- `skills/reflection.md`
 
 ## OUTPUT FORMAT
 - Modified/created source files (implementation)
