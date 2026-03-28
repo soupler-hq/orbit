@@ -70,10 +70,8 @@ const adapterText  = readFile('docs/runtime-adapters.md') || '';
 const commandsText = readFile('commands/commands.md') || '';
 
 // Build lookup sets from registry
-const registryAgentNames  = new Set(registry.agents.map(a => a.name));
-const registrySkillNames  = new Set(registry.skills.map(s => s.name));
+const registryAgentNames   = new Set(registry.agents.map(a => a.name));
 const registryWorkflowCmds = new Set(registry.workflows.map(w => w.command));
-const registryRuntimes    = new Set(registry.runtimes.map(r => r.name));
 
 // ── Metric 1: Routing Accuracy ─────────────────────────────────────────────
 // For each eval case: expected agent exists in registry AND agent file exists.
