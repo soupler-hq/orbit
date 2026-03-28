@@ -1,6 +1,6 @@
 {
   "name": "@soupler-hq/orbit",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "Production-grade Orbit framework — design, build, deploy, and monitor any kind of work",
   "main": "bin/install.js",
   "bin": {
@@ -23,7 +23,8 @@
     "format:write": "prettier --write bin/",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "promote": "bash bin/promote.sh"
   },
   "keywords": [
     "ai-agents",
@@ -55,6 +56,7 @@
     "SKILLS.md",
     "WORKFLOWS.md",
     "orbit.registry.json",
+    "orbit.config.json",
     "orbit.config.schema.json",
     "install.sh",
     "agents/",
@@ -62,12 +64,9 @@
     "commands/",
     "state/",
     "hooks/",
-    "forge/",
     "docs/",
-    "docs/runtime-adapters.md",
-    "docs/evals.md",
     "bin/",
-    "bin/eval.sh"
+    "examples/"
   ],
   "engines": {
     "node": ">=18.0.0"

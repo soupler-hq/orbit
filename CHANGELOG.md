@@ -2,6 +2,19 @@
 
 All notable changes to the Orbit framework will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-03-28
+### Added
+- **bin/promote.sh**: `/orbit:promote` implementation — validates a forged agent or skill against the structural contract, checks for core conflicts, and prints a ready-to-use PR draft for upstreaming to soupler-hq/orbit. Wired as `npm run promote`. Documented in `CONTRIBUTING.md §Promoting a Forged Agent or Skill`.
+- **Forge integrity metric**: `bin/eval-runner.js` now includes a `forge_integrity` metric (5th metric area). If `forge/` exists, all `.md` files are checked for required sections. If `forge/` is absent, the check passes as a valid empty state.
+- **npm publish dry-run**: `publish-dry-run` gate added to `orbit-sentinel.yml` — runs `npm publish --dry-run` on every PR to validate the package is publishable without actually publishing.
+
+### Changed
+- **forge/ removed**: Pre-populated `ml-engineer.md`, `blockchain-engineer.md`, `mobile-engineer.md` removed from the repo. `forge/` is userland — agents are created on demand per project, not shipped in the framework kernel.
+- **CLAUDE.md**: Removed "Forged Agents (pre-built for common domains)" table — these were test artifacts, not framework canon.
+- **bin/validate.sh**: `forge/` removed from `required_dirs` (optional, userland). Added forge agent structural validation block (no-op if `forge/` is absent).
+- **package.json**: `files` array cleaned — removed `forge/`, added `orbit.config.json` and `examples/`, removed redundant explicit sub-paths already covered by directory entries.
+- **.orbit/state/STATE.md**: Updated to v2.6.0 with Sprints 1-3 decisions log, current tech stack, and active Sprint 4 todos.
+
 ## [2.6.0] - 2026-03-28
 ### Added
 - **install.sh Integration Tests**: `tests/install.test.sh` — 33 assertions covering flag matrix (`--tool claude`, `--tool codex`, `--all`), idempotency, STATE.md merge preservation, `--skip-verify`, hook executability, and `.gitignore` injection. Wired as `install-test` required gate in Orbit Sentinel CI.

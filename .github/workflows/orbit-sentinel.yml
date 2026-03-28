@@ -134,3 +134,18 @@ jobs:
         with:
           name: eval-report
           path: eval-report.json
+
+  publish-dry-run:
+    name: publish-dry-run
+    runs-on: ubuntu-latest
+    needs: [lint, test, validate]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://npm.pkg.github.com/'
+      - name: Install dependencies
+        run: npm install
+      - name: 📦 npm publish --dry-run (validate package is publishable)
+        run: npm publish --dry-run
