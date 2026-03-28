@@ -55,21 +55,30 @@ check_hook() {
   local enabled
   enabled=$(jq -r ".hooks.$config_key // false" "$ROOT/orbit.config.json")
 
-  local registered=false
-  if grep -q "\"$install_key\"" "$ROOT/install.sh" 2>/dev/null; then
-    registered=true
+  # Check whether install.sh reads the config flag for this hook.
+  # A hook is "config-gated" if install.sh reads .hooks.<key> from orbit.config.json
+  # before deciding whether to register it. A hook is "unconditional" if it appears
+  # in install.sh without any corresponding flag read.
+  local config_gated=false
+  if grep -q "hooks\.$config_key" "$ROOT/install.sh" 2>/dev/null; then
+    config_gated=true
   fi
 
-  if [ "$enabled" = "false" ] && [ "$registered" = "true" ]; then
-    fail "Hook '$config_key' is false in orbit.config.json but '$install_key' is still registered in install.sh."
-    echo "     Fix: make install.sh read the hooks flags before writing settings.json."
+  local present=false
+  if grep -q "\"$install_key\"" "$ROOT/install.sh" 2>/dev/null; then
+    present=true
+  fi
+
+  if [ "$enabled" = "false" ] && [ "$present" = "true" ] && [ "$config_gated" = "false" ]; then
+    fail "Hook '$config_key' is false in orbit.config.json but '$install_key' is unconditionally registered in install.sh."
+    echo "     Fix: make install.sh read the hooks flags from orbit.config.json before writing settings.json."
     return
   fi
-  if [ "$enabled" = "true" ] && [ "$registered" = "false" ]; then
+  if [ "$enabled" = "true" ] && [ "$present" = "false" ]; then
     note "Hook '$config_key' is true in orbit.config.json but '$install_key' is not found in install.sh."
     return
   fi
-  pass "Hook '$config_key' config ($enabled) matches install.sh registration ($registered)"
+  pass "Hook '$config_key' config ($enabled) — install.sh registration is config-gated: $config_gated"
 }
 
 check_hook "post_tool_use" "PostToolUse"

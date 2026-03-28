@@ -215,70 +215,54 @@ POLICY_EOF
 # ─── Write Claude Code settings.json with hooks ───────────────────────────────
 install_claude_settings() {
   local settings_file="$CLAUDE_DIR/settings.json"
-  local hooks_dir
+  local hdir="$HOME/.claude/orbit/hooks"
+  local config="$FRAMEWORK_DIR/orbit.config.json"
 
-  if [[ "$INSTALL_MODE" == "global" ]]; then
-    hooks_dir="\$HOME/.claude/orbit/hooks"
-  else
-    hooks_dir=".orbit/hooks"
+  # Read hook flags from orbit.config.json; default true if config absent or jq unavailable
+  local hook_post_tool_use=true
+  if [[ -f "$config" ]] && command -v jq &>/dev/null; then
+    local flag
+    flag=$(jq -r '.hooks.post_tool_use // true' "$config")
+    [[ "$flag" == "false" ]] && hook_post_tool_use=false
   fi
 
-  # Merge with existing settings if present, otherwise create new
+  # Build the hooks object conditionally — only register enabled hooks
+  local post_tool_use_arg="false"
+  [[ "$hook_post_tool_use" == true ]] && post_tool_use_arg="true"
+
   if [[ -f "$settings_file" ]] && command -v jq &>/dev/null; then
     echo "  Found existing settings.json — merging hooks..."
     local tmp_settings
     tmp_settings=$(mktemp)
-    jq --arg hdir "$HOME/.claude/orbit/hooks" '
-      .hooks = {
-        "PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/pre-tool-use.sh\" 2>/dev/null || true")}]}],
-        "PostToolUse": [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/post-tool-use.sh\" 2>/dev/null || true")}]}],
-        "PreCompact":  [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/pre-compact.sh\" 2>/dev/null || true")}]}],
-        "Stop":        [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/stop.sh\" 2>/dev/null || true")}]}]
-      }
+    jq --arg hdir "$hdir" --argjson post_tool_use "$post_tool_use_arg" '
+      .hooks = (
+        {"PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/pre-tool-use.sh\" 2>/dev/null || true")}]}]} +
+        (if $post_tool_use then {"PostToolUse": [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/post-tool-use.sh\" 2>/dev/null || true")}]}]} else {} end) +
+        {"PreCompact": [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/pre-compact.sh\" 2>/dev/null || true")}]}],
+         "Stop":       [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/stop.sh\" 2>/dev/null || true")}]}]}
+      )
     ' "$settings_file" > "$tmp_settings" && mv "$tmp_settings" "$settings_file"
   else
-    # Write fresh settings
-    local HOOK_BASE="$HOME/.claude/orbit/hooks"
-    cat > "$settings_file" << SETTINGS_EOF
-{
-  "permissions": {
-    "allow": [
-      "Bash(git:*)",
-      "Bash(npm:*)",
-      "Bash(npx:*)",
-      "Bash(node:*)"
-    ]
-  },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [{"type": "command", "command": "bash \"${HOOK_BASE}/pre-tool-use.sh\" 2>/dev/null || true"}]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": ".*",
-        "hooks": [{"type": "command", "command": "bash \"${HOOK_BASE}/post-tool-use.sh\" 2>/dev/null || true"}]
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": ".*",
-        "hooks": [{"type": "command", "command": "bash \"${HOOK_BASE}/pre-compact.sh\" 2>/dev/null || true"}]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": ".*",
-        "hooks": [{"type": "command", "command": "bash \"${HOOK_BASE}/stop.sh\" 2>/dev/null || true"}]
-      }
-    ]
-  }
-}
-SETTINGS_EOF
+    # Write fresh settings using jq so hook flags are respected consistently
+    jq -n \
+      --arg hdir "$hdir" \
+      --argjson post_tool_use "$post_tool_use_arg" \
+      '{
+        "permissions": {
+          "allow": ["Bash(git:*)", "Bash(npm:*)", "Bash(npx:*)", "Bash(node:*)"]
+        },
+        "hooks": (
+          {"PreToolUse": [{"matcher": "Bash", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/pre-tool-use.sh\" 2>/dev/null || true")}]}]} +
+          (if $post_tool_use then {"PostToolUse": [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/post-tool-use.sh\" 2>/dev/null || true")}]}]} else {} end) +
+          {"PreCompact": [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/pre-compact.sh\" 2>/dev/null || true")}]}],
+           "Stop":       [{"matcher": ".*", "hooks": [{"type": "command", "command": ("bash \"" + $hdir + "/stop.sh\" 2>/dev/null || true")}]}]}
+        )
+      }' > "$settings_file"
   fi
-  echo "  ✓ settings.json (hooks: PreToolUse, PostToolUse, PreCompact, Stop)"
+
+  local active_hooks="PreToolUse, PreCompact, Stop"
+  [[ "$hook_post_tool_use" == true ]] && active_hooks="PreToolUse, PostToolUse, PreCompact, Stop"
+  echo "  ✓ settings.json (hooks: ${active_hooks})"
 }
 
 # ─── Initialize project state directory ───────────────────────────────────────
@@ -355,7 +339,7 @@ echo ""
 echo -e "Framework:"
 echo -e "  Agents:  $(ls "$FRAMEWORK_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ') core agents"
 echo -e "  Skills:  $(ls "$FRAMEWORK_DIR/skills/"*.md 2>/dev/null | wc -l | tr -d ' ') skills loaded"
-echo -e "  Hooks:   PreToolUse, PostToolUse, PreCompact, Stop"
+echo -e "  Hooks:   PreToolUse, PreCompact, Stop (PostToolUse: see orbit.config.json)"
 echo ""
 echo -e "Start with:"
 echo -e "  ${BLUE}/orbit:new-project${NC}   — start a new project from scratch"
