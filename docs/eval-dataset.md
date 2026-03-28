@@ -20,7 +20,7 @@ Each entry should be evaluated for:
 | E03 | Review this React auth component for bugs | REVIEW | typescript-reviewer | `/orbit:review` | Language-specific review |
 | E04 | Create a CI/CD rollback plan for production | OPERATIONS | devops | `/orbit:plan` | Deployment and observability coverage |
 | E05 | Unknown domain with high uncertainty | RESEARCH | researcher | `/orbit:plan` or `/orbit:forge` | Research first, forge if needed |
-| E06 | Build an ML inference monitoring loop | SYNTHESIS | ml-engineer | `/orbit:forge` if no fit | Requires forged specialist |
+| E06 | Build an ML inference monitoring loop | SYNTHESIS | forge | `/orbit:forge` | Routes to forge; forge creates ml-engineer specialist from forge/ml-engineer.md |
 | E07 | Audit prompt injection risks in the workflow docs | REVIEW | security-engineer | `/orbit:audit` | Security plus prompt-safety |
 | E08 | Resume a compacted session and continue phase work | OPERATIONS | strategist or engineer | `/orbit:resume` | State recovery test |
 
