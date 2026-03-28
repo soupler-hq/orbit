@@ -1,4 +1,4 @@
-name: Orbit Release (v2.3)
+name: Orbit Release
 
 on:
   push:
@@ -12,12 +12,12 @@ jobs:
       contents: write
       packages: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Install dependencies
@@ -28,6 +28,17 @@ jobs:
 
       - name: 📝 Extract Latest Release Notes
         run: node bin/extract-changelog.js ${{ github.ref_name }}
+
+      - name: 🔐 Generate SHASUM256 manifest
+        run: |
+          shasum -a 256 \
+            CLAUDE.md INSTRUCTIONS.md SKILLS.md WORKFLOWS.md AGENTS.md \
+            orbit.registry.json orbit.config.json orbit.config.schema.json \
+            install.sh \
+            agents/*.md skills/*.md hooks/scripts/*.sh \
+            > SHASUM256.txt
+          echo "Generated SHASUM256.txt:"
+          cat SHASUM256.txt
 
       - name: 🚀 Publish to GitHub Packages
         run: npm publish
@@ -40,6 +51,7 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: Orbit ${{ github.ref_name }}
           body_path: RELEASE_NOTES.md
+          files: SHASUM256.txt
           draft: false
           prerelease: false
         env:

@@ -270,6 +270,35 @@ Next action: /orbit:build 3 to complete Wave 3
 
 ---
 
+# Orbit Command: /orbit:cost
+> Show current model routing config and estimated token cost breakdown
+
+## PROCESS
+
+Read `orbit.config.json`. Output a table showing:
+
+```
+Model Routing (from orbit.config.json → models.routing)
+──────────────────────────────────────────────────────
+  classify   → {routing.classify}   (intent routing, simple lookups)
+  standard   → {routing.standard}   (coding, debugging, most tasks)
+  reasoning  → {routing.reasoning}  (architecture, complex reasoning)
+  security   → {routing.security}   (threat modeling, adversarial)
+
+Override: edit orbit.config.json → models.routing
+Example:  examples/model-routing.config.json
+```
+
+If `orbit.config.json` is missing or has no `models.routing` key, warn:
+```
+⚠️  No models.routing found in orbit.config.json — using CLAUDE.md defaults.
+   Run: cp examples/model-routing.config.json orbit.config.json
+```
+
+Then show session token usage if available from STATE.md or context metadata.
+
+---
+
 # Orbit Command: /orbit:resume
 > Reload project state and continue from where we left off
 

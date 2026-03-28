@@ -6,29 +6,29 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync, spawnSync } = require('child_process');
+// child_process reserved for future use
 const os = require('os');
 
-const FRAMEWORK_VERSION = '2.3.0';
 const FRAMEWORK_ROOT = path.join(__dirname, '..');
 
 // Parse CLI args
 const args = process.argv.slice(2);
-const command  = args.find(a => ['init', 'sync', 'promote', 'help'].includes(a)) || 'init';
+const command = args.find((a) => ['init', 'sync', 'promote', 'help'].includes(a)) || 'init';
 const isGlobal = args.includes('--global') || args.includes('-g');
-const isNexus  = args.includes('nexus') || args.includes('--nexus');
-const tool = args.includes('--all') ? 'all' 
-  : args.find(a => ['claude', 'codex', 'cursor'].includes(a)) || 'claude';
+const isNexus = args.includes('nexus') || args.includes('--nexus');
+const _tool = args.includes('--all')
+  ? 'all'
+  : args.find((a) => ['claude', 'codex', 'cursor'].includes(a)) || 'claude';
 
 // Colors
 const c = {
   green: (s) => `\x1b[32m${s}\x1b[0m`,
-  blue:  (s) => `\x1b[34m${s}\x1b[0m`,
-  yellow:(s) => `\x1b[33m${s}\x1b[0m`,
-  red:   (s) => `\x1b[31m${s}\x1b[0m`,
-  bold:  (s) => `\x1b[1m${s}\x1b[0m`,
-  dim:   (s) => `\x1b[2m${s}\x1b[0m`,
-  cyan:  (s) => `\x1b[36m${s}\x1b[0m`,
+  blue: (s) => `\x1b[34m${s}\x1b[0m`,
+  yellow: (s) => `\x1b[33m${s}\x1b[0m`,
+  red: (s) => `\x1b[31m${s}\x1b[0m`,
+  bold: (s) => `\x1b[1m${s}\x1b[0m`,
+  dim: (s) => `\x1b[2m${s}\x1b[0m`,
+  cyan: (s) => `\x1b[36m${s}\x1b[0m`,
 };
 
 console.log(`\n${c.bold('╔══════════════════════════════════════════╗')}`);
@@ -37,9 +37,7 @@ console.log(`${c.bold('║      "Nexus" Meta-Orchestrator       ║')}`);
 console.log(`${c.bold('╚══════════════════════════════════════════╝')}\n`);
 
 const projectDir = process.cwd();
-const claudeDir = isGlobal 
-  ? path.join(os.homedir(), '.claude')
-  : path.join(projectDir, '.claude');
+const claudeDir = isGlobal ? path.join(os.homedir(), '.claude') : path.join(projectDir, '.claude');
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -70,12 +68,12 @@ function copyDir(src, dest) {
  */
 function nexusInit() {
   console.log(c.cyan(`▸ Initializing Nexus Logical Root in ${projectDir}...\n`));
-  
+
   const nexusConfig = {
     workspace_mode: 'nexus',
     org: path.basename(projectDir),
     last_sync: new Date().toISOString(),
-    repos: []
+    repos: [],
   };
 
   fs.writeFileSync(path.join(projectDir, 'orbit.nexus.json'), JSON.stringify(nexusConfig, null, 2));
@@ -93,7 +91,7 @@ function nexusInit() {
  */
 function nexusSync() {
   console.log(c.cyan(`\n▸ Syncing Nexus Workspace (Auto-Discovery)...\n`));
-  
+
   const nexusPath = path.join(projectDir, 'orbit.nexus.json');
   if (!fs.existsSync(nexusPath)) {
     console.error(c.yellow('  ⚠️  No orbit.nexus.json found. Run "orbit nexus init" first.'));
@@ -102,7 +100,7 @@ function nexusSync() {
 
   const nexus = JSON.parse(fs.readFileSync(nexusPath, 'utf8'));
   const entries = fs.readdirSync(projectDir, { withFileTypes: true });
-  
+
   nexus.repos = [];
 
   for (const entry of entries) {
@@ -115,16 +113,20 @@ function nexusSync() {
         nexus.repos.push({
           name: entry.name,
           path: `./${entry.name}`,
-          orbit_aware: fs.existsSync(orbitConfig)
+          orbit_aware: fs.existsSync(orbitConfig),
         });
-        console.log(`  ${c.green('✓')} Discovered Repo: ${c.bold(entry.name)} ${fs.existsSync(orbitConfig) ? '(Orbit-Aware)' : '(Legacy)'}`);
+        console.log(
+          `  ${c.green('✓')} Discovered Repo: ${c.bold(entry.name)} ${fs.existsSync(orbitConfig) ? '(Orbit-Aware)' : '(Legacy)'}`
+        );
       }
     }
   }
 
   nexus.last_sync = new Date().toISOString();
   fs.writeFileSync(nexusPath, JSON.stringify(nexus, null, 2));
-  console.log(c.green(`\n  ✅ Nexus Workspace Sync Complete (${nexus.repos.length} repos indexed)`));
+  console.log(
+    c.green(`\n  ✅ Nexus Workspace Sync Complete (${nexus.repos.length} repos indexed)`)
+  );
 }
 
 /**
@@ -143,7 +145,7 @@ function handlePromote() {
   const nexusPath = path.join(projectDir, '..', 'orbit.nexus.json');
   if (fs.existsSync(nexusPath)) {
     const nexus = JSON.parse(fs.readFileSync(nexusPath, 'utf8'));
-    const orbitRepo = nexus.repos.find(r => r.name === 'orbit');
+    const orbitRepo = nexus.repos.find((r) => r.name === 'orbit');
     if (orbitRepo) corePath = path.resolve(projectDir, '..', orbitRepo.path);
   }
 
@@ -199,7 +201,10 @@ function installForClaude() {
   copyFile(path.join(FRAMEWORK_ROOT, 'INSTRUCTIONS.md'), path.join(claudeDir, 'INSTRUCTIONS.md'));
   copyFile(path.join(FRAMEWORK_ROOT, 'SKILLS.md'), path.join(claudeDir, 'SKILLS.md'));
   copyFile(path.join(FRAMEWORK_ROOT, 'WORKFLOWS.md'), path.join(claudeDir, 'WORKFLOWS.md'));
-  copyFile(path.join(FRAMEWORK_ROOT, 'orbit.registry.json'), path.join(claudeDir, 'orbit.registry.json'));
+  copyFile(
+    path.join(FRAMEWORK_ROOT, 'orbit.registry.json'),
+    path.join(claudeDir, 'orbit.registry.json')
+  );
   copyDir(path.join(FRAMEWORK_ROOT, 'agents'), path.join(claudeDir, 'agents'));
   copyDir(path.join(FRAMEWORK_ROOT, 'skills'), path.join(claudeDir, 'skills'));
 
@@ -208,10 +213,29 @@ function installForClaude() {
   copyFile(path.join(FRAMEWORK_ROOT, 'commands', 'commands.md'), path.join(cmdDir, 'commands.md'));
 
   const commands = [
-    'new-project', 'plan', 'build', 'verify', 'ship', 'next',
-    'quick', 'forge', 'review', 'audit', 'eval', 'monitor', 'debug',
-    'map-codebase', 'progress', 'resume', 'deploy', 'rollback',
-    'milestone', 'help', 'nexus-init', 'nexus-sync', 'promote'
+    'new-project',
+    'plan',
+    'build',
+    'verify',
+    'ship',
+    'next',
+    'quick',
+    'forge',
+    'review',
+    'audit',
+    'eval',
+    'monitor',
+    'debug',
+    'map-codebase',
+    'progress',
+    'resume',
+    'deploy',
+    'rollback',
+    'milestone',
+    'help',
+    'nexus-init',
+    'nexus-sync',
+    'promote',
   ];
 
   for (const cmd of commands) {
@@ -241,7 +265,9 @@ try {
   } else if (command === 'promote') {
     handlePromote();
   } else if (command === 'help') {
-    console.log(`Commands:\n  init    - Setup local project\n  nexus   - init/sync multi-repo workspace\n  promote - push local patterns to core\n  help    - show this help`);
+    console.log(
+      `Commands:\n  init    - Setup local project\n  nexus   - init/sync multi-repo workspace\n  promote - push local patterns to core\n  help    - show this help`
+    );
   } else {
     installForClaude();
     initProjectState();

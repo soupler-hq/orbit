@@ -7,15 +7,17 @@ FRAMEWORK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_MODE="local"
 TOOL="claude"
 PROJECT_DIR="${PWD}"
+SKIP_VERIFY=0
 GREEN='\033[0;32m'; BLUE='\033[0;34m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BOLD='\033[1m'; NC='\033[0m'
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --global|-g) INSTALL_MODE="global"; shift ;;
-    --local|-l)  INSTALL_MODE="local";  shift ;;
-    --tool)      TOOL="$2"; shift 2 ;;
-    --all)       TOOL="all"; shift ;;
-    --hooks-only) INSTALL_HOOKS_ONLY=1; shift ;;
+    --global|-g)   INSTALL_MODE="global"; shift ;;
+    --local|-l)    INSTALL_MODE="local";  shift ;;
+    --tool)        TOOL="$2"; shift 2 ;;
+    --all)         TOOL="all"; shift ;;
+    --hooks-only)  INSTALL_HOOKS_ONLY=1; shift ;;
+    --skip-verify) SKIP_VERIFY=1; shift ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -32,6 +34,37 @@ echo "║   Orbit Installer v2.0.0   ║"
 echo "║   Soupler AI Engineering Standard      ║"
 echo "╚════════════════════════════════════════╝"
 echo -e "${NC}"
+
+# ─── Checksum Verification ───────────────────────────────────────────────────
+# Verifies framework files against the published SHASUM256.txt manifest.
+# Requires: curl, shasum (both available by default on macOS and most Linux distros).
+# Skip with --skip-verify (prints a prominent warning).
+verify_checksums() {
+  local manifest="$FRAMEWORK_DIR/SHASUM256.txt"
+
+  if [[ "$SKIP_VERIFY" -eq 1 ]]; then
+    echo -e "${YELLOW}⚠️  WARNING: --skip-verify flag is set. Checksum verification SKIPPED.${NC}"
+    echo -e "${YELLOW}   Only use this in local development. Never skip in production installs.${NC}"
+    return 0
+  fi
+
+  # If a local manifest exists (e.g. cloned repo), verify against it
+  if [[ -f "$manifest" ]]; then
+    echo -e "${YELLOW}▶ Verifying framework file integrity...${NC}"
+    # Run shasum check from the framework dir so relative paths resolve
+    if (cd "$FRAMEWORK_DIR" && shasum -a 256 --check SHASUM256.txt --quiet 2>&1); then
+      echo -e "${GREEN}  ✅ All checksums verified${NC}"
+    else
+      echo -e "${RED}  ❌ Checksum mismatch detected — aborting installation.${NC}" >&2
+      echo -e "${RED}     One or more framework files do not match the published manifest.${NC}" >&2
+      echo -e "${RED}     Download a fresh copy from: https://github.com/soupler-hq/orbit/releases${NC}" >&2
+      exit 1
+    fi
+  else
+    # No local manifest — skip silently (expected for source checkouts without a release)
+    echo -e "${BLUE}  ℹ  No SHASUM256.txt found — skipping integrity check (source install).${NC}"
+  fi
+}
 
 # ─── Install for Claude Code ──────────────────────────────────────────────────
 install_for_claude() {
@@ -126,6 +159,57 @@ CMDEOF
   install_claude_settings
 
   echo -e "${GREEN}  ✅ Claude Code installation complete${NC}"
+}
+
+# ─── Install for Codex ───────────────────────────────────────────────────────
+install_for_codex() {
+  echo -e "${YELLOW}▶ Installing for Codex...${NC}"
+
+  local codex_dir
+  if [[ "$INSTALL_MODE" == "global" ]]; then
+    codex_dir="$HOME/.codex"
+  else
+    codex_dir="$PROJECT_DIR/.codex"
+  fi
+
+  mkdir -p "$codex_dir/agents" "$codex_dir/skills" "$codex_dir/state"
+
+  # Codex reads INSTRUCTIONS.md as its operator prompt (equivalent to CLAUDE.md).
+  cp "$FRAMEWORK_DIR/INSTRUCTIONS.md"          "$codex_dir/INSTRUCTIONS.md"
+  cp "$FRAMEWORK_DIR/AGENTS.md"                "$codex_dir/AGENTS.md"
+  cp "$FRAMEWORK_DIR/SKILLS.md"                "$codex_dir/SKILLS.md"
+  cp "$FRAMEWORK_DIR/WORKFLOWS.md"             "$codex_dir/WORKFLOWS.md"
+  cp "$FRAMEWORK_DIR/orbit.registry.json"      "$codex_dir/orbit.registry.json"
+  cp "$FRAMEWORK_DIR/orbit.config.json"        "$codex_dir/orbit.config.json"
+  cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$codex_dir/orbit.config.schema.json"
+  cp "$FRAMEWORK_DIR/state/STATE.template.md"  "$codex_dir/state/STATE.template.md"
+  echo "  ✓ operator surface + registry + config + state template"
+
+  for f in "$FRAMEWORK_DIR"/agents/*.md; do
+    cp "$f" "$codex_dir/agents/$(basename "$f")"
+  done
+  echo "  ✓ agents/ ($(ls "$FRAMEWORK_DIR/agents/"*.md | wc -l | tr -d ' ') files)"
+
+  for f in "$FRAMEWORK_DIR"/skills/*.md; do
+    cp "$f" "$codex_dir/skills/$(basename "$f")"
+  done
+  echo "  ✓ skills/ ($(ls "$FRAMEWORK_DIR/skills/"*.md | wc -l | tr -d ' ') files)"
+
+  # Codex policy: injected system context pointing to the Orbit control plane.
+  cat > "$codex_dir/policy.md" << 'POLICY_EOF'
+# Orbit Control Plane — Codex Adapter
+
+You are running the Orbit orchestration framework.
+
+Read INSTRUCTIONS.md at session start. Your agent registry is orbit.registry.json.
+Classify the request, select the best agent, dispatch work per WORKFLOWS.md.
+Read state/STATE.md on start, write it on session end.
+
+/orbit: command equivalents — follow the matching section in WORKFLOWS.md:
+  plan → WORKFLOWS.md §plan  |  build → §build  |  verify → §verify  |  ship → §ship
+POLICY_EOF
+  echo "  ✓ policy.md (Orbit adapter context)"
+  echo -e "${GREEN}  ✅ Codex installation complete → $codex_dir${NC}"
 }
 
 # ─── Write Claude Code settings.json with hooks ───────────────────────────────
@@ -250,12 +334,16 @@ GITIGNORE_EOF
 }
 
 # ─── Main ────────────────────────────────────────────────────────────────────
+verify_checksums
+
 if [[ "$INSTALL_MODE" == "local" ]]; then
   init_project_state
 fi
 
 case "$TOOL" in
-  claude|all) install_for_claude ;;
+  claude) install_for_claude ;;
+  codex)  install_for_codex ;;
+  all)    install_for_claude; install_for_codex ;;
 esac
 
 # ─── Summary ─────────────────────────────────────────────────────────────────
@@ -265,7 +353,7 @@ echo ""
 echo -e "Installed to: ${BLUE}$CLAUDE_DIR${NC}"
 echo ""
 echo -e "Framework:"
-echo -e "  Agents:  $(ls "$FRAMEWORK_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ') core + $(ls "$FRAMEWORK_DIR/forge/"*.md 2>/dev/null | wc -l | tr -d ' ') forged"
+echo -e "  Agents:  $(ls "$FRAMEWORK_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ') core agents"
 echo -e "  Skills:  $(ls "$FRAMEWORK_DIR/skills/"*.md 2>/dev/null | wc -l | tr -d ' ') skills loaded"
 echo -e "  Hooks:   PreToolUse, PostToolUse, PreCompact, Stop"
 echo ""

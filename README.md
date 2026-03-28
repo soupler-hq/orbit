@@ -1,8 +1,17 @@
-# Orbit - AI Agent Orchestration Framework
+<div align="center">
+  <img src="https://github.com/soupler-hq/orbit/raw/main/docs/assets/orbit-logo.png" alt="Orbit Logo" width="120" />
+  <h1>Orbit — The SOTA AI Agent Orchestrator</h1>
+  <p><strong>A production-grade, repo-native control plane for enterprise agentic software delivery.</strong></p>
 
-Orbit is a repo-native control plane for agentic software delivery
+  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+  [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+  [![Standard](https://img.shields.io/badge/standard-Soupler_Engineering-black)](#)
+</div>
 
-## What is Orbit?
+---
+
+## 🌌 What is Orbit?
 
 > **The Mental Model**: Imagine a massive construction site. You have hundreds of workers (the Agent models). Without a **Site Manager** and a **Blueprint** (Orbit), every worker might try to build the kitchen in a different spot. Orbit is the site office—providing the specific blueprints, safety protocols, and coordination needed to build a skyscraper instead of a pile of bricks.
 
@@ -163,22 +172,25 @@ The framework separates orchestration policy from runtime implementation:
 
 ---
 
-## Installation & Setup
+## 🚀 Installation & Setup
 
-Orbit v2.3.0 is distributed as a scoped NPM package via **GitHub Packages**.
+Orbit v2.4.0 is distributed as a scoped NPM package via **GitHub Packages** and operates through our **Nexus SOTA Architecture**.
 
-### 1. Enterprise Installation (Recommended)
-To use Orbit across your organization, configure your project to point to the Soupler registry.
+### 1. Enterprise Nexus Installation (Recommended)
+To use Orbit across your organization and orchestrate multiple repositories, initialize the Nexus Workspace.
 
 ```bash
 # Add to your .npmrc file
 @soupler-hq:registry=https://npm.pkg.github.com
 
-# Install as a dev dependency
+# Install as a global or workspace dev dependency
 npm install @soupler-hq/orbit --save-dev
 
-# Initialize the Orbit Control Plane
-npx orbit init --tool claude
+# Initialize the Orbit Control Plane in your root directory
+npx orbit nexus init --tool claude
+
+# Synchronize your multi-repo workspace
+npx orbit nexus sync
 ```
 
 ### 2. Manual/Legacy Installation
@@ -209,6 +221,22 @@ Orbit behaves differently based on your repository's visibility to ensure maximu
 
 Start a Claude Code session in your project and type `/orbit:help`. You should see the full command list.
 
+### Integrity Verification
+
+Every release publishes a `SHASUM256.txt` manifest as a GitHub Release asset. Before trusting installed framework files, verify them:
+
+```bash
+# Download the manifest for your release
+curl -sL https://github.com/soupler-hq/orbit/releases/download/vX.Y.Z/SHASUM256.txt -o SHASUM256.txt
+
+# Verify all files match (run from the installed framework directory)
+shasum -a 256 --check SHASUM256.txt
+```
+
+A mismatch means the installed files differ from the published release. Do not use the framework until you have resolved the discrepancy.
+
+> `install.sh` performs this check automatically at install time. Use `--skip-verify` only in local development contexts (a warning is printed).
+
 ---
 
 ## Repository Layout
@@ -226,6 +254,9 @@ The repository is organized as a control plane:
 - `state/` and `examples/` show how long-running work is persisted and resumed
 - `docs/` contains supporting guidance for token optimization, MCP usage, and playbooks
 - `install.sh` wires the framework into a target project
+- `tests/` unit test suite (Vitest) — `npm test` to run
+- `eslint.config.mjs` and `.prettierrc` define code quality rules — `npm run lint`, `npm run format:check`
+- `SECURITY.md` vulnerability reporting and threat model
 
 ---
 
@@ -235,7 +266,31 @@ The repository is organized as a control plane:
 
 The `CLAUDE.md` file is the brain for Claude Code sessions, but the same control-plane idea works in other runtimes too. It classifies your request, selects the right agent, designs parallel execution, and dispatches work with proper context.
 
-### 2. Agents
+### 2. Model Routing
+
+Orbit routes tasks to the cheapest model that can handle the job. Model IDs are configured in `orbit.config.json` → `models.routing` — never hardcoded in instructions.
+
+```json
+"models": {
+  "routing": {
+    "classify":  "claude-haiku-4-5-20251001",
+    "standard":  "claude-sonnet-4-6",
+    "reasoning": "claude-opus-4-6",
+    "security":  "claude-opus-4-6"
+  }
+}
+```
+
+| Alias | Used for | Cost tier |
+| :--- | :--- | :--- |
+| `classify` | Intent routing, simple lookups | Cheapest (~20x cheaper than standard) |
+| `standard` | Coding, debugging, most tasks | Default |
+| `reasoning` | Architecture, system design, complex plans | Highest |
+| `security` | Threat modeling, adversarial analysis | Highest |
+
+**To override:** edit `orbit.config.json` → `models.routing`. See [`examples/model-routing.config.json`](examples/model-routing.config.json) for a fully annotated example. Run `/orbit:cost` to view the active routing config at any time.
+
+### 3. Agents
 
 Specialized agents with deep domain expertise. Each has:
 
@@ -417,7 +472,7 @@ Orbit is designed from the ground up to minimize token consumption:
 
 ## Sample Eval Set
 
-Use [docs/eval-dataset.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/nexus/docs/eval-dataset.md) to check whether routing, workflow choice, and portability claims still hold after changes.
+Use [docs/eval-dataset.md](docs/eval-dataset.md) to check whether routing, workflow choice, and portability claims still hold after changes.
 
 Representative prompts:
 
@@ -551,7 +606,20 @@ Every commit to the Orbit core is guarded by the **Orbit Sentinel** (`.github/wo
 
 ---
 
-## Contributing
+## 🤝 Community & Open Source
 
-Add skills, agents, or patterns. The skill for writing skills is in `skills/`.
-The key question before any contribution: does this encode genuine domain expertise, or is it generic advice?
+Orbit is officially an **Open Source SOTA framework**. We invite teams, developers, and organizations to contribute and promote their localized agent intelligence to the core.
+
+- **[Contributing Guide](CONTRIBUTING.md)**: Add skills, agents, or patterns to the framework. The core principle: Does this encode genuine domain expertise, or is it generic advice?
+- **[Code of Conduct](CODE_OF_CONDUCT.md)**: We enforce a harassment-free and inclusive environment for all engineers and agent-operators.
+- **[Security Policy](SECURITY.md)**: Report vulnerabilities via GitHub Private Advisories. Do not open public issues for security concerns.
+
+### License
+
+**Orbit is licensed under the Apache License 2.0**.
+This provides full patent protections, making it safe for enterprise adoption. See the [LICENSE](LICENSE) file for the full text.
+
+---
+<div align="center">
+  <i>Orbit: Standardizing the future of agentic orchestration. Brought to you by Soupler Labs.</i>
+</div>

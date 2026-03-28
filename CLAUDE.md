@@ -72,13 +72,6 @@ The registry below mirrors `orbit.registry.json`. Keep both in sync.
 | `security-engineer` | Security audits, threat modeling, OWASP, `/orbit:audit` |
 | `data-engineer` | ETL/ELT pipelines, dbt, Kafka, Spark, warehousing |
 
-### Forged Agents (pre-built for common domains)
-| Agent | Triggers On |
-|-------|------------|
-| `ml-engineer` | ML pipelines, model training/serving, MLOps |
-| `blockchain-engineer` | Smart contracts, Solana/Ethereum, web3 |
-| `mobile-engineer` | iOS/Android, React Native, Flutter |
-
 ### Selection Logic
 ```
 Single clear match → dispatch that agent
@@ -112,14 +105,18 @@ WAVE 3 (sequential): integration → verify → atomic commit → STATE.md updat
 7. Main session stays under 50k tokens — everything else in subagents
 
 ### Model Routing (cost-optimal by default)
+
+Model IDs are defined in `orbit.config.json` → `models.routing`. Reference semantic aliases here — never hardcode model strings in prompts or docs.
+
 ```
-Classify / route / simple lookup  →  claude-haiku-4-5-20251001  (20x cheaper)
-Standard coding / debugging       →  claude-sonnet-4-6           (default)
-System architecture / design      →  claude-opus-4-6             (complex reasoning)
-Security threat modeling          →  claude-opus-4-6             (adversarial thinking)
-Quick fixes / one-liners          →  claude-haiku-4-5-20251001
+Classify / route / simple lookup  →  routing.classify   (cheapest, 20x cost reduction)
+Standard coding / debugging       →  routing.standard   (default workhorse)
+System architecture / design      →  routing.reasoning  (complex multi-step reasoning)
+Security threat modeling          →  routing.security   (adversarial thinking, same as reasoning)
+Quick fixes / one-liners          →  routing.classify
 ```
-Override via: `orbit.config.json` → `models.profiles`
+
+Override model IDs via: `orbit.config.json` → `models.routing` or `models.profiles`
 
 ---
 

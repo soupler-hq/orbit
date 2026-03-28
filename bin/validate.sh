@@ -36,10 +36,10 @@ required_dirs=(
   "hooks/scripts"
   "docs"
   "examples"
-  "forge"
   "state"
   "bin"
 )
+# forge/ is optional — it is userland (created on demand), not kernel
 
 missing=()
 
@@ -101,8 +101,8 @@ for (const name of ['claude', 'codex', 'antigravity']) {
   }
 }
 
-if (!runtimeAdapters.includes('Support level: `native`') || !runtimeAdapters.includes('Support level: `compatible`')) {
-  throw new Error('runtime adapters doc must describe native and compatible support levels');
+if (!runtimeAdapters.includes('Support level: `native`') || !runtimeAdapters.includes('Support level: `stable`')) {
+  throw new Error('runtime adapters doc must describe native and stable support levels');
 }
 
 if (!evals.includes('Routing Accuracy') || !evals.includes('Workflow Compliance') || !evals.includes('Portability')) {
@@ -162,6 +162,35 @@ for (const workflow of registry.workflows || []) {
     throw new Error(`Invalid workflow command in registry: ${workflow.name || 'unknown'}`);
   }
 }
+
+// ── Forge agent structural validation (userland — not in registry) ─────────
+// forge/ agents are created on demand per project. If any exist in the
+// framework repo, they must meet the same structural contract as core agents.
+const forgeDir = path.join(root, 'forge');
+if (fs.existsSync(forgeDir)) {
+  const forgeFiles = fs.readdirSync(forgeDir).filter(f => f.endsWith('.md'));
+  const requiredAgentSections = ['TRIGGERS ON', 'DOMAIN EXPERTISE', 'OPERATING RULES', 'SKILLS LOADED', 'OUTPUT FORMAT'];
+  for (const file of forgeFiles) {
+    const content = fs.readFileSync(path.join(forgeDir, file), 'utf8');
+    for (const section of requiredAgentSections) {
+      if (!content.includes(`## ${section}`)) {
+        throw new Error(`forge/${file} missing required section: ${section}`);
+      }
+    }
+  }
+  if (forgeFiles.length > 0) {
+    console.log(`  ✓ forge/ agents validated (${forgeFiles.length} files)`);
+  }
+}
 NODE
 
 printf 'Orbit validation passed.\n'
+
+# ── Model ID hygiene check ────────────────────────────────────────────────────
+# Warn if CLAUDE.md contains raw Anthropic model IDs instead of routing aliases.
+MODEL_PATTERN='claude-(haiku|sonnet|opus)-[0-9]'
+if grep -qE "$MODEL_PATTERN" "$ROOT_DIR/CLAUDE.md"; then
+  printf '\n⚠️  Warning: CLAUDE.md contains hardcoded model IDs.\n' >&2
+  printf '   Model versions should live only in orbit.config.json → models.routing.\n' >&2
+  grep -nE "$MODEL_PATTERN" "$ROOT_DIR/CLAUDE.md" >&2 || true
+fi

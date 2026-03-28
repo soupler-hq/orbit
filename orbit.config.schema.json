@@ -38,7 +38,17 @@
       "additionalProperties": false,
       "required": ["routing", "profiles", "cost_guard"],
       "properties": {
-        "routing": { "type": "string" },
+        "routing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["classify", "standard", "reasoning", "security"],
+          "properties": {
+            "classify":  { "type": "string" },
+            "standard":  { "type": "string" },
+            "reasoning": { "type": "string" },
+            "security":  { "type": "string" }
+          }
+        },
         "profiles": {
           "type": "object",
           "additionalProperties": {

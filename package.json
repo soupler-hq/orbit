@@ -1,6 +1,6 @@
 {
   "name": "@soupler-hq/orbit",
-  "version": "2.4.0",
+  "version": "2.7.0",
   "description": "Production-grade Orbit framework — design, build, deploy, and monitor any kind of work",
   "main": "bin/install.js",
   "bin": {
@@ -16,7 +16,15 @@
     "nexus-init": "node bin/install.js nexus init",
     "nexus-sync": "node bin/install.js nexus sync",
     "validate": "bash bin/validate.sh",
-    "eval": "bash bin/eval.sh"
+    "eval": "bash bin/eval.sh",
+    "lint": "eslint bin/",
+    "lint:fix": "eslint bin/ --fix",
+    "format:check": "prettier --check bin/",
+    "format:write": "prettier --write bin/",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "promote": "bash bin/promote.sh"
   },
   "keywords": [
     "ai-agents",
@@ -30,12 +38,16 @@
     "devops",
     "automation"
   ],
-  "author": "Orbit",
+  "author": "Soupler Engineering",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourorg/orbit"
+    "url": "https://github.com/soupler-hq/orbit"
   },
+  "bugs": {
+    "url": "https://github.com/soupler-hq/orbit/issues"
+  },
+  "homepage": "https://github.com/soupler-hq/orbit#readme",
   "files": [
     "CLAUDE.md",
     "AGENTS.md",
@@ -44,6 +56,7 @@
     "SKILLS.md",
     "WORKFLOWS.md",
     "orbit.registry.json",
+    "orbit.config.json",
     "orbit.config.schema.json",
     "install.sh",
     "agents/",
@@ -51,14 +64,19 @@
     "commands/",
     "state/",
     "hooks/",
-    "forge/",
     "docs/",
-    "docs/runtime-adapters.md",
-    "docs/evals.md",
     "bin/",
-    "bin/eval.sh"
+    "examples/"
   ],
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^4.1.2",
+    "eslint": "^10.1.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.1",
+    "vitest": "^4.1.2"
   }
 }

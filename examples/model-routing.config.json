@@ -1,9 +1,9 @@
 {
-  "$schema": "./orbit.config.schema.json",
+  "$schema": "../orbit.config.schema.json",
   "version": "2.2.0",
   "project": {
-    "name": "",
-    "org": "soupler",
+    "name": "my-project",
+    "org": "my-org",
     "state_dir": ".orbit/state",
     "hooks_dir": ".orbit/hooks"
   },
@@ -13,6 +13,7 @@
     "description": "autonomous=hands-off, collaborative=human-in-loop, audit=review-only"
   },
   "models": {
+    "_comment": "Override model routing here. All keys are semantic aliases — update the model ID to switch versions without touching CLAUDE.md.",
     "routing": {
       "classify":  "claude-haiku-4-5-20251001",
       "standard":  "claude-sonnet-4-6",
@@ -44,33 +45,9 @@
     "conventional_commits": true,
     "worktree_per_task": true
   },
-  "skills": {
-    "auto_load": true,
-    "lazy_load": true,
-    "cache_loaded": true
-  },
-  "hooks": {
-    "pre_compact": true,
-    "stop": true,
-    "pre_tool_use": true,
-    "post_tool_use": false,
-    "on_error": true
-  },
-  "security": {
-    "prompt_injection_detection": true,
-    "secret_scan_on_commit": true,
-    "destructive_command_guard": true,
-    "identity_separation": false
-  },
-  "notifications": {
-    "slack_webhook_url": "",
-    "on_phase_complete": false,
-    "on_deploy": false,
-    "on_error": false
-  },
-  "mcp": {
-    "max_active_tools": 10,
-    "recommended": ["filesystem", "git", "github", "fetch"],
-    "avoid_in_production": ["dangerous-tools"]
-  }
+  "skills": { "auto_load": true, "lazy_load": true, "cache_loaded": true },
+  "hooks": { "pre_compact": true, "stop": true, "pre_tool_use": true, "post_tool_use": false, "on_error": true },
+  "security": { "prompt_injection_detection": true, "secret_scan_on_commit": true, "destructive_command_guard": true, "identity_separation": false },
+  "notifications": { "slack_webhook_url": "", "on_phase_complete": false, "on_deploy": false, "on_error": false },
+  "mcp": { "max_active_tools": 10, "recommended": ["filesystem", "git", "github", "fetch"], "avoid_in_production": ["dangerous-tools"] }
 }
