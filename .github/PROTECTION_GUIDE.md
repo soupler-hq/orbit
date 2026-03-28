@@ -11,13 +11,17 @@ gh api -X PUT /repos/soupler-hq/orbit/branches/main/protection --input - <<EOF
 {
   "required_status_checks": {
     "strict": true,
-    "contexts": ["validate", "compliance", "safety"]
+    "checks": [
+      { "context": "validate", "app_id": 15368 },
+      { "context": "compliance", "app_id": 15368 },
+      { "context": "safety", "app_id": 15368 }
+    ]
   },
   "enforce_admins": true,
   "required_pull_request_reviews": {
     "dismiss_stale_reviews": true,
     "require_code_owner_reviews": true,
-    "required_approving_review_count": 1
+    "required_approving_review_count": 0
   },
   "restrictions": null,
   "allow_force_pushes": false,
@@ -27,7 +31,23 @@ gh api -X PUT /repos/soupler-hq/orbit/branches/main/protection --input - <<EOF
 EOF
 ```
 
-## 📦 2. Publishing to GitHub Packages
+## 🛠️ 2. Owner Bypass Ruleset (Required for Solo Devs)
+
+Since `enforce_admins` is `true`, you will need a **Repository Ruleset** to allow yourself to merge your own PRs without needing an external approval, while still blocking others.
+
+### Steps to Configure:
+1. Go to **Settings** > **Rules** > **Rulesets**.
+2. Create a **New branch ruleset**.
+3. Name: `Lead-Dev-Bypass`.
+4. **Bypass list**: Add **`soupler-labs`** (Role: Always).
+5. **Target branches**: Include the default branch.
+6. **Rules**:
+   - ✅ **Require a pull request before merging**.
+   - ✅ **Required approvals**: Set to `1`.
+   - ✅ **Required status checks**: Add `validate`, `compliance`, and `safety`.
+7. **Save changes**.
+
+## 📦 3. Publishing to GitHub Packages
 
 Orbit is now configured to publish to the **GitHub NPM Registry**.
 
