@@ -4,9 +4,8 @@
   "title": "Orbit Configuration",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "project", "mode", "models", "agents", "git", "skills", "hooks", "security", "notifications", "mcp"],
+  "required": ["project", "mode", "models", "agents", "git", "skills", "hooks", "security", "notifications", "mcp"],
   "properties": {
-    "version": { "type": "string" },
     "project": {
       "type": "object",
       "additionalProperties": false,
