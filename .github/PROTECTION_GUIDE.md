@@ -46,4 +46,5 @@ Orbit is now configured to publish to the **GitHub NPM Registry**.
 
 - **Never force-push to `main`**: This breaks the linear history required for SOTA traceability.
 - **Pass Sentinel**: All PRs must pass the **Orbit Sentinel** CI before the "Merge" button becomes active.
+- **Review Requirement**: Only **@soupler-labs** (and designated owners) can approve changes.
 - **Audit Logs**: Every release is documented in `CHANGELOG.md` as per the **Documentation Habit** rule.

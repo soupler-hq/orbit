@@ -1,0 +1,5 @@
+# Orbit Code Owners
+# This file ensures only soupler-labs (or specified owners) can approve PRs.
+# The * means every file in the repo.
+
+* @soupler-labs
