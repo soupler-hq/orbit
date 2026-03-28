@@ -221,6 +221,22 @@ Orbit behaves differently based on your repository's visibility to ensure maximu
 
 Start a Claude Code session in your project and type `/orbit:help`. You should see the full command list.
 
+### Integrity Verification
+
+Every release publishes a `SHASUM256.txt` manifest as a GitHub Release asset. Before trusting installed framework files, verify them:
+
+```bash
+# Download the manifest for your release
+curl -sL https://github.com/soupler-hq/orbit/releases/download/vX.Y.Z/SHASUM256.txt -o SHASUM256.txt
+
+# Verify all files match (run from the installed framework directory)
+shasum -a 256 --check SHASUM256.txt
+```
+
+A mismatch means the installed files differ from the published release. Do not use the framework until you have resolved the discrepancy.
+
+> `install.sh` performs this check automatically at install time. Use `--skip-verify` only in local development contexts (a warning is printed).
+
 ---
 
 ## Repository Layout

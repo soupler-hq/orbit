@@ -13,7 +13,12 @@
     "description": "autonomous=hands-off, collaborative=human-in-loop, audit=review-only"
   },
   "models": {
-    "routing": "auto",
+    "routing": {
+      "classify":  "claude-haiku-4-5-20251001",
+      "standard":  "claude-sonnet-4-6",
+      "reasoning": "claude-opus-4-6",
+      "security":  "claude-opus-4-6"
+    },
     "profiles": {
       "classify":    { "model": "claude-haiku-4-5-20251001",  "max_tokens": 1024,  "use_for": ["intent classification", "context routing", "simple lookups"] },
       "implement":   { "model": "claude-sonnet-4-6",          "max_tokens": 8192,  "use_for": ["coding", "refactoring", "debugging", "most tasks"] },

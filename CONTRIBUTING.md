@@ -81,9 +81,14 @@ npm run test:coverage
 
 # Orbit semantic validation
 bash bin/eval.sh
+
+# Dependency security audit
+npm audit --audit-level=high
 ```
 
-All five Sentinel checks must be green: `lint`, `test`, `validate`, `compliance`, `safety`.
+All six Sentinel checks must be green: `lint`, `test`, `validate`, `compliance`, `safety`, `sca`.
+
+**SCA gate**: The `sca` job runs `npm audit --audit-level=high`. If you add a new dependency with a known high/critical vulnerability, your PR will be blocked. Resolve the finding or justify an exception in the PR description.
 
 ---
 

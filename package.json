@@ -1,6 +1,6 @@
 {
   "name": "@soupler-hq/orbit",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "description": "Production-grade Orbit framework — design, build, deploy, and monitor any kind of work",
   "main": "bin/install.js",
   "bin": {

@@ -2,6 +2,19 @@
 
 All notable changes to the Orbit framework will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.1] - 2026-03-28
+### Added
+- **Model Routing Config**: `orbit.config.json` now has a `models.routing` object with semantic aliases (`classify`, `standard`, `reasoning`, `security`). `CLAUDE.md` references aliases instead of raw model IDs, preventing silent staleness on model deprecations.
+- **SCA Pipeline**: `npm audit --audit-level=high` added as required `sca` gate in Orbit Sentinel CI. Dependabot configured for weekly npm and GitHub Actions updates targeting `develop`. CodeQL static analysis runs on every PR and weekly.
+- **SHASUM256 Manifest**: Every release now generates and publishes `SHASUM256.txt` covering all installable framework files. `install.sh` verifies checksums before writing files to the destination.
+- **Security Model Docs**: New `docs/security-model.md` documents the full threat model, integrity verification process, hook safety, prompt injection defense, and SCA controls.
+- **`--skip-verify` flag**: `install.sh` accepts `--skip-verify` for local development (prints a prominent warning).
+
+### Changed
+- `orbit.config.schema.json`: `models.routing` type updated from `string` to a structured object with required `classify/standard/reasoning/security` keys.
+- `bin/validate.sh`: Added model ID hygiene check — warns if hardcoded `claude-*` model strings appear in `CLAUDE.md`.
+- `CONTRIBUTING.md`: SCA gate documented; local checklist updated to include `npm audit --audit-level=high`.
+
 ## [2.5.0] - 2026-03-28
 ### Added
 - **Security Policy**: `SECURITY.md` with threat model, responsible disclosure process, supported versions table, and consumer best practices for hook verification.

@@ -152,6 +152,16 @@ jobs:
         if: steps.tag_check.outputs.exists == 'false'
         run: node bin/extract-changelog.js ${{ steps.version.outputs.version }}
 
+      - name: 🔐 Generate SHASUM256 manifest
+        if: steps.tag_check.outputs.exists == 'false'
+        run: |
+          shasum -a 256 \
+            CLAUDE.md INSTRUCTIONS.md SKILLS.md WORKFLOWS.md AGENTS.md \
+            orbit.registry.json orbit.config.json orbit.config.schema.json \
+            install.sh \
+            agents/*.md skills/*.md hooks/scripts/*.sh \
+            > SHASUM256.txt
+
       - name: 🚀 Publish to GitHub Packages
         if: steps.tag_check.outputs.exists == 'false'
         run: npm publish
@@ -173,6 +183,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Orbit ${{ steps.version.outputs.tag }}
           body_path: RELEASE_NOTES.md
+          files: SHASUM256.txt
           draft: false
           prerelease: false
         env:
