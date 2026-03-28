@@ -2,6 +2,16 @@
 
 All notable changes to the Orbit framework will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-03-28
+### Added
+- **Hardened Branch Protection**: Implemented mandatory status checks locked to GitHub Actions App ID (`15368`).
+- **Owner Sovereignty**: Added `.github/CODEOWNERS` for `@soupler-labs` to enforce review requirements.
+- **Bypass Protocol**: Defined Repository Ruleset for `@soupler-labs` to enable autonomous merging while maintaining CI enforcement.
+- **Protection Guide**: New `.github/PROTECTION_GUIDE.md` for team onboarding and incident response.
+
+### Fixed
+- **Validation Consistency**: Resolved missing `VERIFICATION WORKFLOW` sections in `nexus.md` and `sota-architecture.md`.
+
 ## [2.3.0] - 2026-03-28
 ### Added
 - **Nexus SOTA Architecture**: Support for logical workspace meta-orchestration across multiple repositories.
