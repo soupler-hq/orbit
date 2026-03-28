@@ -188,11 +188,14 @@ jobs:
 
       - name: 🏷️ Create and push tag
         if: steps.tag_check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag ${{ steps.version.outputs.tag }}
-          git push https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }} ${{ steps.version.outputs.tag }}
+          SHA=$(git rev-parse HEAD)
+          gh api repos/${{ github.repository }}/git/refs \
+            --method POST \
+            --field ref="refs/tags/${{ steps.version.outputs.tag }}" \
+            --field sha="$SHA"
 
       - name: 🔍 Check if package version already published
         if: steps.tag_check.outputs.exists == 'false'
