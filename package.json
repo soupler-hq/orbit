@@ -30,12 +30,16 @@
     "devops",
     "automation"
   ],
-  "author": "Orbit",
+  "author": "Soupler Engineering",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourorg/orbit"
+    "url": "https://github.com/soupler-hq/orbit"
   },
+  "bugs": {
+    "url": "https://github.com/soupler-hq/orbit/issues"
+  },
+  "homepage": "https://github.com/soupler-hq/orbit#readme",
   "files": [
     "CLAUDE.md",
     "AGENTS.md",
