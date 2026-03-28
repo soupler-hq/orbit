@@ -2,6 +2,16 @@
 
 All notable changes to the Orbit framework will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-03-28
+### Added
+- **Nexus SOTA Architecture**: Support for logical workspace meta-orchestration across multiple repositories.
+- **Auto-Discovery CLI**: New `orbit nexus init` and `orbit nexus sync` commands in `bin/install.js`.
+- **Worksapce Consciousness**: Enhanced `orchestrator.js` to resolve cross-repo paths and manage global state.
+- **Nexus Skill**: New `skills/nexus.md` encoding multi-repo coordination principles.
+- **Sentinel CI/CD**: Automated SOTA governance via GitHub Actions (`orbit-sentinel.yml`).
+- **Promote Capability**: New `promote` command for knowledge propagation from projects to the Orbit core.
+- **Release Automation**: One-shot publishing to GitHub Packages and GitHub Releases.
+
 ## [2.2.0] - 2026-03-27
 ### Added
 - **Persistence Pattern**: Implemented `bin/snapshot.sh` and `bin/resume.sh` for serialization and rehydration of session state.
@@ -14,13 +24,6 @@ All notable changes to the Orbit framework will be documented in this file. The 
 - **Atomic State Consistency**: Implemented filesystem-based mutex locking (`.orbit.lock`) to prevent `STATE.md` corruption during parallel aggregation.
 - **Git Worktree Handoff**: Automated task isolation via `git worktree add` for parallel wave execution.
 - **Model Routing Intelligence**: Orchestrator now enforces `orbit.config.json` model profiles based on agent domain (e.g., Haiku for classification, Sonnet for implementation).
-
-## [2.3.0] - 2026-03-28
-### Added
-- **Nexus SOTA Architecture**: Support for logical workspace meta-orchestration across multiple repositories.
-- **Auto-Discovery CLI**: New `orbit nexus init` and `orbit nexus sync` commands in `bin/install.js`.
-- **Workspace Consciousness**: Enhanced `orchestrator.js` to resolve cross-repo paths and manage global state.
-- **Nexus Skill**: New `skills/nexus.md` encoding multi-repo coordination principles.
 
 ## [2.0.0] - 2026-03-27
 ### Added

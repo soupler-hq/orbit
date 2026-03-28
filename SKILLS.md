@@ -21,6 +21,7 @@
 - `skills/ecommerce.md` - Checkout, payments, inventory, and order state machines.
 - `skills/instructor.md` - Educational delivery, analogy-first explanations, and Socratic discovery.
 - `skills/sota-architecture.md` - Kernel vs. Userland management, agent promotion, and bloat prevention.
+- `skills/nexus.md` - Multi-repo workspace coordination and organization-wide orchestration.
 
 ## Registry Discipline
 - Skill metadata lives in `orbit.registry.json`.

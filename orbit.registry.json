@@ -169,7 +169,9 @@
     { "name": "ai-systems", "file": "skills/ai-systems.md", "purpose": "agent systems and routing", "loaded_by": ["forge", "architect"] },
     { "name": "ecommerce", "file": "skills/ecommerce.md", "purpose": "commerce systems", "loaded_by": ["architect", "engineer"] },
     { "name": "reflection", "file": "skills/reflection.md", "purpose": "autonomous self-correction (RALPH loop)", "loaded_by": ["reviewer", "engineer", "safety-evaluator"] },
-    { "name": "instructor", "file": "skills/instructor.md", "purpose": "educational delivery and concept explanation", "loaded_by": ["pedagogue", "architect", "engineer"] }
+    { "name": "instructor", "file": "skills/instructor.md", "purpose": "educational delivery and concept explanation", "loaded_by": ["pedagogue", "architect", "engineer"] },
+    { "name": "nexus", "file": "skills/nexus.md", "purpose": "multi-repo workspace coordination", "loaded_by": ["architect", "strategist"] },
+    { "name": "sota-architecture", "file": "skills/sota-architecture.md", "purpose": "kernel vs userland management and bloat prevention", "loaded_by": ["architect", "forge"] }
   ],
   "workflows": [
     {
@@ -332,6 +334,13 @@
       "mode": "audit",
       "inputs": ["session usage"],
       "outputs": ["token and cost estimate"]
+    },
+    {
+      "name": "promote",
+      "command": "/orbit:promote",
+      "mode": "collaborative",
+      "inputs": ["local patterns", "agents", "skills"],
+      "outputs": ["core repository PR", "registry update"]
     }
   ]
 }

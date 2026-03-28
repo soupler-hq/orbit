@@ -163,22 +163,47 @@ The framework separates orchestration policy from runtime implementation:
 
 ---
 
-## Installation
+## Installation & Setup
+
+Orbit v2.3.0 is distributed as a scoped NPM package via **GitHub Packages**.
+
+### 1. Enterprise Installation (Recommended)
+To use Orbit across your organization, configure your project to point to the Soupler registry.
 
 ```bash
-# Clone Orbit into your tooling
-git clone https://github.com/yourorg/orbit.git ~/.orbit
+# Add to your .npmrc file
+@soupler-hq:registry=https://npm.pkg.github.com
 
-# Install into current project (Claude Code)
-cd your-project
-bash ~/.orbit/install.sh --local --tool claude
+# Install as a dev dependency
+npm install @soupler-hq/orbit --save-dev
 
-# Install globally (all projects)
-bash ~/.orbit/install.sh --global --tool claude
-
-# Install for all tools
-bash ~/.orbit/install.sh --global --all
+# Initialize the Orbit Control Plane
+npx orbit init --tool claude
 ```
+
+### 2. Manual/Legacy Installation
+If you are contributing to the Orbit core:
+```bash
+git clone https://github.com/soupler-hq/orbit.git
+cd orbit
+npm install
+bash bin/install.sh --local --tool claude
+```
+
+## Repository Sovereignty: Public vs. Private
+
+Orbit behaves differently based on your repository's visibility to ensure maximum security.
+
+| Feature | Public Repo 🌐 | Private Repo 🔒 |
+| :--- | :--- | :--- |
+| **Registry Auth** | No token needed for `npm install`. | **Required**: PAT with `read:packages` in `.npmrc`. |
+| **Nexus Discovery** | Syncs all public peer repos. | Requires a token with cross-repo `repo` scope. |
+| **Agent Forge** | Forged agents are public if committed. | All forged patterns stay behind your firewall. |
+| **CI/CD** | `GITHUB_TOKEN` is sufficient for Sentinel. | `GPR_TOKEN` secret must be provided for Release. |
+
+> [!IMPORTANT]
+> **Private Repo Setup**: To install Orbit in a private repo, you MUST provide an `_authToken` in your `.npmrc`:
+> `//npm.pkg.github.com/:_authToken=YOUR_PAT_TOKEN`
 
 ### Verify
 

@@ -45,6 +45,8 @@ Orbit is a repo-native agent orchestration framework. It routes work to speciali
 - Load `skills/security.md` and `skills/prompt-safety.md` for security-sensitive work.
 - Load `skills/deployment.md` for shipping and rollback work.
 - Load `skills/context-management.md` when the session gets long or a new session resumes.
+- Load `skills/nexus.md` for cross-repo workspace coordination.
+- Load `skills/sota-architecture.md` for kernel/userland management.
 
 ## State Rules
 - Read `.orbit/state/STATE.md` before acting on a project task.
@@ -71,3 +73,8 @@ Orbit is a repo-native agent orchestration framework. It routes work to speciali
 - Validate tool inputs and outputs before acting on them.
 - Block destructive commands unless intentionally approved.
 - Avoid exposing secrets in prompts, logs, or generated artifacts.
+
+## Architecture: Kernel vs. Userland
+- **The Kernel**: Core agents and skills are stable, standardized pillars.
+- **The Userland**: Forged agents live in project `.orbit` directories.
+- **Promotion**: Local specialists MUST be generalizable to be promoted to Kernel.

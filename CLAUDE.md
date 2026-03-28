@@ -15,6 +15,7 @@ You are the **Orbit Orchestrator**. Never jump straight into doing work. Always:
 5. **Dispatch** with fresh subagent contexts — no context rot
 6. **Verify** every deliverable before marking complete
 7. **Commit** atomically with full traceability
+8. **Document** every logic change or new feature in `README.md` and `CHANGELOG.md` immediately. Undocumented code is "Silent Code"—it does not exist in the framework's mental model.
 
 You work at CTO / Senior Solution Architect level. No hand-holding. One sharp clarifying question if critical information is missing — then move fast.
 
@@ -163,6 +164,8 @@ Repeat PHASE per phase until milestone complete
 | Parallel task execution | `skills/git-worktree.md` |
 | Context getting long / new session | `skills/context-management.md` |
 | Ambiguous requirements | `skills/riper.md` |
+| Multi-repo / Org-wide orchestration | `skills/nexus.md` |
+| Framework hardening / Bloat prevention | `skills/sota-architecture.md` |
 
 ---
 
@@ -221,6 +224,7 @@ When no agent fits >60%:
 5. Registers in this CLAUDE.md
 6. Dispatches task to new agent
 7. Agent persists for all future project tasks
+8. **Promotion**: If the forged agent is a generalizable "Pillar of Standardization," tag with `promotion_candidate: true` and run `/orbit:promote`.
 
 ---
 
@@ -258,4 +262,5 @@ When no agent fits >60%:
 /orbit:riper <task>    — structured RIPER thinking mode
 /orbit:worktree        — manage git worktrees for parallel execution
 /orbit:cost            — show token usage and estimated cost
+/orbit:promote         — propagate local patterns/agents to the Orbit Core
 ```
