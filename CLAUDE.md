@@ -187,12 +187,31 @@ Rule: if STATE.md missing → create before doing anything else.
 
 ## GIT DISCIPLINE
 
+### Branch-first — non-negotiable
+**Before writing a single line of code:**
+1. Check current branch: `git branch --show-current`
+2. If on `main` or `develop` → create a feature branch immediately:
+   ```
+   git checkout -b fix/issue-N-short-description   # for bug fixes
+   git checkout -b feat/short-description           # for features
+   git checkout -b chore/short-description          # for maintenance
+   ```
+3. Never commit directly to `main` or `develop`. No exceptions.
+
+**After work is done and committed on the feature branch:**
+```
+git push -u origin <branch>
+gh pr create --base develop --title "..." --body "..."
+```
+The PR goes through Sentinel CI before merging. Code does not exist until it is reviewed.
+
+### Commit format
 Every task → atomic commit immediately on completion:
 ```
-feat(phase-N): <what was built>
-fix(task-X): <what was fixed>
-arch(design): <architecture decision>
-docs(spec): <documentation added>
+feat(scope): <what was built>
+fix(scope): <what was fixed>
+arch(scope): <architecture decision>
+docs(scope): <documentation added>
 refactor(scope): <what was improved>
 test(scope): <what was tested>
 chore(scope): <maintenance>
