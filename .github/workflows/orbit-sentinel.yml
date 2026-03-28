@@ -109,3 +109,11 @@ jobs:
         run: npm install
       - name: 🔍 npm audit (high+critical)
         run: npm audit --audit-level=high
+
+  install-test:
+    name: install-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 🔧 install.sh integration tests
+        run: bash tests/install.test.sh
