@@ -8,39 +8,84 @@ Orbit is designed as a repo-native control plane. The core behavior lives in mar
 
 ## Support Levels
 
-- `native` - the runtime automatically understands the framework entrypoints and lifecycle
-- `compatible` - the runtime can use the framework with light mapping or wrapper logic
-- `adapter-required` - the runtime needs a custom bridge before it can use the framework reliably
+- `native` — the runtime automatically understands the framework entrypoints and lifecycle
+- `stable` — the runtime has a full install pathway; `install.sh --tool <name>` works end-to-end
+- `experimental` — partial support; documented constraints; no production guarantee
+- `planned` — on the roadmap; not yet implemented
+
+---
 
 ## Claude
 
 Support level: `native`
 
-- Reads `CLAUDE.md` directly
-- Works with `/orbit:` commands and repo-local hook behavior
+- Reads `CLAUDE.md` directly as the session orchestrator
+- Works with `/orbit:` slash commands natively
+- Lifecycle hooks (`PreToolUse`, `PostToolUse`, `PreCompact`, `Stop`) run via `settings.json`
 - Best fit for the current control-plane layout
+
+**Install:** `bash install.sh --tool claude`
+
+---
 
 ## Codex
 
-Support level: `compatible`
+Support level: `stable`
 
-- Can use the same repo-local instructions and registry
-- Should read `INSTRUCTIONS.md`, `SKILLS.md`, and `WORKFLOWS.md` as the operator surface
-- Should map its own command or task surface into the `/orbit:` workflow model
-- Can reuse the same agent registry and state files without changing the framework design
+Codex does not read `CLAUDE.md`. Instead, Orbit maps the control plane to Codex's operator surface:
+
+| Orbit concept | Claude mapping | Codex mapping |
+| :--- | :--- | :--- |
+| Session orchestrator | `CLAUDE.md` | `INSTRUCTIONS.md` + `policy.md` |
+| Agent registry | `orbit.registry.json` | `orbit.registry.json` (same) |
+| Workflow definitions | `WORKFLOWS.md` | `WORKFLOWS.md` (same) |
+| Slash commands | `/orbit:` via `commands/` | Follow matching `WORKFLOWS.md` section |
+| Lifecycle hooks | `settings.json` hooks | Not mapped (Codex has no hook API) |
+| State persistence | `.orbit/state/STATE.md` | `.codex/state/STATE.md` |
+
+**Install:** `bash install.sh --tool codex`
+
+This installs to `.codex/` (local) or `~/.codex/` (global) with:
+- `INSTRUCTIONS.md` — operator surface (equivalent to `CLAUDE.md`)
+- `policy.md` — injected system context pointing to the Orbit control plane
+- `orbit.registry.json`, `orbit.config.json` — registry and config
+- `agents/`, `skills/` — full agent and skill library
+- `state/STATE.template.md` — state template
+
+**Adapter Contract:**
+
+1. **Load instructions**: Codex reads `INSTRUCTIONS.md` as the system-level operator prompt at session start.
+2. **Agent selection**: Codex reads `orbit.registry.json` to select the appropriate agent for the task.
+3. **Workflow execution**: Codex follows the matching section in `WORKFLOWS.md` (e.g. for a multi-step task, follow the `plan → build → verify → ship` lifecycle).
+4. **State persistence**: Codex writes session state to `.codex/state/STATE.md` at session end.
+5. **Hooks**: Codex has no lifecycle hook API. Safety checks from `hooks/scripts/pre-tool-use.sh` are NOT enforced. Use Codex only in trusted environments.
+
+---
 
 ## Antigravity
 
-Support level: `compatible`
+Support level: `experimental`
 
-- Can use the framework if it reads markdown instructions and can execute repo-local workflows
-- Should consume `INSTRUCTIONS.md`, `WORKFLOWS.md`, and `orbit.registry.json`
-- May need a launcher or adapter that maps Antigravity task routing into Orbit routing
-- Should treat hooks and state files as the source of truth for lifecycle and recovery
+Antigravity can follow the Orbit control plane if it can read markdown instructions and execute repo-local workflows, but no stable hook or lifecycle API has been published. The install pathway is not yet implemented.
+
+**Current constraints:**
+- No `install_for_antigravity()` in `install.sh` — manual setup required
+- Hook injection mechanism is unspecified in Antigravity's public docs
+- State persistence pathway is untested
+
+**Manual setup (best-effort):**
+1. Point Antigravity at `INSTRUCTIONS.md` as its operator context.
+2. Provide `orbit.registry.json` and `WORKFLOWS.md` as reference documents.
+3. Write session state manually to `.orbit/state/STATE.md`.
+4. Skip hook-based safety checks until Antigravity publishes a lifecycle API.
+
+**Tracking:** Full implementation tracked in [issue #17](https://github.com/soupler-hq/orbit/issues/17). When Antigravity publishes a stable hook/lifecycle API, `install_for_antigravity()` will be added and the support level will be upgraded to `stable`.
+
+---
 
 ## Adapter Contract
 
-Every runtime adapter should answer these questions:
+Every runtime adapter must answer:
 
 1. How does the runtime load the framework instructions?
 2. How does it select agents from the registry?
@@ -48,13 +93,6 @@ Every runtime adapter should answer these questions:
 4. How does it persist state and recover after compaction or interruption?
 5. How does it run hooks or safety checks?
 
-## Recommended Adapter Shape
-
-- A small bootstrap layer that loads the repo docs
-- A command mapper that translates runtime-native commands into framework workflows
-- A state bridge that writes to `STATE.md` and the pre-compact snapshot
-- A validation step that confirms the runtime still honors the registry and workflow contract
-
 ## Practical Rule
 
-If a runtime can follow the control plane without special casing the repository structure, it is a first-class compatible runtime. If it needs custom glue, that glue should be small and isolated.
+If a runtime can follow the control plane without special-casing the repository structure, it is a first-class compatible runtime. Custom glue should be small, isolated, and documented here.

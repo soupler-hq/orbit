@@ -161,6 +161,57 @@ CMDEOF
   echo -e "${GREEN}  ✅ Claude Code installation complete${NC}"
 }
 
+# ─── Install for Codex ───────────────────────────────────────────────────────
+install_for_codex() {
+  echo -e "${YELLOW}▶ Installing for Codex...${NC}"
+
+  local codex_dir
+  if [[ "$INSTALL_MODE" == "global" ]]; then
+    codex_dir="$HOME/.codex"
+  else
+    codex_dir="$PROJECT_DIR/.codex"
+  fi
+
+  mkdir -p "$codex_dir/agents" "$codex_dir/skills" "$codex_dir/state"
+
+  # Codex reads INSTRUCTIONS.md as its operator prompt (equivalent to CLAUDE.md).
+  cp "$FRAMEWORK_DIR/INSTRUCTIONS.md"          "$codex_dir/INSTRUCTIONS.md"
+  cp "$FRAMEWORK_DIR/AGENTS.md"                "$codex_dir/AGENTS.md"
+  cp "$FRAMEWORK_DIR/SKILLS.md"                "$codex_dir/SKILLS.md"
+  cp "$FRAMEWORK_DIR/WORKFLOWS.md"             "$codex_dir/WORKFLOWS.md"
+  cp "$FRAMEWORK_DIR/orbit.registry.json"      "$codex_dir/orbit.registry.json"
+  cp "$FRAMEWORK_DIR/orbit.config.json"        "$codex_dir/orbit.config.json"
+  cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$codex_dir/orbit.config.schema.json"
+  cp "$FRAMEWORK_DIR/state/STATE.template.md"  "$codex_dir/state/STATE.template.md"
+  echo "  ✓ operator surface + registry + config + state template"
+
+  for f in "$FRAMEWORK_DIR"/agents/*.md; do
+    cp "$f" "$codex_dir/agents/$(basename "$f")"
+  done
+  echo "  ✓ agents/ ($(ls "$FRAMEWORK_DIR/agents/"*.md | wc -l | tr -d ' ') files)"
+
+  for f in "$FRAMEWORK_DIR"/skills/*.md; do
+    cp "$f" "$codex_dir/skills/$(basename "$f")"
+  done
+  echo "  ✓ skills/ ($(ls "$FRAMEWORK_DIR/skills/"*.md | wc -l | tr -d ' ') files)"
+
+  # Codex policy: injected system context pointing to the Orbit control plane.
+  cat > "$codex_dir/policy.md" << 'POLICY_EOF'
+# Orbit Control Plane — Codex Adapter
+
+You are running the Orbit orchestration framework.
+
+Read INSTRUCTIONS.md at session start. Your agent registry is orbit.registry.json.
+Classify the request, select the best agent, dispatch work per WORKFLOWS.md.
+Read state/STATE.md on start, write it on session end.
+
+/orbit: command equivalents — follow the matching section in WORKFLOWS.md:
+  plan → WORKFLOWS.md §plan  |  build → §build  |  verify → §verify  |  ship → §ship
+POLICY_EOF
+  echo "  ✓ policy.md (Orbit adapter context)"
+  echo -e "${GREEN}  ✅ Codex installation complete → $codex_dir${NC}"
+}
+
 # ─── Write Claude Code settings.json with hooks ───────────────────────────────
 install_claude_settings() {
   local settings_file="$CLAUDE_DIR/settings.json"
@@ -290,7 +341,9 @@ if [[ "$INSTALL_MODE" == "local" ]]; then
 fi
 
 case "$TOOL" in
-  claude|all) install_for_claude ;;
+  claude) install_for_claude ;;
+  codex)  install_for_codex ;;
+  all)    install_for_claude; install_for_codex ;;
 esac
 
 # ─── Summary ─────────────────────────────────────────────────────────────────
