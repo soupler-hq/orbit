@@ -20,7 +20,10 @@
     "lint": "eslint bin/",
     "lint:fix": "eslint bin/ --fix",
     "format:check": "prettier --check bin/",
-    "format:write": "prettier --write bin/"
+    "format:write": "prettier --write bin/",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [
     "ai-agents",
@@ -71,8 +74,10 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^4.1.2",
     "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.8.1"
+    "prettier": "^3.8.1",
+    "vitest": "^4.1.2"
   }
 }
