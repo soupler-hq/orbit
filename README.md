@@ -266,7 +266,31 @@ The repository is organized as a control plane:
 
 The `CLAUDE.md` file is the brain for Claude Code sessions, but the same control-plane idea works in other runtimes too. It classifies your request, selects the right agent, designs parallel execution, and dispatches work with proper context.
 
-### 2. Agents
+### 2. Model Routing
+
+Orbit routes tasks to the cheapest model that can handle the job. Model IDs are configured in `orbit.config.json` → `models.routing` — never hardcoded in instructions.
+
+```json
+"models": {
+  "routing": {
+    "classify":  "claude-haiku-4-5-20251001",
+    "standard":  "claude-sonnet-4-6",
+    "reasoning": "claude-opus-4-6",
+    "security":  "claude-opus-4-6"
+  }
+}
+```
+
+| Alias | Used for | Cost tier |
+| :--- | :--- | :--- |
+| `classify` | Intent routing, simple lookups | Cheapest (~20x cheaper than standard) |
+| `standard` | Coding, debugging, most tasks | Default |
+| `reasoning` | Architecture, system design, complex plans | Highest |
+| `security` | Threat modeling, adversarial analysis | Highest |
+
+**To override:** edit `orbit.config.json` → `models.routing`. See [`examples/model-routing.config.json`](examples/model-routing.config.json) for a fully annotated example. Run `/orbit:cost` to view the active routing config at any time.
+
+### 3. Agents
 
 Specialized agents with deep domain expertise. Each has:
 

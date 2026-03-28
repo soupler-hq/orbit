@@ -109,3 +109,28 @@ jobs:
         run: npm install
       - name: 🔍 npm audit (high+critical)
         run: npm audit --audit-level=high
+
+  install-test:
+    name: install-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 🔧 install.sh integration tests
+        run: bash tests/install.test.sh
+
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 📊 Eval runner (routing/workflow/registry/portability ≥80%)
+        run: node bin/eval-runner.js --json | tee eval-report.json && node bin/eval-runner.js
+      - name: Upload eval report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-report
+          path: eval-report.json

@@ -101,8 +101,8 @@ for (const name of ['claude', 'codex', 'antigravity']) {
   }
 }
 
-if (!runtimeAdapters.includes('Support level: `native`') || !runtimeAdapters.includes('Support level: `compatible`')) {
-  throw new Error('runtime adapters doc must describe native and compatible support levels');
+if (!runtimeAdapters.includes('Support level: `native`') || !runtimeAdapters.includes('Support level: `stable`')) {
+  throw new Error('runtime adapters doc must describe native and stable support levels');
 }
 
 if (!evals.includes('Routing Accuracy') || !evals.includes('Workflow Compliance') || !evals.includes('Portability')) {

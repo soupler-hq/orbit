@@ -2,6 +2,18 @@
 
 All notable changes to the Orbit framework will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-03-28
+### Added
+- **install.sh Integration Tests**: `tests/install.test.sh` — 33 assertions covering flag matrix (`--tool claude`, `--tool codex`, `--all`), idempotency, STATE.md merge preservation, `--skip-verify`, hook executability, and `.gitignore` injection. Wired as `install-test` required gate in Orbit Sentinel CI.
+- **Eval Runner**: `bin/eval-runner.js` — machine-executable eval suite reading `docs/eval-dataset.md`. Checks routing accuracy, workflow coverage, registry integrity, and runtime portability across 79 assertions. Fails CI if overall pass rate < 80%. Publishes `eval-report.json` artifact. Wired as `quality` gate in Orbit Sentinel CI.
+- **Codex Runtime Adapter**: `install_for_codex()` in `install.sh` maps the Orbit control plane to Codex's operator surface (`INSTRUCTIONS.md` + `policy.md`). `--tool codex` and `--all` flags install to `.codex/`. Adapter contract documented in `docs/runtime-adapters.md`.
+- **Model Routing UX**: `orbit.config.json` `models.routing` semantic aliases (`classify/standard/reasoning/security`) documented in `README.md §Model Routing`, `/orbit:cost` command, and `examples/model-routing.config.json`.
+
+### Changed
+- `orbit.registry.json`: Antigravity marked `experimental` with honest constraints; Codex marked `stable` with `install_fn: "install_for_codex"`.
+- `docs/runtime-adapters.md`: Full rewrite — support levels table (native/stable/experimental/planned), Codex full adapter contract, Antigravity experimental constraints and manual setup.
+- `docs/eval-dataset.md`: E06 routing corrected — ML inference tasks route via `forge` agent which instantiates `forge/ml-engineer.md` specialist.
+
 ## [2.5.1] - 2026-03-28
 ### Added
 - **Model Routing Config**: `orbit.config.json` now has a `models.routing` object with semantic aliases (`classify`, `standard`, `reasoning`, `security`). `CLAUDE.md` references aliases instead of raw model IDs, preventing silent staleness on model deprecations.
