@@ -22,6 +22,7 @@
 - `skills/instructor.md` - Educational delivery, analogy-first explanations, and Socratic discovery.
 - `skills/sota-architecture.md` - Kernel vs. Userland management, agent promotion, and bloat prevention.
 - `skills/nexus.md` - Multi-repo workspace coordination and organization-wide orchestration.
+- `skills/workflow-audit.md` - CI/CD pipeline architecture review — release step ordering, trigger hygiene, idempotency.
 
 ## Registry Discipline
 - Skill metadata lives in `orbit.registry.json`.
@@ -33,7 +34,7 @@
 - `engineer` loads TDD and debugging skills.
 - `strategist` loads planning and brainstorming skills.
 - `reviewer` loads the review skill.
-- `devops` loads deployment and observability skills.
+- `devops` loads deployment, observability, and workflow-audit skills.
 - `researcher` loads brainstorming and planning support as needed.
 - `designer` loads brainstorming support for UX discovery.
 - `security-engineer` loads security, identity, and review skills.

@@ -77,6 +77,7 @@ The registry below mirrors `orbit.registry.json`. Keep both in sync.
 Single clear match → dispatch that agent
 TypeScript/Python/Go code review → dispatch language-specific reviewer
 Security concern → always dispatch security-engineer (parallel with other agents)
+PR touches .github/workflows/ → always dispatch devops agent for pipeline architecture review
 Spans 2-3 domains → parallel wave, merge results
 All domains → strategist FIRST, then parallelize
 No agent >60% fit → trigger Agent Forge
@@ -152,6 +153,7 @@ Repeat PHASE per phase until milestone complete
 | Creating new agent | `skills/forge.md` |
 | Code review | `skills/review.md` |
 | Deploying | `skills/deployment.md` |
+| Reviewing or authoring CI/CD workflows | `skills/workflow-audit.md` |
 | Starting a project | `skills/brainstorming.md` |
 | Monitoring | `skills/observability.md` |
 | E-commerce | `skills/ecommerce.md` |

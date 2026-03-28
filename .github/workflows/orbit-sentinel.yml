@@ -133,6 +133,16 @@ jobs:
           name: eval-report
           path: eval-report.json
 
+  workflow-lint:
+    name: workflow-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 🔍 actionlint (workflow architecture)
+        run: |
+          bash <(curl -s https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint
+
   publish-dry-run:
     name: publish-dry-run
     runs-on: ubuntu-latest
