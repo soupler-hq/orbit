@@ -2,6 +2,31 @@
 
 All notable changes to the Orbit framework will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-03-29
+### Added
+- **Runtime instruction generation**: `templates/orbit.base.md` is now the single source of truth for all runtime instruction files. `bin/generate-instructions.js` generates the runtime-specific file at install time — no pre-built per-runtime files ship in the package. Adding a new runtime requires only a JSON config entry in `orbit.config.json` → `runtimes`.
+- **`npm run generate`**: Regenerates `CLAUDE.md` from the template. Run after editing `templates/orbit.base.md`.
+- **`skills/workflow-audit.md`**: New skill encoding CI/CD pipeline best practices — release step ordering contract, trigger hygiene, idempotency patterns. Auto-loaded by the devops agent.
+- **`actionlint` gate in Sentinel**: Static analysis of all workflow files on every PR. Catches duplicate triggers, shell errors, and invalid workflow syntax before merge.
+
+### Changed
+- **`orbit.config.json`**: Added `runtimes` block configuring name, instruction file, and install path for each supported runtime (`claude`, `codex`, `antigravity`).
+- **`install.sh`**: `install_for_claude()` and `install_for_codex()` now call `generate-instructions.js` instead of copying static files. Install footprint is clean — only the target runtime's instruction file is written.
+- **`CLAUDE.md` routing rule**: PRs touching `.github/workflows/` now explicitly route through the devops agent for pipeline architecture review.
+- **`docs/runtime-adapters.md`**: Documents the template-based instruction generation model and how to add new runtimes.
+
+### Removed
+- **`AGENTS.md`**: Eliminated — was a manually-maintained copy of `CLAUDE.md` for non-Claude runtimes, drifting every sprint. Replaced by runtime-specific generation from `templates/orbit.base.md`.
+- **`AGILE_PLAN.md`**: Removed — project planning artifact, not framework canon.
+
+### Fixed
+- **Release pipeline step ordering**: Tag push now precedes npm publish — tag is the point of no return. If tag push fails, nothing is published and re-run is clean.
+- **Idempotent npm publish**: Added package version check before publishing — skips with a warning if version already exists in GitHub Packages (prevents 409 crash on pipeline re-run).
+- **`RELEASE_TOKEN` for tag push**: Release workflow uses owner PAT to satisfy tag lockdown bypass. `GITHUB_TOKEN` cannot bypass repository tag rulesets.
+- **Sentinel duplicate CI runs**: Removed `push: branches: [develop]` trigger — Sentinel now runs once per PR, not twice.
+- **Unused `vi` imports**: Removed from `tests/install.test.js` and `tests/orchestrator.test.js` (flagged by GitHub Advanced Security / CodeQL).
+- **SC2002 shellcheck**: Replaced `cat package.json | jq` with `jq < package.json` in both workflow files.
+
 ## [2.7.0] - 2026-03-28
 ### Added
 - **bin/promote.sh**: `/orbit:promote` implementation — validates a forged agent or skill against the structural contract, checks for core conflicts, and prints a ready-to-use PR draft for upstreaming to soupler-hq/orbit. Wired as `npm run promote`. Documented in `CONTRIBUTING.md §Promoting a Forged Agent or Skill`.

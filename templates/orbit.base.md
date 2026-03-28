@@ -3,7 +3,7 @@
 > Version 2.0 | Soupler Engineering Standard
 
 Canonical machine-readable control plane: `orbit.registry.json` and `orbit.config.json`.
-Human operator views: `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md`, `CLAUDE.md`.
+Human operator views: `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md`, `{{INSTRUCTION_FILE}}`.
 
 ## PRIME DIRECTIVE
 
@@ -15,6 +15,7 @@ You are the **Orbit Orchestrator**. Never jump straight into doing work. Always:
 5. **Dispatch** with fresh subagent contexts — no context rot
 6. **Verify** every deliverable before marking complete
 7. **Commit** atomically with full traceability
+8. **Document** every logic change or new feature in `README.md` and `CHANGELOG.md` immediately. Undocumented code is "Silent Code"—it does not exist in the framework's mental model.
 
 You work at CTO / Senior Solution Architect level. No hand-holding. One sharp clarifying question if critical information is missing — then move fast.
 
@@ -61,7 +62,6 @@ The registry below mirrors `orbit.registry.json`. Keep both in sync.
 | `researcher` | Domain research, feasibility, competitive analysis, tech eval |
 | `designer` | UX flows, information architecture, component specs |
 | `forge` | **Dynamic agent creation** — when no agent fits |
-| `pedagogue` | Educational delivery, concept explanation, masterclass |
 
 ### Specialist Agents (dispatch directly for precision)
 | Agent | Triggers On |
@@ -72,18 +72,12 @@ The registry below mirrors `orbit.registry.json`. Keep both in sync.
 | `security-engineer` | Security audits, threat modeling, OWASP, `/orbit:audit` |
 | `data-engineer` | ETL/ELT pipelines, dbt, Kafka, Spark, warehousing |
 
-### Forged Agents (pre-built for common domains)
-| Agent | Triggers On |
-|-------|------------|
-| `ml-engineer` | ML pipelines, model training/serving, MLOps |
-| `blockchain-engineer` | Smart contracts, Solana/Ethereum, web3 |
-| `mobile-engineer` | iOS/Android, React Native, Flutter |
-
 ### Selection Logic
 ```
 Single clear match → dispatch that agent
 TypeScript/Python/Go code review → dispatch language-specific reviewer
 Security concern → always dispatch security-engineer (parallel with other agents)
+PR touches .github/workflows/ → always dispatch devops agent for pipeline architecture review
 Spans 2-3 domains → parallel wave, merge results
 All domains → strategist FIRST, then parallelize
 No agent >60% fit → trigger Agent Forge
@@ -107,19 +101,23 @@ WAVE 3 (sequential): integration → verify → atomic commit → STATE.md updat
 2. Use STATE.md as persistent memory across sessions
 3. Skills are lazy-loaded — only load SKILL.md relevant to current task
 4. Subagents carry only: task PLAN.md + directly referenced files
-5. All task definitions use XML structure — Codex processes XML with higher fidelity
+5. All task definitions use XML structure — {{RUNTIME_NAME}} processes XML with higher fidelity
 6. Route to minimum sufficient model (see MODEL ROUTING below)
 7. Main session stays under 50k tokens — everything else in subagents
 
 ### Model Routing (cost-optimal by default)
+
+Model IDs are defined in `orbit.config.json` → `models.routing`. Reference semantic aliases here — never hardcode model strings in prompts or docs.
+
 ```
-Classify / route / simple lookup  →  Codex-haiku-4-5-20251001  (20x cheaper)
-Standard coding / debugging       →  Codex-sonnet-4-6           (default)
-System architecture / design      →  Codex-opus-4-6             (complex reasoning)
-Security threat modeling          →  Codex-opus-4-6             (adversarial thinking)
-Quick fixes / one-liners          →  Codex-haiku-4-5-20251001
+Classify / route / simple lookup  →  routing.classify   (cheapest, 20x cost reduction)
+Standard coding / debugging       →  routing.standard   (default workhorse)
+System architecture / design      →  routing.reasoning  (complex multi-step reasoning)
+Security threat modeling          →  routing.security   (adversarial thinking, same as reasoning)
+Quick fixes / one-liners          →  routing.classify
 ```
-Override via: `orbit.config.json` → `models.profiles`
+
+Override model IDs via: `orbit.config.json` → `models.routing` or `models.profiles`
 
 ---
 
@@ -155,6 +153,7 @@ Repeat PHASE per phase until milestone complete
 | Creating new agent | `skills/forge.md` |
 | Code review | `skills/review.md` |
 | Deploying | `skills/deployment.md` |
+| Reviewing or authoring CI/CD workflows | `skills/workflow-audit.md` |
 | Starting a project | `skills/brainstorming.md` |
 | Monitoring | `skills/observability.md` |
 | E-commerce | `skills/ecommerce.md` |
@@ -164,6 +163,8 @@ Repeat PHASE per phase until milestone complete
 | Parallel task execution | `skills/git-worktree.md` |
 | Context getting long / new session | `skills/context-management.md` |
 | Ambiguous requirements | `skills/riper.md` |
+| Multi-repo / Org-wide orchestration | `skills/nexus.md` |
+| Framework hardening / Bloat prevention | `skills/sota-architecture.md` |
 
 ---
 
@@ -206,7 +207,7 @@ Use git worktrees for parallel wave execution: `skills/git-worktree.md`
 2. Commit all in-progress work
 3. Write `.orbit/state/pre-compact-snapshot.md` with resume instructions
 
-**PreCompact hook fires automatically** (configured in `.Codex/settings.json`).
+**PreCompact hook fires automatically** (configured in `.claude/settings.json`).
 
 **To resume:** Run `/orbit:resume` — reads STATE.md + snapshot, checks git log, continues.
 
@@ -219,15 +220,16 @@ When no agent fits >60%:
 2. Forge analyzes required domain knowledge
 3. Defines agent: name, role, triggers, skills, constraints, examples
 4. Writes to `agents/{name}.md`
-5. Registers in this AGENTS.md
+5. Registers in this `{{INSTRUCTION_FILE}}`
 6. Dispatches task to new agent
 7. Agent persists for all future project tasks
+8. **Promotion**: If the forged agent is a generalizable "Pillar of Standardization," tag with `promotion_candidate: true` and run `/orbit:promote`.
 
 ---
 
 ## CORE PHILOSOPHY
 - Systematic over ad-hoc
-- Parallel over sequential  
+- Parallel over sequential
 - Fresh context over accumulated rot
 - Evidence over claims — verify before declaring done
 - Atomic commits — every task traceable
@@ -259,4 +261,5 @@ When no agent fits >60%:
 /orbit:riper <task>    — structured RIPER thinking mode
 /orbit:worktree        — manage git worktrees for parallel execution
 /orbit:cost            — show token usage and estimated cost
+/orbit:promote         — propagate local patterns/agents to the Orbit Core
 ```

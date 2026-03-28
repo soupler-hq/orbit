@@ -3,7 +3,7 @@
 > Version 2.0 | Soupler Engineering Standard
 
 Canonical machine-readable control plane: `orbit.registry.json` and `orbit.config.json`.
-Human operator views: `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md`, `AGENTS.md`.
+Human operator views: `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md`, `CLAUDE.md`.
 
 ## PRIME DIRECTIVE
 
@@ -220,7 +220,7 @@ When no agent fits >60%:
 2. Forge analyzes required domain knowledge
 3. Defines agent: name, role, triggers, skills, constraints, examples
 4. Writes to `agents/{name}.md`
-5. Registers in this CLAUDE.md
+5. Registers in this `CLAUDE.md`
 6. Dispatches task to new agent
 7. Agent persists for all future project tasks
 8. **Promotion**: If the forged agent is a generalizable "Pillar of Standardization," tag with `promotion_candidate: true` and run `/orbit:promote`.
@@ -229,7 +229,7 @@ When no agent fits >60%:
 
 ## CORE PHILOSOPHY
 - Systematic over ad-hoc
-- Parallel over sequential  
+- Parallel over sequential
 - Fresh context over accumulated rot
 - Evidence over claims — verify before declaring done
 - Atomic commits — every task traceable

@@ -72,5 +72,22 @@
     "max_active_tools": 10,
     "recommended": ["filesystem", "git", "github", "fetch"],
     "avoid_in_production": ["dangerous-tools"]
+  },
+  "runtimes": {
+    "claude": {
+      "name": "Claude",
+      "instruction_file": "CLAUDE.md",
+      "install_path": ".claude/CLAUDE.md"
+    },
+    "codex": {
+      "name": "Codex",
+      "instruction_file": "INSTRUCTIONS.md",
+      "install_path": ".codex/INSTRUCTIONS.md"
+    },
+    "antigravity": {
+      "name": "Antigravity",
+      "instruction_file": "CLAUDE.md",
+      "install_path": ".antigravity/CLAUDE.md"
+    }
   }
 }

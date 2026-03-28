@@ -47,7 +47,6 @@ PROJECT1="$TMPDIR_ROOT/proj-claude"
 run_install "$PROJECT1" --tool claude
 
 assert_file "CLAUDE.md installed"             "$PROJECT1/.claude/CLAUDE.md"
-assert_file "AGENTS.md installed"             "$PROJECT1/.claude/AGENTS.md"
 assert_file "INSTRUCTIONS.md installed"       "$PROJECT1/.claude/INSTRUCTIONS.md"
 assert_file "SKILLS.md installed"             "$PROJECT1/.claude/SKILLS.md"
 assert_file "WORKFLOWS.md installed"          "$PROJECT1/.claude/WORKFLOWS.md"
@@ -65,7 +64,6 @@ PROJECT2="$TMPDIR_ROOT/proj-codex"
 run_install "$PROJECT2" --tool codex
 
 assert_file "INSTRUCTIONS.md installed"     "$PROJECT2/.codex/INSTRUCTIONS.md"
-assert_file "AGENTS.md installed"           "$PROJECT2/.codex/AGENTS.md"
 assert_file "orbit.registry.json installed" "$PROJECT2/.codex/orbit.registry.json"
 assert_file "orbit.config.json installed"   "$PROJECT2/.codex/orbit.config.json"
 assert_file "policy.md installed"           "$PROJECT2/.codex/policy.md"
