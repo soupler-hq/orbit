@@ -2,7 +2,7 @@
  * Tests for bin/install.js
  * Covers: arg parsing, mode selection, tool routing, core utilities
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
