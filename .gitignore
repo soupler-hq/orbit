@@ -12,3 +12,10 @@ node_modules/
 .DS_Store
 *.log
 .orbit.lock
+
+# Generated
+coverage/
+package-lock.json
+
+# Local IDE
+.claude/settings.local.json
