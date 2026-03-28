@@ -22,6 +22,16 @@ echo "  Orbit Config Validator"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
+# ── 0. Branch convention — never commit directly to protected branches ─────────
+echo "[ 0/5 ] Branch convention"
+CURRENT_BRANCH="${GITHUB_HEAD_REF:-$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")}"
+if [[ "$CURRENT_BRANCH" == "develop" || "$CURRENT_BRANCH" == "main" ]]; then
+  fail "Running on protected branch '$CURRENT_BRANCH'. Changes must go through a feature branch and PR."
+  echo "     Convention: fix/issue-N-description or feat/description → PR → merge"
+else
+  pass "Branch '$CURRENT_BRANCH' is a feature branch (not a protected branch)"
+fi
+
 # ── 1. Version: orbit.config.json must NOT contain a "version" field ──────────
 echo "[ 1/5 ] Version field in orbit.config.json"
 if jq -e '.version' "$ROOT/orbit.config.json" > /dev/null 2>&1; then
