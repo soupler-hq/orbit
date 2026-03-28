@@ -6,6 +6,23 @@
 
 Orbit is designed as a repo-native control plane. The core behavior lives in markdown instructions, reusable skills, workflows, hooks, and a machine-readable registry. A runtime adapter is the thin layer that maps a specific agent engine to that control plane.
 
+## Instruction Generation
+
+Orbit ships a single source of truth — `templates/orbit.base.md` — and generates the runtime-specific instruction file at install time. There are no pre-built per-runtime files in the package.
+
+```
+templates/orbit.base.md          ← single source of truth (runtime-agnostic)
+        ↓ bin/generate-instructions.js --runtime <name>
+CLAUDE.md / INSTRUCTIONS.md / …  ← generated at install time for the target runtime
+```
+
+Runtimes are configured in `orbit.config.json` → `runtimes`. Adding a new runtime requires only a JSON config entry — no new markdown files.
+
+To regenerate the framework's own `CLAUDE.md` after editing the template:
+```bash
+npm run generate
+```
+
 ## Support Levels
 
 - `native` — the runtime automatically understands the framework entrypoints and lifecycle

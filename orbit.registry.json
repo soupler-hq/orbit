@@ -580,6 +580,14 @@
         "architect",
         "forge"
       ]
+    },
+    {
+      "name": "workflow-audit",
+      "file": "skills/workflow-audit.md",
+      "purpose": "CI/CD pipeline architecture review — release step ordering, trigger hygiene, idempotency",
+      "loaded_by": [
+        "devops"
+      ]
     }
   ],
   "workflows": [

@@ -15,8 +15,8 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
       - name: Install dependencies
@@ -40,8 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
       - name: Install dependencies
@@ -51,7 +51,7 @@ jobs:
       - name: 📊 Coverage gate (≥60%)
         run: npm run test:coverage
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-report
@@ -63,8 +63,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, test]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
       - name: Install dependencies
@@ -73,7 +73,7 @@ jobs:
         run: bash bin/validate.sh
       - name: 📝 Changelog Verification
         run: |
-          if ! grep -q "## \[$(cat package.json | jq -r .version)\]" CHANGELOG.md; then
+          if ! grep -q "## \[$(jq -r .version < package.json)\]" CHANGELOG.md; then
             echo "❌ Version in package.json not documented in CHANGELOG.md"
             exit 1
           fi
@@ -84,8 +84,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, test]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
       - name: Install dependencies
@@ -99,8 +99,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, test]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
       - name: Install dependencies
@@ -117,11 +117,11 @@ jobs:
       contents: write
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0   # need full history to push the tag
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: '22'
           registry-url: 'https://npm.pkg.github.com'
@@ -186,23 +186,38 @@ jobs:
             agents/*.md skills/*.md hooks/scripts/*.sh \
             > SHASUM256.txt
 
-      - name: 🚀 Publish to GitHub Packages
-        if: steps.tag_check.outputs.exists == 'false'
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: 🏷️ Create and push tag
         if: steps.tag_check.outputs.exists == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ steps.version.outputs.tag }}
-          git push origin ${{ steps.version.outputs.tag }}
+          git push https://x-access-token:${{ secrets.RELEASE_TOKEN }}@github.com/${{ github.repository }} ${{ steps.version.outputs.tag }}
+
+      - name: 🔍 Check if package version already published
+        if: steps.tag_check.outputs.exists == 'false'
+        id: pkg_check
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          if npm view @soupler-hq/orbit@$VERSION version \
+               --registry https://npm.pkg.github.com/ 2>/dev/null | grep -q "$VERSION"; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "⏭️ @soupler-hq/orbit@$VERSION already published — skipping"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚀 Publish to GitHub Packages
+        if: steps.tag_check.outputs.exists == 'false' && steps.pkg_check.outputs.published == 'false'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📦 Create GitHub Release
         if: steps.tag_check.outputs.exists == 'false'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Orbit ${{ steps.version.outputs.tag }}

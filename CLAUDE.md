@@ -3,7 +3,7 @@
 > Version 2.0 | Soupler Engineering Standard
 
 Canonical machine-readable control plane: `orbit.registry.json` and `orbit.config.json`.
-Human operator views: `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md`, `AGENTS.md`.
+Human operator views: `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md`, `CLAUDE.md`.
 
 ## PRIME DIRECTIVE
 
@@ -77,6 +77,7 @@ The registry below mirrors `orbit.registry.json`. Keep both in sync.
 Single clear match → dispatch that agent
 TypeScript/Python/Go code review → dispatch language-specific reviewer
 Security concern → always dispatch security-engineer (parallel with other agents)
+PR touches .github/workflows/ → always dispatch devops agent for pipeline architecture review
 Spans 2-3 domains → parallel wave, merge results
 All domains → strategist FIRST, then parallelize
 No agent >60% fit → trigger Agent Forge
@@ -152,6 +153,7 @@ Repeat PHASE per phase until milestone complete
 | Creating new agent | `skills/forge.md` |
 | Code review | `skills/review.md` |
 | Deploying | `skills/deployment.md` |
+| Reviewing or authoring CI/CD workflows | `skills/workflow-audit.md` |
 | Starting a project | `skills/brainstorming.md` |
 | Monitoring | `skills/observability.md` |
 | E-commerce | `skills/ecommerce.md` |
@@ -218,7 +220,7 @@ When no agent fits >60%:
 2. Forge analyzes required domain knowledge
 3. Defines agent: name, role, triggers, skills, constraints, examples
 4. Writes to `agents/{name}.md`
-5. Registers in this CLAUDE.md
+5. Registers in this `CLAUDE.md`
 6. Dispatches task to new agent
 7. Agent persists for all future project tasks
 8. **Promotion**: If the forged agent is a generalizable "Pillar of Standardization," tag with `promotion_candidate: true` and run `/orbit:promote`.
@@ -227,7 +229,7 @@ When no agent fits >60%:
 
 ## CORE PHILOSOPHY
 - Systematic over ad-hoc
-- Parallel over sequential  
+- Parallel over sequential
 - Fresh context over accumulated rot
 - Evidence over claims — verify before declaring done
 - Atomic commits — every task traceable

@@ -78,12 +78,12 @@ install_for_claude() {
     "$CLAUDE_DIR/state" \
     "$CLAUDE_DIR/orbit/hooks"
 
-  # ── Orchestrator ──────────────────────────────────────────────────────────
-  cp "$FRAMEWORK_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
-  echo "  ✓ CLAUDE.md (orchestrator v2.0)"
+  # ── Orchestrator (generated from template at install time) ────────────────
+  node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
+    --runtime claude --output "$CLAUDE_DIR/CLAUDE.md"
+  echo "  ✓ CLAUDE.md (generated for Claude runtime)"
 
   # ── Control Plane ─────────────────────────────────────────────────────────
-  cp "$FRAMEWORK_DIR/AGENTS.md" "$CLAUDE_DIR/AGENTS.md"
   cp "$FRAMEWORK_DIR/INSTRUCTIONS.md" "$CLAUDE_DIR/INSTRUCTIONS.md"
   cp "$FRAMEWORK_DIR/SKILLS.md" "$CLAUDE_DIR/SKILLS.md"
   cp "$FRAMEWORK_DIR/WORKFLOWS.md" "$CLAUDE_DIR/WORKFLOWS.md"
@@ -174,9 +174,9 @@ install_for_codex() {
 
   mkdir -p "$codex_dir/agents" "$codex_dir/skills" "$codex_dir/state"
 
-  # Codex reads INSTRUCTIONS.md as its operator prompt (equivalent to CLAUDE.md).
-  cp "$FRAMEWORK_DIR/INSTRUCTIONS.md"          "$codex_dir/INSTRUCTIONS.md"
-  cp "$FRAMEWORK_DIR/AGENTS.md"                "$codex_dir/AGENTS.md"
+  # Codex operator prompt generated from template at install time.
+  node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
+    --runtime codex --output "$codex_dir/INSTRUCTIONS.md"
   cp "$FRAMEWORK_DIR/SKILLS.md"                "$codex_dir/SKILLS.md"
   cp "$FRAMEWORK_DIR/WORKFLOWS.md"             "$codex_dir/WORKFLOWS.md"
   cp "$FRAMEWORK_DIR/orbit.registry.json"      "$codex_dir/orbit.registry.json"
