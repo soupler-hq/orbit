@@ -53,7 +53,7 @@ Can the same control plane work across runtimes?
 4. `review this auth change for security issues`
 5. `for this unfamiliar domain, propose a safe first pass`
 
-For a richer example corpus, see [docs/eval-dataset.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/nexus/docs/eval-dataset.md).
+For a richer example corpus, see [docs/eval-dataset.md](eval-dataset.md).
 
 ## Scoring Rubric
 

@@ -15,10 +15,10 @@ class OrbitOrchestrator {
     this.registryPath = path.join(projectRoot, 'orbit.registry.json');
     this.configPath = path.join(projectRoot, 'orbit.config.json');
     this.stateDir = path.join(projectRoot, '.orbit', 'state');
-    
+
     this.registry = JSON.parse(fs.readFileSync(this.registryPath, 'utf8'));
-    this.config = fs.existsSync(this.configPath) 
-      ? JSON.parse(fs.readFileSync(this.configPath, 'utf8')) 
+    this.config = fs.existsSync(this.configPath)
+      ? JSON.parse(fs.readFileSync(this.configPath, 'utf8'))
       : { models: { routing: 'auto' }, git: { worktree_per_task: false } };
 
     // Nexus Consciousness (Task 2.3)
@@ -37,7 +37,7 @@ class OrbitOrchestrator {
       try {
         fs.mkdirSync(lockPath);
         return true;
-      } catch (e) {
+      } catch (_e) {
         attempts++;
         execSync('sleep 0.1');
       }
@@ -52,7 +52,7 @@ class OrbitOrchestrator {
     const lockPath = path.join(this.stateDir, '.orbit.lock');
     try {
       fs.rmdirSync(lockPath);
-    } catch (e) {
+    } catch (_e) {
       // Ignore if already gone
     }
   }
@@ -62,14 +62,16 @@ class OrbitOrchestrator {
    */
   setupWorktree(taskName, branchName) {
     if (!this.config.git?.worktree_per_task) return this.projectRoot;
-    
+
     const worktreePath = path.join(this.projectRoot, '.worktrees', taskName);
     console.log(`[Git] Creating worktree at ${worktreePath}...`);
     try {
       execSync(`git worktree add "${worktreePath}" -b "${branchName}"`, { stdio: 'pipe' });
       return worktreePath;
     } catch (e) {
-      console.warn(`⚠️  Worktree failed (maybe branch exists?), falling back to root: ${e.message}`);
+      console.warn(
+        `⚠️  Worktree failed (maybe branch exists?), falling back to root: ${e.message}`
+      );
       return this.projectRoot;
     }
   }
@@ -79,7 +81,7 @@ class OrbitOrchestrator {
    */
   resolveNexusPath(repoName, relativePath) {
     if (!this.isNexus) return path.join(this.projectRoot, relativePath);
-    const repo = this.nexus.repos.find(r => r.name === repoName);
+    const repo = this.nexus.repos.find((r) => r.name === repoName);
     if (!repo) throw new Error(`Repo ${repoName} not found in Nexus registry`);
     return path.resolve(this.projectRoot, repo.path, relativePath);
   }
@@ -89,40 +91,50 @@ class OrbitOrchestrator {
    */
   async executeWave(tasks, waveId = Date.now().toString()) {
     console.log(`\n🚀 Starting Wave ${waveId} with ${tasks.length} agents...\n`);
-    
-    const results = await Promise.all(tasks.map(async (task, index) => {
-      const agent = this.registry.agents.find(a => a.name === task.agent);
-      if (!agent) throw new Error(`Agent ${task.agent} not found in registry`);
 
-      // 1. Model Routing Enforcement (Task 2.1)
-      const profile = this.config.models?.profiles?.[agent.domain] || this.config.models?.profiles?.implement;
-      const modelEnv = profile ? profile.model : 'claude-sonnet-4-6';
+    const results = await Promise.all(
+      tasks.map(async (task, index) => {
+        const agent = this.registry.agents.find((a) => a.name === task.agent);
+        if (!agent) throw new Error(`Agent ${task.agent} not found in registry`);
 
-      // 2. Git Worktree Handoff (Task 2.2)
-      const taskName = `task_${waveId}_${index}`;
-      const branchName = `orbit/${taskName}`;
-      const executionPath = this.setupWorktree(taskName, branchName);
+        // 1. Model Routing Enforcement (Task 2.1)
+        const profile =
+          this.config.models?.profiles?.[agent.domain] || this.config.models?.profiles?.implement;
+        const modelEnv = profile ? profile.model : 'claude-sonnet-4-6';
 
-      // 3. Context Creation
-      const taskDir = path.join(this.stateDir, taskName);
-      fs.mkdirSync(taskDir, { recursive: true });
-      fs.writeFileSync(path.join(taskDir, 'INSTRUCTIONS.md'), task.prompt);
-      fs.writeFileSync(path.join(taskDir, 'METADATA.json'), JSON.stringify({
-        agent: task.agent,
-        model: modelEnv,
-        path: executionPath,
-        timestamp: new Date().toISOString()
-      }, null, 2));
-      
-      console.log(`[${task.agent}] Dispatched (Model: ${modelEnv}, Path: ${executionPath})`);
-      
-      return {
-        agent: task.agent,
-        status: 'DISPATCHED',
-        context: taskDir,
-        model: modelEnv
-      };
-    }));
+        // 2. Git Worktree Handoff (Task 2.2)
+        const taskName = `task_${waveId}_${index}`;
+        const branchName = `orbit/${taskName}`;
+        const executionPath = this.setupWorktree(taskName, branchName);
+
+        // 3. Context Creation
+        const taskDir = path.join(this.stateDir, taskName);
+        fs.mkdirSync(taskDir, { recursive: true });
+        fs.writeFileSync(path.join(taskDir, 'INSTRUCTIONS.md'), task.prompt);
+        fs.writeFileSync(
+          path.join(taskDir, 'METADATA.json'),
+          JSON.stringify(
+            {
+              agent: task.agent,
+              model: modelEnv,
+              path: executionPath,
+              timestamp: new Date().toISOString(),
+            },
+            null,
+            2
+          )
+        );
+
+        console.log(`[${task.agent}] Dispatched (Model: ${modelEnv}, Path: ${executionPath})`);
+
+        return {
+          agent: task.agent,
+          status: 'DISPATCHED',
+          context: taskDir,
+          model: modelEnv,
+        };
+      })
+    );
 
     return results;
   }
@@ -134,10 +146,11 @@ class OrbitOrchestrator {
     this.acquireStateLock();
     try {
       console.log(`\n📊 Aggregating results for wave ${waveId}...\n`);
-      
-      const taskDirs = fs.readdirSync(this.stateDir)
-        .filter(d => d.startsWith(`task_${waveId}`))
-        .map(d => path.join(this.stateDir, d));
+
+      const taskDirs = fs
+        .readdirSync(this.stateDir)
+        .filter((d) => d.startsWith(`task_${waveId}`))
+        .map((d) => path.join(this.stateDir, d));
 
       let finalSummary = `# Wave Summary: ${waveId}\n\n`;
       let foundAny = false;
@@ -148,9 +161,12 @@ class OrbitOrchestrator {
         if (fs.existsSync(summaryPath)) {
           const content = fs.readFileSync(summaryPath, 'utf8');
           const metadata = JSON.parse(fs.readFileSync(path.join(dir, 'METADATA.json'), 'utf8'));
-          
+
           // Consensus Pattern: Check for Approval in Reviewer/Security summaries
-          if ((metadata.agent === 'reviewer' || metadata.agent === 'security-engineer') && !content.includes('APPROVED')) {
+          if (
+            (metadata.agent === 'reviewer' || metadata.agent === 'security-engineer') &&
+            !content.includes('APPROVED')
+          ) {
             console.warn(`🛡️  Consensus Warning: ${metadata.agent} has NOT approved the wave.`);
             consensusMet = false;
           }
@@ -161,7 +177,7 @@ class OrbitOrchestrator {
       }
 
       if (!foundAny) {
-        console.warn("⚠️ No SUMMARY.md files found to aggregate.");
+        console.warn('⚠️ No SUMMARY.md files found to aggregate.');
         return null;
       }
 
@@ -182,12 +198,12 @@ class OrbitOrchestrator {
 if (require.main === module) {
   const orchestrator = new OrbitOrchestrator(process.cwd());
   const args = process.argv.slice(2);
-  
+
   if (args[0] === '--wave') {
     const tasks = JSON.parse(args[1]);
     orchestrator.executeWave(tasks);
   } else {
-    console.log("Orbit Orchestrator v2.0");
+    console.log('Orbit Orchestrator v2.0');
     console.log("Usage: node orchestrator.js --wave=\"[{'agent': 'engineer', 'prompt': '...'}]\"");
   }
 }

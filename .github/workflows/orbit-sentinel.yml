@@ -7,14 +7,59 @@ on:
     branches: [ develop, main ]
 
 jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install
+      - name: 🔍 ESLint
+        run: npm run lint
+      - name: 🎨 Prettier format check
+        run: npm run format:check
+      - name: 🚫 PII scan
+        run: |
+          if git grep -r "/Users/" -- '*.json' '*.sh' '*.js' '*.ts' \
+            ':(exclude).github/workflows/orbit-sentinel.yml'; then
+            echo "❌ Hardcoded local paths detected — remove before merging"
+            exit 1
+          fi
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install
+      - name: 🧪 Unit Tests
+        run: npm test
+      - name: 📊 Coverage gate (≥60%)
+        run: npm run test:coverage
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+
   validate:
     name: validate
     runs-on: ubuntu-latest
+    needs: [lint, test]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
       - name: Install dependencies
         run: npm install
       - name: 🛡️ Semantic Validation
@@ -30,10 +75,10 @@ jobs:
     name: compliance
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
       - name: Install dependencies
         run: npm install
       - name: 🏅 SOTA Compliance Check
@@ -43,10 +88,10 @@ jobs:
     name: safety
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
       - name: Install dependencies
         run: npm install
       - name: 🔒 Safety & Adversarial Audit

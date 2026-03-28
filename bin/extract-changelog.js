@@ -23,15 +23,15 @@ console.log(`▸ Extracting notes for version: ${cleanVersion}...`);
 const fullChangelog = fs.readFileSync(changelogPath, 'utf8');
 const lines = fullChangelog.split('\n');
 
-let releaseNotes = [];
+const releaseNotes = [];
 let foundVersion = false;
 
 // Regex to find headers like "## [2.3.0]" or "## 2.3.0"
-const versionHeaderRegex = /^##\s+\[?([\d\.]+)\]?/;
+const versionHeaderRegex = /^##\s+\[?([\d.]+)\]?/;
 
 for (const line of lines) {
   const match = line.match(versionHeaderRegex);
-  
+
   if (match) {
     if (match[1] === cleanVersion) {
       foundVersion = true;

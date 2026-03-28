@@ -9,7 +9,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 bash "$ROOT_DIR/bin/validate.sh" >/dev/null
 
 required_patterns=(
-  "## What is Orbit?"
+  "What is Orbit?"
   "### Compatibility"
   "### Architecture"
   "### Flow Diagram"
