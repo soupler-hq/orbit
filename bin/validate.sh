@@ -165,3 +165,12 @@ for (const workflow of registry.workflows || []) {
 NODE
 
 printf 'Orbit validation passed.\n'
+
+# ── Model ID hygiene check ────────────────────────────────────────────────────
+# Warn if CLAUDE.md contains raw Anthropic model IDs instead of routing aliases.
+MODEL_PATTERN='claude-(haiku|sonnet|opus)-[0-9]'
+if grep -qE "$MODEL_PATTERN" "$ROOT_DIR/CLAUDE.md"; then
+  printf '\n⚠️  Warning: CLAUDE.md contains hardcoded model IDs.\n' >&2
+  printf '   Model versions should live only in orbit.config.json → models.routing.\n' >&2
+  grep -nE "$MODEL_PATTERN" "$ROOT_DIR/CLAUDE.md" >&2 || true
+fi
