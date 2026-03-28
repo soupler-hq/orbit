@@ -555,3 +555,5 @@ Every commit to the Orbit core is guarded by the **Orbit Sentinel** (`.github/wo
 
 Add skills, agents, or patterns. The skill for writing skills is in `skills/`.
 The key question before any contribution: does this encode genuine domain expertise, or is it generic advice?
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full fork-and-pull workflow, branch naming conventions, quality checklist, and commit style guide.

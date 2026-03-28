@@ -32,7 +32,7 @@ Soupler HQ is the internal operations platform for Soupler — a B2B SaaS compan
 | Cache | Redis | 7.x | BullMQ for queues |
 | Auth | Auth.js (next-auth) | 5 beta | JWT + session |
 | Payments | Stripe | 14.x | Webhooks + Elements |
-| Hosting | Railway | — | Auto-deploy from main |
+| Hosting | Railway | — | Auto-deploy from tag |
 | CI/CD | GitHub Actions | — | test → build → deploy |
 | Monitoring | Sentry + Railway logs | — | Error tracking |
 

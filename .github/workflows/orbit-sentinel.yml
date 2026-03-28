@@ -2,9 +2,9 @@ name: Orbit Sentinel (SOTA Governance)
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ develop ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ develop, main ]
 
 jobs:
   validate:
