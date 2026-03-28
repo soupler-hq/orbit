@@ -31,7 +31,7 @@ const versionHeaderRegex = /^##\s+\[?([\d.]+)\]?/;
 
 for (const line of lines) {
   const match = line.match(versionHeaderRegex);
-  
+
   if (match) {
     if (match[1] === cleanVersion) {
       foundVersion = true;
