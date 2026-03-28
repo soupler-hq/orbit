@@ -16,7 +16,11 @@
     "nexus-init": "node bin/install.js nexus init",
     "nexus-sync": "node bin/install.js nexus sync",
     "validate": "bash bin/validate.sh",
-    "eval": "bash bin/eval.sh"
+    "eval": "bash bin/eval.sh",
+    "lint": "eslint bin/",
+    "lint:fix": "eslint bin/ --fix",
+    "format:check": "prettier --check bin/",
+    "format:write": "prettier --write bin/"
   },
   "keywords": [
     "ai-agents",
@@ -64,5 +68,11 @@
   ],
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.1.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.1"
   }
 }

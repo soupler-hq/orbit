@@ -37,7 +37,7 @@ class OrbitOrchestrator {
       try {
         fs.mkdirSync(lockPath);
         return true;
-      } catch (e) {
+      } catch (_e) {
         attempts++;
         execSync('sleep 0.1');
       }
@@ -52,7 +52,7 @@ class OrbitOrchestrator {
     const lockPath = path.join(this.stateDir, '.orbit.lock');
     try {
       fs.rmdirSync(lockPath);
-    } catch (e) {
+    } catch (_e) {
       // Ignore if already gone
     }
   }

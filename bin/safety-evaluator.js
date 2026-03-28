@@ -10,7 +10,7 @@ const path = require('path');
 
 const ARGS = process.argv.slice(2);
 const PROPOSED_COMMAND = ARGS[0];
-const AGENT_CONTEXT = ARGS[1] || process.cwd();
+const _AGENT_CONTEXT = ARGS[1] || process.cwd();
 
 if (!PROPOSED_COMMAND) {
   console.error("Usage: safety-evaluator <command> [context_path]");
@@ -19,7 +19,7 @@ if (!PROPOSED_COMMAND) {
 
 // 1. Load Registry and State
 const projectRoot = findProjectRoot(process.cwd());
-const registry = JSON.parse(fs.readFileSync(path.join(projectRoot, 'orbit.registry.json'), 'utf8'));
+const _registry = JSON.parse(fs.readFileSync(path.join(projectRoot, 'orbit.registry.json'), 'utf8'));
 
 // 2. Intelligent Heuristics (Bridging to LLM)
 // In a full implementation, this sends the command + context to a model.

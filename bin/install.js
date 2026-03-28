@@ -6,10 +6,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync, spawnSync } = require('child_process');
+// child_process reserved for future use
 const os = require('os');
 
-const FRAMEWORK_VERSION = '2.3.0';
 const FRAMEWORK_ROOT = path.join(__dirname, '..');
 
 // Parse CLI args
@@ -17,8 +16,8 @@ const args = process.argv.slice(2);
 const command  = args.find(a => ['init', 'sync', 'promote', 'help'].includes(a)) || 'init';
 const isGlobal = args.includes('--global') || args.includes('-g');
 const isNexus  = args.includes('nexus') || args.includes('--nexus');
-const tool = args.includes('--all') ? 'all' 
-  : args.find(a => ['claude', 'codex', 'cursor'].includes(a)) || 'claude';
+const _tool = args.includes('--all') ? 'all'
+  : args.find((a) => ['claude', 'codex', 'cursor'].includes(a)) || 'claude';
 
 // Colors
 const c = {

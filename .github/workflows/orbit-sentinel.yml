@@ -7,9 +7,31 @@ on:
     branches: [ develop, main ]
 
 jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install
+      - name: 🔍 ESLint
+        run: npm run lint
+      - name: 🎨 Prettier format check
+        run: npm run format:check
+      - name: 🚫 PII scan
+        run: |
+          if git grep -r "/Users/" -- '*.md' '*.json' '*.sh' '*.js' '*.ts' '*.yml'; then
+            echo "❌ Hardcoded local paths detected — remove before merging"
+            exit 1
+          fi
+
   validate:
     name: validate
     runs-on: ubuntu-latest
+    needs: lint
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
