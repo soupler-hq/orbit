@@ -148,9 +148,33 @@ jobs:
             echo "🚀 New version ${{ steps.version.outputs.tag }} — proceeding with release"
           fi
 
+      - name: 🏷️ Find last published version
+        if: steps.tag_check.outputs.exists == 'false'
+        id: last_release
+        run: |
+          # Most recent semver tag that already exists (the previous release).
+          # fetch-depth: 0 ensures all tags are available.
+          LAST_TAG=$(git tag --sort=-v:refname \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+            | head -1 || true)
+          if [[ -n "$LAST_TAG" ]]; then
+            echo "last_version=${LAST_TAG#v}" >> "$GITHUB_OUTPUT"
+            echo "Found last release: $LAST_TAG"
+          else
+            echo "last_version=" >> "$GITHUB_OUTPUT"
+            echo "No previous release tag — extracting current version only"
+          fi
+
       - name: 📝 Extract Release Notes
         if: steps.tag_check.outputs.exists == 'false'
-        run: node bin/extract-changelog.js ${{ steps.version.outputs.version }}
+        run: |
+          if [[ -n "${{ steps.last_release.outputs.last_version }}" ]]; then
+            node bin/extract-changelog.js \
+              --to ${{ steps.version.outputs.version }} \
+              --from ${{ steps.last_release.outputs.last_version }}
+          else
+            node bin/extract-changelog.js --to ${{ steps.version.outputs.version }}
+          fi
 
       - name: 🔐 Generate SHASUM256 manifest
         if: steps.tag_check.outputs.exists == 'false'
