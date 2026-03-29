@@ -265,10 +265,7 @@
         "security audit"
       ],
       "skills": [
-        "skills/security-and-identity.md",
-        "skills/prompt-safety.md",
-        "skills/architecture.md",
-        "skills/reflection.md"
+        "skills/prompt-safety.md"
       ],
       "outputs": [
         "risk score",
@@ -338,8 +335,7 @@
       "purpose": "system design",
       "loaded_by": [
         "architect",
-        "data-engineer",
-        "safety-evaluator"
+        "data-engineer"
       ]
     },
     {
@@ -400,8 +396,7 @@
       "purpose": "auth, identity, tenancy, and validation",
       "loaded_by": [
         "architect",
-        "security-engineer",
-        "safety-evaluator"
+        "security-engineer"
       ]
     },
     {
@@ -472,8 +467,7 @@
       "purpose": "autonomous self-correction (RALPH loop)",
       "loaded_by": [
         "reviewer",
-        "engineer",
-        "safety-evaluator"
+        "engineer"
       ]
     },
     {

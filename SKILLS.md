@@ -46,7 +46,7 @@
 - `designer` loads: skills/brainstorming.md.
 - `security-engineer` loads: skills/security-and-identity.md, skills/review.md.
 - `data-engineer` loads: skills/architecture.md, skills/observability.md, skills/tdd.md, skills/scalability.md.
-- `safety-evaluator` loads: skills/security-and-identity.md, skills/prompt-safety.md, skills/architecture.md, skills/reflection.md.
+- `safety-evaluator` loads: skills/prompt-safety.md.
 - `forge` loads: skills/ai-systems.md, skills/brainstorming.md.
 - `pedagogue` loads: skills/instructor.md, skills/brainstorming.md.
 <!-- GENERATED:END agent_skill_map -->
