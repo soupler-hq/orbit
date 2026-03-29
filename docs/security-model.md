@@ -6,15 +6,15 @@
 
 Orbit installs lifecycle hooks that execute on every agent tool call. This gives it meaningful system access — and makes it a worthwhile supply-chain target. The following controls are in place.
 
-| Threat | Control | Where |
-| :--- | :--- | :--- |
-| Malicious NPM package | SHASUM256 manifest + install-time verification | `install.sh`, release workflow |
-| Compromised hook script | Checksum covers all `hooks/scripts/*.sh` | `SHASUM256.txt` |
-| Prompt injection | Pre-tool-use hook detects adversarial patterns | `hooks/scripts/pre-tool-use.sh` |
-| Hardcoded secrets in commits | `secret_scan_on_commit` guard | `orbit.config.json` |
-| Unpatched transitive deps | npm audit gate + Dependabot weekly updates | `orbit-sentinel.yml`, `.github/dependabot.yml` |
-| Vulnerable JS patterns | CodeQL static analysis on every PR | `.github/workflows/codeql.yml` |
-| Config tampering | Schema validation on every CI run | `bin/validate.sh` |
+| Threat                       | Control                                        | Where                                          |
+| :--------------------------- | :--------------------------------------------- | :--------------------------------------------- |
+| Malicious NPM package        | SHASUM256 manifest + install-time verification | `install.sh`, release workflow                 |
+| Compromised hook script      | Checksum covers all `hooks/scripts/*.sh`       | `SHASUM256.txt`                                |
+| Prompt injection             | Pre-tool-use hook detects adversarial patterns | `hooks/scripts/pre-tool-use.sh`                |
+| Hardcoded secrets in commits | `secret_scan_on_commit` guard                  | `orbit.config.json`                            |
+| Unpatched transitive deps    | npm audit gate + Dependabot weekly updates     | `orbit-sentinel.yml`, `.github/dependabot.yml` |
+| Vulnerable JS patterns       | CodeQL static analysis on every PR             | `.github/workflows/codeql.yml`                 |
+| Config tampering             | Schema validation on every CI run              | `bin/validate.sh`                              |
 
 ---
 
@@ -24,7 +24,7 @@ Every release publishes a `SHASUM256.txt` manifest covering all installable fram
 
 ```
 CLAUDE.md
-INSTRUCTIONS.md  SKILLS.md  WORKFLOWS.md  AGENTS.md
+INSTRUCTIONS.md  SKILLS.md  WORKFLOWS.md
 orbit.registry.json  orbit.config.json  orbit.config.schema.json
 install.sh
 agents/*.md
