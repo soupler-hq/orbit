@@ -17,7 +17,7 @@ Each entry should be evaluated for:
 |---|---|---|---|---|---|
 | E01 | Add rate limiting to auth endpoints | ENGINEERING | engineer | `/orbit:quick` | Code change with TDD and security skill |
 | E02 | Design a multi-region active-active architecture | SYNTHESIS | architect | `/orbit:plan` then `/orbit:build` | Needs architecture and scalability analysis |
-| E03 | Review this React auth component for bugs | REVIEW | typescript-reviewer | `/orbit:review` | Language-specific review |
+| E03 | Review this React auth component for bugs | REVIEW | reviewer | `/orbit:review` | Language-specific review (TypeScript axes activated) |
 | E04 | Create a CI/CD rollback plan for production | OPERATIONS | devops | `/orbit:plan` | Deployment and observability coverage |
 | E05 | Unknown domain with high uncertainty | RESEARCH | researcher | `/orbit:plan` or `/orbit:forge` | Research first, forge if needed |
 | E06 | Build an ML inference monitoring loop | SYNTHESIS | forge | `/orbit:forge` | Routes to forge; forge creates a domain-specific ml-engineer agent on demand |
