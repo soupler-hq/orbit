@@ -80,10 +80,10 @@
     "agents": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["forge_threshold", "max_parallel", "context_per_subagent", "auto_register_forged"],
+      "required": ["forge_threshold", "recommended_parallel_sessions", "context_per_subagent", "auto_register_forged"],
       "properties": {
         "forge_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
-        "max_parallel": { "type": "integer", "minimum": 1 },
+        "recommended_parallel_sessions": { "type": "integer", "minimum": 1 },
         "context_per_subagent": { "type": "integer", "minimum": 1 },
         "auto_register_forged": { "type": "boolean" }
       }

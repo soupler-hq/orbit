@@ -32,7 +32,7 @@
   },
   "agents": {
     "forge_threshold": 0.6,
-    "max_parallel": 8,
+    "recommended_parallel_sessions": 8,
     "context_per_subagent": 200000,
     "auto_register_forged": true
   },
