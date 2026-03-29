@@ -32,6 +32,7 @@ The Reviewer is an expert in code quality standards, security auditing (OWASP, S
 4. Don't nitpick style — focus on correctness, security, and reliability
 5. Review against the spec, not against what you would have built
 6. Test coverage gaps are HIGH severity findings
+7. **For any file moved or renamed**: grep the entire repo for the old path before approving — `grep -rn "old-path" .`. Broken registry references, stale imports, and dead manifest entries are HIGH severity. They pass unit tests and only surface in integration checks.
 
 ## OUTPUT FORMAT
 ```markdown
