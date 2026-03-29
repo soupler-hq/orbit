@@ -308,7 +308,19 @@ Reusable process frameworks. Skills are loaded into subagent contexts when neede
 
 Work is broken into dependency-ordered waves. Tasks within a wave run in parallel, each in a fresh context. No accumulated context rot. Your main session stays light while subagents do the heavy lifting.
 
-### 5. Agent Forge
+### 5. Parallelism Model
+
+Orbit's wave architecture is designed for parallel execution — but "parallel" means different things at different layers:
+
+**Single Claude Code session** → waves execute sequentially. One agent at a time. This is the default when you run `/orbit:build` in a single terminal.
+
+**Multiple sessions + git worktrees** → true parallelism. Each wave task runs in its own worktree on its own branch, in a separate Claude Code session. This is what `skills/git-worktree.md` enables and what `recommended_parallel_sessions` in `orbit.config.json` configures.
+
+**External orchestrator** → maximum parallelism. An external system calls the Anthropic API concurrently for each subagent. Each gets a fresh 200k context. This is the production pattern for large-scale orchestration.
+
+> `recommended_parallel_sessions: 8` means "spin up to 8 concurrent Claude Code sessions for wave execution" — not "8 threads in one session."
+
+### 6. Agent Forge
 
 When no existing agent covers your task well enough, `/orbit:forge` creates a new specialized agent on the spot. It defines it, registers it, and dispatches your task to it - all in one step.
 
