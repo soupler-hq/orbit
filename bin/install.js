@@ -197,7 +197,6 @@ function handlePromote() {
 function installForClaude() {
   console.log(c.yellow(`\n▸ Installing for Claude Code → ${claudeDir}\n`));
   copyFile(path.join(FRAMEWORK_ROOT, 'CLAUDE.md'), path.join(claudeDir, 'CLAUDE.md'));
-  copyFile(path.join(FRAMEWORK_ROOT, 'AGENTS.md'), path.join(claudeDir, 'AGENTS.md'));
   copyFile(path.join(FRAMEWORK_ROOT, 'INSTRUCTIONS.md'), path.join(claudeDir, 'INSTRUCTIONS.md'));
   copyFile(path.join(FRAMEWORK_ROOT, 'SKILLS.md'), path.join(claudeDir, 'SKILLS.md'));
   copyFile(path.join(FRAMEWORK_ROOT, 'WORKFLOWS.md'), path.join(claudeDir, 'WORKFLOWS.md'));
@@ -208,7 +207,7 @@ function installForClaude() {
   copyDir(path.join(FRAMEWORK_ROOT, 'agents'), path.join(claudeDir, 'agents'));
   copyDir(path.join(FRAMEWORK_ROOT, 'skills'), path.join(claudeDir, 'skills'));
 
-  const cmdDir = path.join(claudeDir, 'commands', 'nx');
+  const cmdDir = path.join(claudeDir, 'commands', 'orbit');
   ensureDir(cmdDir);
   copyFile(path.join(FRAMEWORK_ROOT, 'commands', 'commands.md'), path.join(cmdDir, 'commands.md'));
 
@@ -231,6 +230,9 @@ function installForClaude() {
     'resume',
     'deploy',
     'rollback',
+    'riper',
+    'worktree',
+    'cost',
     'milestone',
     'help',
     'nexus-init',

@@ -3,10 +3,11 @@
   <h1>Orbit — The SOTA AI Agent Orchestrator</h1>
   <p><strong>A production-grade, repo-native control plane for enterprise agentic software delivery.</strong></p>
 
-  [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-  [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-  [![Standard](https://img.shields.io/badge/standard-Soupler_Engineering-black)](#)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
+[![Standard](https://img.shields.io/badge/standard-Soupler_Engineering-black)](#)
+
 </div>
 
 ---
@@ -28,8 +29,8 @@ Key capabilities:
 - Context preservation - pre-compact hooks plus `/orbit:resume` protect long-running work
 - RIPER workflow - Research -> Innovate -> Plan -> Execute -> Review for disciplined execution
 - Prompt injection defense - hook-based detection for risky or adversarial input
-- 17 domain skills - TDD, architecture, security, deployment, AI systems, RIPER, git worktrees, prompt safety, and more
-- Language-specific reviewers - TypeScript, Python, and Go specialists instead of a generic reviewer only
+- 21 reusable skills - TDD, architecture, security, deployment, AI systems, RIPER, git worktrees, prompt safety, and more
+- Unified reviewer - TypeScript, Python, and Go axes are folded into the main review agent instead of separate reviewer files
 - Generated human views - `INSTRUCTIONS.md`, `SKILLS.md`, and `WORKFLOWS.md` are generated from `orbit.registry.json` and `templates/*.tpl.md` via `node bin/generate-instructions.js --human-views`
 - Production state - persistent STATE.md memory, atomic commits, and project-level operational memory
 - Machine-readable registries - agent, skill, and workflow metadata live in `orbit.registry.json`
@@ -77,6 +78,7 @@ flowchart TB
 ```
 
 #### 🧭 Architecture Narrated
+
 1. **The User** (top) sends a request to the **Runtime Agent** (Claude Code, Antigravity, etc.).
 2. **The Runtime** pulls its "DNA" from the **Registry** (`orbit.registry.json`) and **Instructions**.
 3. **Intent Classification** determines which **Specialist Agent** should handle the work.
@@ -100,6 +102,7 @@ flowchart LR
 ```
 
 #### 🌊 The Execution Wave (Step-by-Step)
+
 - **Classify**: Orbit maps your request to a `Domain` (e.g. ENGINEERING) and `Mode` (e.g. AUTONOMOUS).
 - **Route**: If a specialist exists, it is dispatched. If not, **Agent Forge** builds a new one.
 - **Plan**: Work is split into parallel **Waves** using `skills/planning.md`.
@@ -153,13 +156,14 @@ flowchart TB
 ```
 
 #### 🏗️ The Three Pillars of Orbit
+
 Orbit is architected around three fundamental layers that ensure stability and scalability:
 
-| Pillar | Responsibility | Core Files |
-| :--- | :--- | :--- |
-| **1. Control Plane** | The "Rules of the House." Governs routing, safety, and agent roles. | `orbit.registry.json`, `CLAUDE.md`, `INSTRUCTIONS.md` |
-| **2. Execution Layer** | The "Workers." Specialized agents and reusable skills that perform the actual work. | `agents/`, `skills/`, `forge/` |
-| **3. Persistence Layer** | The "Memory." Ensures long-running tasks are resumable and every change is traceable. | `STATE.md`, `hooks/`, `Git History` |
+| Pillar                   | Responsibility                                                                        | Core Files                                            |
+| :----------------------- | :------------------------------------------------------------------------------------ | :---------------------------------------------------- |
+| **1. Control Plane**     | The "Rules of the House." Governs routing, safety, and agent roles.                   | `orbit.registry.json`, `CLAUDE.md`, `INSTRUCTIONS.md` |
+| **2. Execution Layer**   | The "Workers." Specialized agents and reusable skills that perform the actual work.   | `agents/`, `skills/`, `forge/`                        |
+| **3. Persistence Layer** | The "Memory." Ensures long-running tasks are resumable and every change is traceable. | `STATE.md`, `hooks/`, `Git History`                   |
 
 ### Tool-Agnostic Control Plane
 
@@ -175,9 +179,10 @@ The framework separates orchestration policy from runtime implementation:
 
 ## 🚀 Installation & Setup
 
-Orbit v2.4.0 is distributed as a scoped NPM package via **GitHub Packages** and operates through our **Nexus SOTA Architecture**.
+Orbit v2.8.0 is distributed as a scoped NPM package via **GitHub Packages** and operates through our **Nexus SOTA Architecture**.
 
 ### 1. Enterprise Nexus Installation (Recommended)
+
 To use Orbit across your organization and orchestrate multiple repositories, initialize the Nexus Workspace.
 
 ```bash
@@ -195,7 +200,9 @@ npx orbit nexus sync
 ```
 
 ### 2. Manual/Legacy Installation
+
 If you are contributing to the Orbit core:
+
 ```bash
 git clone https://github.com/soupler-hq/orbit.git
 cd orbit
@@ -207,12 +214,12 @@ bash bin/install.sh --local --tool claude
 
 Orbit behaves differently based on your repository's visibility to ensure maximum security.
 
-| Feature | Public Repo 🌐 | Private Repo 🔒 |
-| :--- | :--- | :--- |
-| **Registry Auth** | No token needed for `npm install`. | **Required**: PAT with `read:packages` in `.npmrc`. |
-| **Nexus Discovery** | Syncs all public peer repos. | Requires a token with cross-repo `repo` scope. |
-| **Agent Forge** | Forged agents are public if committed. | All forged patterns stay behind your firewall. |
-| **CI/CD** | `GITHUB_TOKEN` is sufficient for Sentinel. | `GPR_TOKEN` secret must be provided for Release. |
+| Feature             | Public Repo 🌐                             | Private Repo 🔒                                     |
+| :------------------ | :----------------------------------------- | :-------------------------------------------------- |
+| **Registry Auth**   | No token needed for `npm install`.         | **Required**: PAT with `read:packages` in `.npmrc`. |
+| **Nexus Discovery** | Syncs all public peer repos.               | Requires a token with cross-repo `repo` scope.      |
+| **Agent Forge**     | Forged agents are public if committed.     | All forged patterns stay behind your firewall.      |
+| **CI/CD**           | `GITHUB_TOKEN` is sufficient for Sentinel. | `GPR_TOKEN` secret must be provided for Release.    |
 
 > [!IMPORTANT]
 > **Private Repo Setup**: To install Orbit in a private repo, you MUST provide an `_authToken` in your `.npmrc`:
@@ -282,12 +289,12 @@ Orbit routes tasks to the cheapest model that can handle the job. Model IDs are 
 }
 ```
 
-| Alias | Used for | Cost tier |
-| :--- | :--- | :--- |
-| `classify` | Intent routing, simple lookups | Cheapest (~20x cheaper than standard) |
-| `standard` | Coding, debugging, most tasks | Default |
-| `reasoning` | Architecture, system design, complex plans | Highest |
-| `security` | Threat modeling, adversarial analysis | Highest |
+| Alias       | Used for                                   | Cost tier                             |
+| :---------- | :----------------------------------------- | :------------------------------------ |
+| `classify`  | Intent routing, simple lookups             | Cheapest (~20x cheaper than standard) |
+| `standard`  | Coding, debugging, most tasks              | Default                               |
+| `reasoning` | Architecture, system design, complex plans | Highest                               |
+| `security`  | Threat modeling, adversarial analysis      | Highest                               |
 
 **To override:** edit `orbit.config.json` → `models.routing`. See [`examples/model-routing.config.json`](examples/model-routing.config.json) for a fully annotated example. Run `/orbit:cost` to view the active routing config at any time.
 
@@ -553,9 +560,10 @@ graph TD
 ```
 
 ### Nexus Flow Example: Cross-Repo Consistency
+
 1. **Initiate**: `node orbit/bin/install.js nexus init` in the workspace root.
 2. **Synchronize**: `node orbit/bin/install.js nexus sync` auto-discovers and indexes all sub-repos.
-3. **Query**: Ask the orchestrator: *"Does our central IDP support the new Auth requirements in the Marketing repo?"*
+3. **Query**: Ask the orchestrator: _"Does our central IDP support the new Auth requirements in the Marketing repo?"_
 4. **Wave Execution**:
    - **Wave 1**: Orchestrator spawns a subagent in `engineering-standards` to extract IDP specs.
    - **Wave 2**: Orchestrator spawns a subagent in `soupler-marketing` to extract React Auth demands.
@@ -572,6 +580,7 @@ Orbit v2.3.0 enforces a **"Lean Kernel"** design to prevent framework bloat.
 - **Project Userland**: Specialized specialists created via `agent-forge` live in the project's `.orbit/` directory.
 
 ### Knowledge Propagation: `/orbit:promote`
+
 When a project-local agent or skill discovers a generalizable pattern, use `/orbit:promote` to push it back to the Core.
 
 1. **Tag**: Add `promotion_candidate: true` to the agent/skill frontmatter.
@@ -606,15 +615,19 @@ Every commit to the Orbit core is guarded by the **Orbit Sentinel** (`.github/wo
 ## 🤔 Anticipatory FAQ
 
 **Q: Is Orbit a new LLM or Model?**
+
 > **A:** No. Orbit is a **Control Plane** that sits on top of your existing models (like Claude 3.5 Sonnet or GPT-4o). It provides the "Operating System" that guides those models to work together.
 
 **Q: This repo seems complex. Do I need to learn all these files?**
+
 > **A:** No. As a developer, Orbit handles the complexity for you. You just use `/orbit:` commands. The files in this repo are the "Internal Logic" that the AI uses to keep your project high-quality.
 
 **Q: How do I add a new agent?**
+
 > **A:** You can use `/orbit:forge "description of agent"` to have the framework build it for you, or manually add a new `.md` file to `agents/` and register it in `orbit.registry.json`.
 
 **Q: What if the AI makes a mistake during a Wave?**
+
 > **A:** The **RALPH Loop** (`skills/reflection.md`) is designed to catch these mistakes. The AI will "Reflect" on the error, try an alternative "Action," and only interrupt you if it stays stuck after 3 attempts.
 
 ---
@@ -633,6 +646,7 @@ Orbit is officially an **Open Source SOTA framework**. We invite teams, develope
 This provides full patent protections, making it safe for enterprise adoption. See the [LICENSE](LICENSE) file for the full text.
 
 ---
+
 <div align="center">
   <i>Orbit: Standardizing the future of agentic orchestration. Brought to you by Soupler Labs.</i>
 </div>
