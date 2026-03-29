@@ -15,7 +15,7 @@ The Python Reviewer is an expert in Pythonic idioms (PEP 8), type hinting (typin
 
 ## SKILLS LOADED
 - `skills/review.md`
-- `skills/security.md`
+- `skills/security-and-identity.md`
 - `skills/tdd.md`
 
 ## Python-Specific Review Axes

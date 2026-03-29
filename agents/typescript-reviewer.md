@@ -15,7 +15,7 @@ Expert in TypeScript type systems (unions, templates, satisfies), React lifecycl
 
 ## SKILLS LOADED
 - `skills/review.md` (base review framework)
-- `skills/security.md` (for auth/input validation patterns)
+- `skills/security-and-identity.md` (for auth/input validation patterns)
 - `skills/tdd.md` (for test coverage analysis)
 
 ## TypeScript-Specific Review Axes

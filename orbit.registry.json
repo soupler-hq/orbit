@@ -59,7 +59,7 @@
       ],
       "skills": [
         "skills/architecture.md",
-        "skills/security.md",
+        "skills/security-and-identity.md",
         "skills/scalability.md"
       ],
       "outputs": [
@@ -217,8 +217,7 @@
         "auth changes"
       ],
       "skills": [
-        "skills/security.md",
-        "skills/identity.md",
+        "skills/security-and-identity.md",
         "skills/review.md"
       ],
       "outputs": [
@@ -267,7 +266,7 @@
       ],
       "skills": [
         "skills/review.md",
-        "skills/security.md",
+        "skills/security-and-identity.md",
         "skills/tdd.md"
       ],
       "outputs": [
@@ -288,7 +287,7 @@
       ],
       "skills": [
         "skills/review.md",
-        "skills/security.md",
+        "skills/security-and-identity.md",
         "skills/tdd.md"
       ],
       "outputs": [
@@ -307,7 +306,7 @@
       ],
       "skills": [
         "skills/review.md",
-        "skills/security.md",
+        "skills/security-and-identity.md",
         "skills/tdd.md"
       ],
       "outputs": [
@@ -327,7 +326,7 @@
         "security audit"
       ],
       "skills": [
-        "skills/security.md",
+        "skills/security-and-identity.md",
         "skills/prompt-safety.md",
         "skills/architecture.md",
         "skills/reflection.md"
@@ -460,16 +459,16 @@
       ]
     },
     {
-      "name": "security",
-      "file": "skills/security.md",
-      "purpose": "auth and validation",
+      "name": "security-and-identity",
+      "file": "skills/security-and-identity.md",
+      "purpose": "auth, identity, tenancy, and validation",
       "loaded_by": [
         "architect",
-        "security-engineer",
-        "typescript-reviewer",
-        "python-reviewer",
         "go-reviewer",
-        "safety-evaluator"
+        "python-reviewer",
+        "safety-evaluator",
+        "security-engineer",
+        "typescript-reviewer"
       ]
     },
     {
@@ -514,15 +513,6 @@
       "loaded_by": [
         "architect",
         "data-engineer"
-      ]
-    },
-    {
-      "name": "identity",
-      "file": "skills/identity.md",
-      "purpose": "auth and tenancy",
-      "loaded_by": [
-        "architect",
-        "security-engineer"
       ]
     },
     {
@@ -584,7 +574,7 @@
     {
       "name": "workflow-audit",
       "file": "skills/workflow-audit.md",
-      "purpose": "CI/CD pipeline architecture review — release step ordering, trigger hygiene, idempotency",
+      "purpose": "CI/CD pipeline architecture review \u2014 release step ordering, trigger hygiene, idempotency",
       "loaded_by": [
         "devops"
       ]

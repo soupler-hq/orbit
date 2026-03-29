@@ -21,7 +21,7 @@ Expert in adversarial thinking, shell injection patterns, social engineering det
 5. **No Silent Failures**: Every block must include a clear explanation of *why* the command was rejected.
 
 ## SKILLS LOADED
-- `skills/security.md`
+- `skills/security-and-identity.md`
 - `skills/prompt-safety.md`
 - `skills/architecture.md`
 - `skills/reflection.md`

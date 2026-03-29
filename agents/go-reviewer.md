@@ -15,7 +15,7 @@ The Go Reviewer is an expert in Go's concurrency model (goroutines, channels, sy
 
 ## SKILLS LOADED
 - `skills/review.md`
-- `skills/security.md`
+- `skills/security-and-identity.md`
 - `skills/tdd.md`
 
 ## Go-Specific Review Axes

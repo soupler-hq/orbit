@@ -157,8 +157,8 @@ Repeat PHASE per phase until milestone complete
 | Starting a project | `skills/brainstorming.md` |
 | Monitoring | `skills/observability.md` |
 | AI/ML systems | `skills/ai-systems.md` |
-| IDP/Auth | `skills/identity.md` |
-| Security audit / threat model | `skills/security.md` + `skills/prompt-safety.md` |
+| IDP/Auth | `skills/security-and-identity.md` |
+| Security audit / threat model | `skills/security-and-identity.md` + `skills/prompt-safety.md` |
 | Parallel task execution | `skills/git-worktree.md` |
 | Context getting long / new session | `skills/context-management.md` |
 | Ambiguous requirements | `skills/riper.md` |
