@@ -15,13 +15,12 @@
 - `skills/review.md` — quality review.
 - `skills/deployment.md` — ship safety.
 - `skills/observability.md` — logs metrics tracing.
-- `skills/security.md` — auth and validation.
+- `skills/security-and-identity.md` — auth, identity, tenancy, and validation.
 - `skills/prompt-safety.md` — prompt injection defense.
 - `skills/context-management.md` — session and token control.
 - `skills/riper.md` — structured reasoning.
 - `skills/git-worktree.md` — parallel development.
 - `skills/scalability.md` — capacity planning.
-- `skills/identity.md` — auth and tenancy.
 - `skills/ai-systems.md` — agent systems and routing.
 - `examples/skills/ecommerce.md` — commerce systems.
 - `skills/reflection.md` — autonomous self-correction (RALPH loop).
@@ -38,19 +37,16 @@
 
 ## Agent Skill Map
 <!-- GENERATED:START agent_skill_map -->
-- `architect` loads: skills/architecture.md, skills/security.md, skills/scalability.md.
+- `architect` loads: skills/architecture.md, skills/security-and-identity.md, skills/scalability.md.
 - `engineer` loads: skills/tdd.md, skills/debugging.md, skills/reflection.md.
 - `strategist` loads: skills/planning.md, skills/brainstorming.md.
 - `reviewer` loads: skills/review.md, skills/reflection.md.
 - `devops` loads: skills/deployment.md, skills/observability.md.
 - `researcher` loads: skills/brainstorming.md.
 - `designer` loads: skills/brainstorming.md.
-- `security-engineer` loads: skills/security.md, skills/identity.md, skills/review.md.
+- `security-engineer` loads: skills/security-and-identity.md, skills/review.md.
 - `data-engineer` loads: skills/architecture.md, skills/observability.md, skills/tdd.md, skills/scalability.md.
-- `typescript-reviewer` loads: skills/review.md, skills/security.md, skills/tdd.md.
-- `python-reviewer` loads: skills/review.md, skills/security.md, skills/tdd.md.
-- `go-reviewer` loads: skills/review.md, skills/security.md, skills/tdd.md.
-- `safety-evaluator` loads: skills/security.md, skills/prompt-safety.md, skills/architecture.md, skills/reflection.md.
+- `safety-evaluator` loads: skills/security-and-identity.md, skills/prompt-safety.md, skills/architecture.md, skills/reflection.md.
 - `forge` loads: skills/ai-systems.md, skills/brainstorming.md.
 - `pedagogue` loads: skills/instructor.md, skills/brainstorming.md.
 <!-- GENERATED:END agent_skill_map -->

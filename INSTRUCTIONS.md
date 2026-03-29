@@ -37,9 +37,6 @@ Orbit is a repo-native agent orchestration framework. It routes work to speciali
 - Use `designer` for: ux, flows, ia, component spec.
 - Use `security-engineer` for: security review, threat model, audit, auth changes.
 - Use `data-engineer` for: etl, warehouse, dbt, kafka, stream processing.
-- Use `typescript-reviewer` for: review ts, review react, review next.js, review nestjs.
-- Use `python-reviewer` for: review python, review fastapi, review django, review flask.
-- Use `go-reviewer` for: review go, review golang.
 - Use `safety-evaluator` for: pre-tool-use, risky command, security audit.
 - Use `forge` for: no matching agent, forge new agent.
 - Use `pedagogue` for: explain, teach, masterclass, how it works, why do we need.
