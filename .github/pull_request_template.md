@@ -34,8 +34,9 @@
 
 ### Code
 - [ ] Tests added or updated for changed behaviour
-- [ ] CI passes locally (`npm test`, `npm run lint`, `bash bin/validate.sh`)
-- [ ] `bash bin/validate-config.sh` passes (no version skew, no hook mismatches)
+- [ ] `npm test` + `npm run lint` pass
+- [ ] `bash bin/validate.sh` passes — registry integrity (catches missing files, broken references)
+- [ ] `bash bin/validate-config.sh` passes — cross-file consistency (version, hooks, model IDs)
 - [ ] No hardcoded model IDs — only semantic aliases from `orbit.config.json → models.routing`
 - [ ] No hardcoded local paths (`/Users/...`)
 
