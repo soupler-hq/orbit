@@ -83,6 +83,10 @@ install_for_claude() {
     --runtime claude --output "$CLAUDE_DIR/CLAUDE.md"
   echo "  ✓ CLAUDE.md (generated for Claude runtime)"
 
+  # ── Human-view files (generated from registry + templates at install time) ─
+  node "$FRAMEWORK_DIR/bin/generate-instructions.js" --human-views
+  echo "  ✓ INSTRUCTIONS.md, SKILLS.md, WORKFLOWS.md (generated from registry)"
+
   # ── Control Plane ─────────────────────────────────────────────────────────
   cp "$FRAMEWORK_DIR/INSTRUCTIONS.md" "$CLAUDE_DIR/INSTRUCTIONS.md"
   cp "$FRAMEWORK_DIR/SKILLS.md" "$CLAUDE_DIR/SKILLS.md"

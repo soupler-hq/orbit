@@ -25,7 +25,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "promote": "bash bin/promote.sh",
-    "generate": "node bin/generate-instructions.js --runtime claude --output CLAUDE.md"
+    "generate": "node bin/generate-instructions.js --runtime claude --output CLAUDE.md",
+    "generate:views": "node bin/generate-instructions.js --human-views"
   },
   "keywords": [
     "ai-agents",
