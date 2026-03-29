@@ -45,3 +45,11 @@
 - Execution produces task outputs and `SUMMARY.md`.
 - Verification produces `PHASE-{N}-VERIFICATION.md` and `PHASE-{N}-UAT.md`.
 - Shipping updates state and release metadata.
+
+## Reasoning Framework Hierarchy
+Two named frameworks operate at different levels — their precedence is explicit:
+
+- **RIPER** (`skills/riper.md`) is the **outer loop** governing the full task lifecycle (Research → Innovate → Plan → Execute → Review). It applies to every non-trivial task.
+- **RALPH** (`skills/reflection.md`) is the **inner recovery loop** — an error-correction reflex that fires automatically inside RIPER's Execute step when an attempt fails. You never invoke RALPH directly.
+
+See `skills/riper.md` → *Relationship to RALPH* for the full hierarchy explanation and a side-by-side comparison table.
