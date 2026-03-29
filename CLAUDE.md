@@ -156,7 +156,6 @@ Repeat PHASE per phase until milestone complete
 | Reviewing or authoring CI/CD workflows | `skills/workflow-audit.md` |
 | Starting a project | `skills/brainstorming.md` |
 | Monitoring | `skills/observability.md` |
-| E-commerce | `skills/ecommerce.md` |
 | AI/ML systems | `skills/ai-systems.md` |
 | IDP/Auth | `skills/identity.md` |
 | Security audit / threat model | `skills/security.md` + `skills/prompt-safety.md` |
