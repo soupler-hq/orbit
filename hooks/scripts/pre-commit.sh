@@ -17,9 +17,14 @@ if ! bash "$ROOT_DIR/bin/validate.sh" > /dev/null; then
   exit 1
 fi
 
-# 2. Check for missing metadata or unlinked skills
-echo "🛡️  Orbit Governance: Validating registry integrity..."
-# (Implicit in validate.sh)
+# 2. Scan for committed secrets and private keys
+echo "🛡️  Orbit Governance: Scanning for secrets..."
+SECRET_PATTERNS='(ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{80,}|sk_live_[A-Za-z0-9]{16,}|xox[baprs]-[A-Za-z0-9-]{10,}|-----BEGIN (RSA|EC|OPENSSH|PRIVATE KEY)-----|AKIA[0-9A-Z]{16})'
+if git -C "$ROOT_DIR" grep -nE "$SECRET_PATTERNS" -- ':!package-lock.json' ':!coverage/**' ':!node_modules/**' >/dev/null 2>&1; then
+  echo "❌ COMMIT BLOCKED: Potential secrets or private keys detected in tracked files." >&2
+  git -C "$ROOT_DIR" grep -nE "$SECRET_PATTERNS" -- ':!package-lock.json' ':!coverage/**' ':!node_modules/**' >&2 || true
+  exit 1
+fi
 
 echo "✅ Orbit Governance: Validation passed. Proceeding with commit."
 exit 0

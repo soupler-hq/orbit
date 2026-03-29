@@ -19,13 +19,24 @@ beforeEach(async () => {
 function buildFixtureRoot(tmpDir) {
   const registry = {
     agents: [
-      { name: 'engineer', domain: 'engineering' },
-      { name: 'reviewer', domain: 'review' },
-      { name: 'security-engineer', domain: 'security' },
+      { name: 'engineer', domains: ['ENGINEERING'] },
+      { name: 'reviewer', domains: ['REVIEW'] },
+      { name: 'security-engineer', domains: ['SECURITY'] },
     ],
   };
   const config = {
-    models: { routing: 'auto', profiles: { engineering: { model: 'claude-sonnet-4-6' } } },
+    models: {
+      routing: {
+        classify: 'claude-haiku-4-5-20251001',
+        standard: 'claude-sonnet-4-5',
+        reasoning: 'claude-opus-4-6',
+        security: 'claude-opus-4-6',
+      },
+      profiles: {
+        implement: { model: 'claude-sonnet-4-6' },
+        architect: { model: 'claude-opus-4-6' },
+      },
+    },
     git: { worktree_per_task: false },
   };
   fs.writeFileSync(path.join(tmpDir, 'orbit.registry.json'), JSON.stringify(registry));
@@ -173,14 +184,19 @@ describe('OrbitOrchestrator — executeWave', () => {
 
   it('dispatches tasks and returns DISPATCHED results', async () => {
     const orch = new OrbitOrchestrator(tmpDir);
-    const tasks = [
-      { agent: 'engineer', prompt: 'Build the auth module' },
-    ];
+    const tasks = [{ agent: 'engineer', prompt: 'Build the auth module' }];
     const results = await orch.executeWave(tasks, 'w001');
     expect(results).toHaveLength(1);
     expect(results[0].status).toBe('DISPATCHED');
     expect(results[0].agent).toBe('engineer');
-    expect(results[0].model).toBe('claude-sonnet-4-6');
+    expect(results[0].model).toBe('claude-sonnet-4-5');
+  });
+
+  it('routes security work to the security model alias', async () => {
+    const orch = new OrbitOrchestrator(tmpDir);
+    const tasks = [{ agent: 'security-engineer', prompt: 'Review auth controls' }];
+    const results = await orch.executeWave(tasks, 'w001-security');
+    expect(results[0].model).toBe('claude-opus-4-6');
   });
 
   it('writes INSTRUCTIONS.md and METADATA.json for each task', async () => {
@@ -202,11 +218,11 @@ describe('OrbitOrchestrator — executeWave', () => {
     );
   });
 
-  it('falls back to default model when no profile configured for domain', async () => {
+  it('uses routing aliases when no domain-specific profile exists', async () => {
     const orch = new OrbitOrchestrator(tmpDir);
     const tasks = [{ agent: 'reviewer', prompt: 'Review the code' }];
     const results = await orch.executeWave(tasks, 'w004');
-    expect(results[0].model).toBe('claude-sonnet-4-6');
+    expect(results[0].model).toBe('claude-sonnet-4-5');
   });
 });
 
