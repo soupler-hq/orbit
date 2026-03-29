@@ -45,3 +45,15 @@ For low-complexity, familiar tasks: Research (what I know) → Plan (3 tasks) �
 1.  **Logical Consistency**: Ensure the skill's core principles align with the current architecture.
 2.  **Output Integrity**: Verify that any artifacts generated follow the template and fulfill all requirements.
 3.  **Traceability**: Ensure that all decisions made during this skill's use are logged in the task state.
+
+## Relationship to RALPH
+RIPER is the **planning-and-execution spine** for any task — it governs the full lifecycle from research through review. RALPH (Reflect, Act, Learn, Persist, Halt) is the **error-correction reflex** that fires inside RIPER's Execute step when something goes wrong.
+
+Think of it as: RIPER is the outer loop, RALPH is the inner recovery loop.
+
+| Framework | Scope | When it fires |
+|-----------|-------|---------------|
+| RIPER | Full task lifecycle | Every non-trivial task |
+| RALPH | Error recovery only | Inside Execute, on failure |
+
+For `/orbit:quick` tasks: RIPER Lite (Research → Plan → Execute → Verify) applies. RALPH fires on any execution error within the Execute step. You never invoke RALPH directly — it activates autonomously when an execution attempt fails.
