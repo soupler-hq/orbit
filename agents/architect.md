@@ -30,7 +30,7 @@ The Architect specializes in high-availability systems, distributed computing, d
 
 ## SKILLS LOADED
 - `skills/architecture.md`
-- `skills/security.md`
+- `skills/security-and-identity.md`
 - `skills/scalability.md`
 
 ## OUTPUT FORMAT

@@ -66,6 +66,7 @@ Code is done when: tests are green, linter passes, types are correct, error case
 - **Never commit directly to `main` or `develop`** — always on a feature branch
 - **Never push without running `/orbit:review` first** — self-review is mandatory, not optional
 - **Never raise a PR without a ship decision recorded** — APPROVED / APPROVED WITH CONDITIONS / BLOCKED
+- **Never move or rename a file without grepping for all references first** — `grep -rn "old-filename" .` before `git mv`. Registries, manifests, imports, and docs all break silently on a rename.
 - Never write code before the test
 - Never commit failing tests
 - Never ignore compiler/linter errors

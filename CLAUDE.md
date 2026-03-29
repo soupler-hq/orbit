@@ -66,16 +66,14 @@ The registry below mirrors `orbit.registry.json`. Keep both in sync.
 ### Specialist Agents (dispatch directly for precision)
 | Agent | Triggers On |
 |-------|------------|
-| `typescript-reviewer` | Review of .ts/.tsx/.js/.jsx code, React, Next.js, NestJS |
-| `python-reviewer` | Review of .py code, FastAPI, Django, data science |
-| `go-reviewer` | Review of .go code, goroutines, interfaces |
+| `reviewer` (with language) | Code review with language-specific axes: TypeScript (.ts/.tsx/.js/.jsx), Python (.py), Go (.go) |
 | `security-engineer` | Security audits, threat modeling, OWASP, `/orbit:audit` |
 | `data-engineer` | ETL/ELT pipelines, dbt, Kafka, Spark, warehousing |
 
 ### Selection Logic
 ```
 Single clear match → dispatch that agent
-TypeScript/Python/Go code review → dispatch language-specific reviewer
+TypeScript/Python/Go code review → dispatch `reviewer` with language context (activates language-specific axes)
 Security concern → always dispatch security-engineer (parallel with other agents)
 PR touches .github/workflows/ → always dispatch devops agent for pipeline architecture review
 Spans 2-3 domains → parallel wave, merge results
@@ -157,8 +155,8 @@ Repeat PHASE per phase until milestone complete
 | Starting a project | `skills/brainstorming.md` |
 | Monitoring | `skills/observability.md` |
 | AI/ML systems | `skills/ai-systems.md` |
-| IDP/Auth | `skills/identity.md` |
-| Security audit / threat model | `skills/security.md` + `skills/prompt-safety.md` |
+| IDP/Auth | `skills/security-and-identity.md` |
+| Security audit / threat model | `skills/security-and-identity.md` + `skills/prompt-safety.md` |
 | Parallel task execution | `skills/git-worktree.md` |
 | Context getting long / new session | `skills/context-management.md` |
 | Ambiguous requirements | `skills/riper.md` |
