@@ -28,6 +28,10 @@
 
 ## Checklist
 
+### Branch
+- [ ] This PR is from a feature branch, NOT a direct push to `develop` or `main`
+- [ ] Branch name follows convention: `fix/issue-N-description` or `feat/description`
+
 ### Code
 - [ ] Tests added or updated for changed behaviour
 - [ ] CI passes locally (`npm test`, `npm run lint`, `bash bin/validate.sh`)
