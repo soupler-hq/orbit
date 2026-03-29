@@ -254,67 +254,6 @@
       ]
     },
     {
-      "name": "typescript-reviewer",
-      "file": "agents/typescript-reviewer.md",
-      "domains": [
-        "REVIEW"
-      ],
-      "triggers": [
-        "review ts",
-        "review react",
-        "review next.js",
-        "review nestjs"
-      ],
-      "skills": [
-        "skills/review.md",
-        "skills/security.md",
-        "skills/tdd.md"
-      ],
-      "outputs": [
-        "TS review report"
-      ]
-    },
-    {
-      "name": "python-reviewer",
-      "file": "agents/python-reviewer.md",
-      "domains": [
-        "REVIEW"
-      ],
-      "triggers": [
-        "review python",
-        "review fastapi",
-        "review django",
-        "review flask"
-      ],
-      "skills": [
-        "skills/review.md",
-        "skills/security.md",
-        "skills/tdd.md"
-      ],
-      "outputs": [
-        "Python review report"
-      ]
-    },
-    {
-      "name": "go-reviewer",
-      "file": "agents/go-reviewer.md",
-      "domains": [
-        "REVIEW"
-      ],
-      "triggers": [
-        "review go",
-        "review golang"
-      ],
-      "skills": [
-        "skills/review.md",
-        "skills/security.md",
-        "skills/tdd.md"
-      ],
-      "outputs": [
-        "Go review report"
-      ]
-    },
-    {
       "name": "safety-evaluator",
       "file": "agents/safety-evaluator.md",
       "domains": [
@@ -436,10 +375,7 @@
       "purpose": "quality review",
       "loaded_by": [
         "reviewer",
-        "security-engineer",
-        "typescript-reviewer",
-        "python-reviewer",
-        "go-reviewer"
+        "security-engineer"
       ]
     },
     {
@@ -466,9 +402,6 @@
       "loaded_by": [
         "architect",
         "security-engineer",
-        "typescript-reviewer",
-        "python-reviewer",
-        "go-reviewer",
         "safety-evaluator"
       ]
     },
