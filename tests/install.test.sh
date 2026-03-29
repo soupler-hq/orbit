@@ -5,6 +5,8 @@
 # CI:    docker run --rm -v "$PWD":/orbit -w /orbit node:22-alpine sh -c "apk add bash && bash tests/install.test.sh"
 
 set -euo pipefail
+export LC_ALL=C
+export LANG=C
 
 FRAMEWORK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PASS=0; FAIL=0
@@ -80,6 +82,14 @@ run_install "$PROJECT3" --all
 assert_file "Claude: CLAUDE.md"         "$PROJECT3/.claude/CLAUDE.md"
 assert_file "Codex: INSTRUCTIONS.md"    "$PROJECT3/.codex/INSTRUCTIONS.md"
 assert_file "Codex: policy.md"          "$PROJECT3/.codex/policy.md"
+
+# ─────────────────────────────────────────────────────────────────────────────
+section "Node wrapper smoke test: bin/install.js delegates to install.sh"
+PROJECT3B="$TMPDIR_ROOT/proj-node-wrapper"
+mkdir -p "$PROJECT3B"
+( cd "$PROJECT3B" && HOME="$TMPDIR_ROOT/home" node "$FRAMEWORK_DIR/bin/install.js" --tool claude >/dev/null 2>&1 ) || true
+assert_file "Node wrapper CLAUDE.md installed"   "$PROJECT3B/.claude/CLAUDE.md"
+assert_file "Node wrapper STATE.md created"       "$PROJECT3B/.orbit/state/STATE.md"
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Idempotency: running install twice produces identical result"

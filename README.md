@@ -210,6 +210,8 @@ npm install
 bash bin/install.sh --local --tool claude
 ```
 
+The `npx orbit init` CLI path delegates to `install.sh`, so the shell installer is the canonical install engine. `bin/install.js` now acts as a compatibility wrapper for install, Nexus sync/init, and promotion commands.
+
 ## Repository Sovereignty: Public vs. Private
 
 Orbit behaves differently based on your repository's visibility to ensure maximum security.
@@ -261,7 +263,8 @@ The repository is organized as a control plane:
 - `commands/` defines the `/orbit:` command surface
 - `state/` and `examples/` show how long-running work is persisted and resumed
 - `docs/` contains supporting guidance for token optimization, MCP usage, and playbooks
-- `install.sh` wires the framework into a target project
+- `install.sh` wires the framework into a target project and is the canonical install engine
+- `bin/install.js` is the compatibility wrapper for install/Nexus/promotion commands
 - `tests/` unit test suite (Vitest) — `npm test` to run
 - `eslint.config.mjs` and `.prettierrc` define code quality rules — `npm run lint`, `npm run format:check`
 - `SECURITY.md` vulnerability reporting and threat model

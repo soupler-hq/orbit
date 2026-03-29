@@ -7,6 +7,7 @@ All notable changes to the Orbit framework will be documented in this file. The 
 ### Fixed
 
 - **Model routing in `bin/orchestrator.js`**: task dispatch now resolves models from the registry's `domains` array and routing aliases instead of a nonexistent `agent.domain` field.
+- **Installer consolidation**: `bin/install.js` now delegates install flows to `install.sh` instead of maintaining a second installer implementation. The Claude command path stays aligned with `commands/orbit`.
 - **Installer drift in `bin/install.js`**: removed the stale `AGENTS.md` copy step and aligned the Claude command path with `commands/orbit`.
 - **Commit-time secret scan**: `hooks/scripts/pre-commit.sh` now blocks commits that contain obvious secrets or private keys.
 - **README/version drift**: updated the public version banner and capability summary to match the current release and registry shape.
