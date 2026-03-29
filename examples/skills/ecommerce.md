@@ -1,5 +1,6 @@
-# SKILL: E-Commerce Systems
-> Patterns and non-negotiables for building commerce platforms
+# EXAMPLE SKILL: E-Commerce Domain
+> Template for vertical domain skills. Copy to your project's `.orbit/skills/` and customise.
+> Not loaded by default — add to your project's `CLAUDE.md` skills table to activate.
 
 ## ACTIVATION
 Auto-loaded when building any e-commerce, marketplace, payments, or ordering system.

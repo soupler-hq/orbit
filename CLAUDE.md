@@ -156,7 +156,6 @@ Repeat PHASE per phase until milestone complete
 | Reviewing or authoring CI/CD workflows | `skills/workflow-audit.md` |
 | Starting a project | `skills/brainstorming.md` |
 | Monitoring | `skills/observability.md` |
-| E-commerce | `skills/ecommerce.md` |
 | AI/ML systems | `skills/ai-systems.md` |
 | IDP/Auth | `skills/identity.md` |
 | Security audit / threat model | `skills/security.md` + `skills/prompt-safety.md` |
@@ -187,12 +186,35 @@ Rule: if STATE.md missing → create before doing anything else.
 
 ## GIT DISCIPLINE
 
+### Branch-first — non-negotiable
+**Before writing a single line of code:**
+1. Check current branch: `git branch --show-current`
+2. If on `main` or `develop` → create a feature branch immediately:
+   ```
+   git checkout -b fix/issue-N-short-description   # for bug fixes
+   git checkout -b feat/short-description           # for features
+   git checkout -b chore/short-description          # for maintenance
+   ```
+3. Never commit directly to `main` or `develop`. No exceptions.
+
+**After work is done and committed on the feature branch — mandatory sequence:**
+```
+1. /orbit:review          ← run reviewer agent on all changed files
+2. address CRITICAL/HIGH  ← fix findings, commit fixes on same branch
+3. git push -u origin <branch>
+4. gh pr create --base develop --title "..." --body "..."
+                          ← include ship decision + findings in PR body
+```
+The PR goes through Sentinel CI before merging. Code does not exist until it is reviewed.
+`/orbit:review` is not optional. If skipped, the PR template will be missing the ship decision and the reviewer will flag it.
+
+### Commit format
 Every task → atomic commit immediately on completion:
 ```
-feat(phase-N): <what was built>
-fix(task-X): <what was fixed>
-arch(design): <architecture decision>
-docs(spec): <documentation added>
+feat(scope): <what was built>
+fix(scope): <what was fixed>
+arch(scope): <architecture decision>
+docs(scope): <documentation added>
 refactor(scope): <what was improved>
 test(scope): <what was tested>
 chore(scope): <maintenance>

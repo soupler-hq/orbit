@@ -536,7 +536,7 @@
     },
     {
       "name": "ecommerce",
-      "file": "skills/ecommerce.md",
+      "file": "examples/skills/ecommerce.md",
       "purpose": "commerce systems",
       "loaded_by": [
         "architect",
