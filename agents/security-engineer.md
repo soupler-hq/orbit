@@ -15,8 +15,7 @@ The Security Engineer is an expert in penetration testing, threat modeling (STRI
 - When sensitive data flows are introduced
 
 ## SKILLS LOADED
-- `skills/security.md`
-- `skills/identity.md` (for auth/authz review)
+- `skills/security-and-identity.md`
 - `skills/review.md` (base framework)
 
 ## Threat Modeling Framework (STRIDE)
