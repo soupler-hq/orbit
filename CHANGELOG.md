@@ -5,6 +5,7 @@ All notable changes to the Orbit framework will be documented in this file. The 
 ## [2.8.0] - 2026-03-29
 ### Added
 - **Runtime instruction generation**: `templates/orbit.base.md` is now the single source of truth for all runtime instruction files. `bin/generate-instructions.js` generates the runtime-specific file at install time — no pre-built per-runtime files ship in the package. Adding a new runtime requires only a JSON config entry in `orbit.config.json` → `runtimes`.
+- **Human-view generation**: `INSTRUCTIONS.md`, `SKILLS.md`, and `WORKFLOWS.md` are generated from `orbit.registry.json` and `templates/*.tpl.md`. `bin/generate-instructions.js --human-views` regenerates the operator docs, and Sentinel CI now blocks drift.
 - **`npm run generate`**: Regenerates `CLAUDE.md` from the template. Run after editing `templates/orbit.base.md`.
 - **`skills/workflow-audit.md`**: New skill encoding CI/CD pipeline best practices — release step ordering contract, trigger hygiene, idempotency patterns. Auto-loaded by the devops agent.
 - **`actionlint` gate in Sentinel**: Static analysis of all workflow files on every PR. Catches duplicate triggers, shell errors, and invalid workflow syntax before merge.

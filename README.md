@@ -30,6 +30,7 @@ Key capabilities:
 - Prompt injection defense - hook-based detection for risky or adversarial input
 - 17 domain skills - TDD, architecture, security, deployment, AI systems, RIPER, git worktrees, prompt safety, and more
 - Language-specific reviewers - TypeScript, Python, and Go specialists instead of a generic reviewer only
+- Generated human views - `INSTRUCTIONS.md`, `SKILLS.md`, and `WORKFLOWS.md` are generated from `orbit.registry.json` and `templates/*.tpl.md` via `node bin/generate-instructions.js --human-views`
 - Production state - persistent STATE.md memory, atomic commits, and project-level operational memory
 - Machine-readable registries - agent, skill, and workflow metadata live in `orbit.registry.json`
 
