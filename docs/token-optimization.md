@@ -1,3 +1,10 @@
+---
+id: token-optimization-v1
+status: Final
+version: v1
+last_updated: 2026-03-30
+---
+
 # Orbit Token Optimization Guide
 > How Orbit minimizes token consumption while maximizing output quality
 

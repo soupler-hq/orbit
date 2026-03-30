@@ -1,3 +1,10 @@
+---
+id: eval-dataset-v1
+status: Final
+version: v1
+last_updated: 2026-03-30
+---
+
 # Sample Eval Dataset
 
 > Small prompt set for checking routing, workflow choice, and runtime portability

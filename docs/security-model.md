@@ -1,3 +1,10 @@
+---
+id: security-model-v1
+status: Final
+version: v1
+last_updated: 2026-03-30
+---
+
 # Orbit Security Model
 
 > How Orbit defends against supply-chain attacks, prompt injection, and hook abuse

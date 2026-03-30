@@ -214,7 +214,7 @@ describe('OrbitOrchestrator — executeWave', () => {
     const orch = new OrbitOrchestrator(tmpDir);
     const tasks = [{ agent: 'nonexistent-agent', prompt: 'Do something' }];
     await expect(orch.executeWave(tasks, 'w003')).rejects.toThrow(
-      'Agent nonexistent-agent not found in registry'
+      'ERR-ORBIT-004'
     );
   });
 
