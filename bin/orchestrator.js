@@ -83,7 +83,9 @@ class OrbitOrchestrator {
         execSync('sleep 0.1');
       }
     }
-    throw new Error('[ERR-ORBIT-003] Could not acquire Orbit state lock after 10 retries. Delete .orbit/state/.orbit.lock if the lock is stale.');
+    throw new Error(
+      '[ERR-ORBIT-003] Could not acquire Orbit state lock after 10 retries. Delete .orbit/state/.orbit.lock if the lock is stale.'
+    );
   }
 
   /**
@@ -123,7 +125,10 @@ class OrbitOrchestrator {
   resolveNexusPath(repoName, relativePath) {
     if (!this.isNexus) return path.join(this.projectRoot, relativePath);
     const repo = this.nexus.repos.find((r) => r.name === repoName);
-    if (!repo) throw new Error(`[ERR-ORBIT-006] Repo ${repoName} not found in Nexus registry. Run: node bin/install.js nexus sync`);
+    if (!repo)
+      throw new Error(
+        `[ERR-ORBIT-006] Repo ${repoName} not found in Nexus registry. Run: node bin/install.js nexus sync`
+      );
     return path.resolve(this.projectRoot, repo.path, relativePath);
   }
 
@@ -136,7 +141,10 @@ class OrbitOrchestrator {
     const results = await Promise.all(
       tasks.map(async (task, index) => {
         const agent = this.registry.agents.find((a) => a.name === task.agent);
-        if (!agent) throw new Error(`[ERR-ORBIT-004] Agent '${task.agent}' not found in registry at ≥60% match. Run /orbit:forge to create a specialist agent.`);
+        if (!agent)
+          throw new Error(
+            `[ERR-ORBIT-004] Agent '${task.agent}' not found in registry at ≥60% match. Run /orbit:forge to create a specialist agent.`
+          );
 
         // 1. Model Routing Enforcement (Task 2.1)
         const modelEnv = this.resolveModelForAgent(agent);
