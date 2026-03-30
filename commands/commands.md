@@ -1,3 +1,26 @@
+# STATE.md Update Protocol
+> Standing rule — applies to every Orbit command, every session
+
+STATE.md is Orbit's memory. It must stay current without being asked. Update it automatically whenever any of the following occur:
+
+| Trigger | What to write |
+|---------|---------------|
+| Issue completed (PR merged or task done) | Move item from Todos to Last 5 Completed Tasks |
+| Decision made (architecture, scope, approach) | Add row to Decisions Log with date, version, decision, rationale |
+| New issue created | Add to appropriate wave/milestone in Todos |
+| Blocker encountered | Add to Todos with `BLOCKED:` prefix and reason |
+| Blocker resolved | Remove from Todos, add resolution to Decisions Log |
+| Milestone shipped | Update Active Milestone, Current Version, add to Decisions Log |
+| Session produces significant context | Update Project Context if active phase/milestone changed |
+
+**Rules:**
+- Never wait to be asked. Update STATE.md as part of completing any task.
+- Decisions Log entries must include rationale — not just what was decided, but why.
+- Last 5 Completed Tasks: always most recent first, always include issue number if applicable.
+- If STATE.md does not exist, create it before doing any other work.
+
+---
+
 # Orbit Command: /orbit:new-project
 > Initialize a brand new project from scratch
 

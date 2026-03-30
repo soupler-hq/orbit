@@ -32,3 +32,10 @@ RELEASE_NOTES.md
 # settings.json is tracked explicitly; everything else under .claude/ is local
 .claude/*
 !.claude/settings.json
+
+# Orbit
+.orbit/errors/
+.orbit/state/sessions.log
+.orbit/state/tool-usage.log
+.orbit/state/compact.log
+.worktrees/
