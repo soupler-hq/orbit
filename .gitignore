@@ -15,14 +15,12 @@ coverage/
 
 # OS/Node
 node_modules/
-package-lock.json
 .DS_Store
 *.log
 .orbit.lock
 
 # Generated
 coverage/
-package-lock.json
 
 # Local IDE
 .claude/settings.local.json

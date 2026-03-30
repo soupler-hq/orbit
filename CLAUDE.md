@@ -2,6 +2,10 @@
 > Production-grade agentic system: design, build, deploy, monitor — any domain
 > Version 2.0 | Soupler Engineering Standard
 
+> **First time?** Slash commands require a one-time install before they work.
+> VS Code: `bash install.sh --local --tool claude` | Terminal: `bash install.sh --global --tool claude`
+> Then open a new session. See README → Installation & Setup for full details.
+
 Canonical machine-readable control plane: `orbit.registry.json` and `orbit.config.json`.
 Human operator views: `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md`, `CLAUDE.md`.
 

@@ -199,6 +199,28 @@ npx orbit nexus init --tool claude
 npx orbit nexus sync
 ```
 
+### Install modes — VS Code vs terminal
+
+Orbit installs into the directory that your coding agent reads. Use the right mode for your tool:
+
+| Mode | Flag | Installs into | Use when |
+|------|------|---------------|----------|
+| Local | `--local` | `.claude/` in project root | VS Code / IDE (Claude Code extension reads project `.claude/`) |
+| Global | `--global` | `~/.claude/` | Terminal `claude` CLI (reads from home directory) |
+
+```bash
+# VS Code / IDE users — installs into project .claude/
+bash install.sh --local --tool claude
+
+# Terminal users — installs globally into ~/.claude/
+bash install.sh --global --tool claude
+
+# Both at once
+bash install.sh --all --tool claude
+```
+
+> **Slash commands (`/orbit:*`) are only available after running install.** If you open Claude Code and `/orbit:resume` shows "Unknown skill", run the install command above for your mode, then open a new session.
+
 ### 2. Manual/Legacy Installation
 
 If you are contributing to the Orbit core:
@@ -207,7 +229,7 @@ If you are contributing to the Orbit core:
 git clone https://github.com/soupler-hq/orbit.git
 cd orbit
 npm install
-bash bin/install.sh --local --tool claude
+bash install.sh --local --tool claude
 ```
 
 The `npx orbit init` CLI path delegates to `install.sh`, so the shell installer is the canonical install engine. `bin/install.js` now acts as a compatibility wrapper for install, Nexus sync/init, and promotion commands.
