@@ -11,9 +11,15 @@
 
 ---
 
+## What is Orbit?
+
 Orbit is a tool-agnostic control plane that turns any compatible coding agent (Claude, Codex, Antigravity) into a coordinated engineering team. It classifies intent, routes to specialist agents, executes work in parallel waves with fresh contexts, and persists state across sessions — all from your repository.
 
 **Key capabilities:** smart agent routing · Agent Forge · wave execution · model-cost routing · prompt injection defense · 21 reusable skills · STATE.md persistence · multi-repo Nexus mode
+
+### Compatibility
+
+Orbit works across runtimes — Claude Code (native), Codex (stable), Antigravity (experimental). Any agent that can read markdown instructions and run repo-local scripts can use the same registry, skills, and workflows without changes. See [docs/runtime-adapters.md](docs/runtime-adapters.md).
 
 ---
 
@@ -85,6 +91,31 @@ bash install.sh --local --tool claude
 | [docs/error-codes.md](docs/error-codes.md) | ERR-ORBIT-NNN registry with runbooks |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | How to add skills, agents, or patterns |
 | [SECURITY.md](SECURITY.md) | Vulnerability reporting and threat model |
+
+---
+
+## Why Use This Framework
+
+### With Orbit
+
+- Requests are classified before execution — the right agent gets the right job
+- Complex work is decomposed into waves instead of being forced through one long context
+- Skills create repeatable standards for TDD, architecture, security, and deployment
+- Hooks and STATE.md make long-running work resumable across sessions
+- The same repo works across Claude, Codex, and Antigravity without rewrites
+
+### Without Orbit
+
+- The assistant jumps straight into implementation, skipping planning and review
+- Context accumulates until earlier architectural decisions become fuzzy
+- Security and operational concerns depend on memory rather than explicit process
+- Multi-step work is harder to resume, audit, or hand off
+
+---
+
+## Sample Eval Set
+
+Use [docs/eval-dataset.md](docs/eval-dataset.md) to verify routing, workflow, and portability claims after changes. Representative prompts: add rate limiting to auth endpoints · design a multi-region active-active architecture · review a React auth component · create a CI/CD rollback plan · unknown domain with high uncertainty.
 
 ---
 

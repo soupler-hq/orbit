@@ -9,6 +9,79 @@ last_updated: 2026-03-30
 
 > System design, control plane, wave execution model, and component layout.
 
+### Architecture
+
+Orbit separates orchestration policy from runtime implementation. The repository defines rules, roles, workflows, and persistence. The active agent runtime interprets those instructions.
+
+### Compatibility
+
+| Runtime | Support level | Notes |
+|---------|--------------|-------|
+| Claude Code | `native` | Reads `CLAUDE.md` directly; hooks and slash commands work natively |
+| Codex | `stable` | Uses `INSTRUCTIONS.md` + `policy.md`; no hook API |
+| Antigravity | `experimental` | Partial; no stable hook lifecycle published yet |
+
+See [runtime-adapters.md](runtime-adapters.md) for full adapter contracts.
+
+### Flow Diagram
+
+```mermaid
+flowchart LR
+    Request --> Classify --> Route --> Plan --> Execute --> Verify --> Persist --> Ship
+```
+
+### Component Diagram
+
+```mermaid
+flowchart TB
+    subgraph ControlPlane[Control Plane]
+        CLAUDE[CLAUDE.md]
+        REG[orbit.registry.json]
+        SKILLS[skills/]
+        WORK[WORKFLOWS.md]
+    end
+
+    subgraph Execution[Execution Layer]
+        CORE[Core Agents]
+        SPEC[Specialist Agents]
+        FORGE[Agent Forge]
+    end
+
+    subgraph Persistence[Persistence Layer]
+        STATE[STATE.md]
+        SNAP[pre-compact snapshot]
+        GIT[Git history]
+    end
+
+    CLAUDE --> CORE
+    REG --> CORE
+    SKILLS --> CORE
+    WORK --> CORE
+    CORE --> SPEC
+    CORE --> FORGE
+    CORE --> STATE
+    STATE --> SNAP
+    STATE --> GIT
+```
+
+## Complex Scenario: Secure Feature Delivery
+
+A product team requests a new admin billing export feature that must be audited, permissioned, and delivered without exposing customer data.
+
+1. Classify as `SYNTHESIS`, `PROJECT`, `AUTONOMOUS`
+2. Route to `strategist` first — work spans product, security, backend, delivery
+3. Pull in `security-engineer`, `engineer`, `data-engineer`, `reviewer` in parallel
+4. `planning.md` splits into waves: schema changes → API design → export job → permission checks → audit logging
+5. `security.md` defines data-access rules, redaction, and failure handling before implementation
+6. Each wave runs in fresh contexts — auth logic, export job, and UI concerns don't bleed together
+7. Verify with tests, threat modeling, and review before shipping
+8. Persist to `STATE.md`, commit atomically
+
+Without the framework: single linear thread, review steps skipped, security decisions undocumented.
+With the framework: roles, waves, and checks make security and delivery quality explicit.
+
+---
+
 ## Control Plane
 
 Orbit separates orchestration policy from runtime implementation. The repository defines rules, roles, workflows, and persistence. The active agent runtime interprets those instructions. The same repo works with Claude, Codex, or Antigravity — no rewrites required.
