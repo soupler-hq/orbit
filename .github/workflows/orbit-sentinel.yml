@@ -2,7 +2,7 @@ name: Orbit Sentinel (SOTA Governance)
 
 on:
   pull_request:
-    branches: [ develop, main ]
+    branches: [develop, main]
 
 jobs:
   lock-check:
@@ -152,7 +152,7 @@ jobs:
     name: workflow-lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: 🔍 actionlint (workflow architecture)
         run: |
           bash <(curl -s https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
