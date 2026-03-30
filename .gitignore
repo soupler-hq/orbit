@@ -15,15 +15,29 @@ coverage/
 
 # OS/Node
 node_modules/
-package-lock.json
 .DS_Store
 *.log
 .orbit.lock
 
 # Generated
 coverage/
-package-lock.json
 
 # Local IDE
 .claude/settings.local.json
 RELEASE_NOTES.md
+
+# Local Orbit install artifacts (machine-specific, not part of the published framework)
+# settings.json is tracked explicitly; everything else under .claude/ is local
+.claude/*
+!.claude/settings.json
+
+# AGENTS.md — eliminated in v2.8.0, replaced by generated CLAUDE.md/INSTRUCTIONS.md
+# Guard against accidental re-creation by old installers or manual copies
+AGENTS.md
+
+# Orbit
+.orbit/errors/
+.orbit/state/sessions.log
+.orbit/state/tool-usage.log
+.orbit/state/compact.log
+.worktrees/

@@ -1,3 +1,26 @@
+# STATE.md Update Protocol
+> Standing rule — applies to every Orbit command, every session
+
+STATE.md is Orbit's memory. It must stay current without being asked. Update it automatically whenever any of the following occur:
+
+| Trigger | What to write |
+|---------|---------------|
+| Issue completed (PR merged or task done) | Move item from Todos to Last 5 Completed Tasks |
+| Decision made (architecture, scope, approach) | Add row to Decisions Log with date, version, decision, rationale |
+| New issue created | Add to appropriate wave/milestone in Todos |
+| Blocker encountered | Add to Todos with `BLOCKED:` prefix and reason |
+| Blocker resolved | Remove from Todos, add resolution to Decisions Log |
+| Milestone shipped | Update Active Milestone, Current Version, add to Decisions Log |
+| Session produces significant context | Update Project Context if active phase/milestone changed |
+
+**Rules:**
+- Never wait to be asked. Update STATE.md as part of completing any task.
+- Decisions Log entries must include rationale — not just what was decided, but why.
+- Last 5 Completed Tasks: always most recent first, always include issue number if applicable.
+- If STATE.md does not exist, create it before doing any other work.
+
+---
+
 # Orbit Command: /orbit:new-project
 > Initialize a brand new project from scratch
 
@@ -304,10 +327,36 @@ Then show session token usage if available from STATE.md or context metadata.
 
 ## PROCESS
 
-Read STATE.md. Summarize:
-- Last 5 completed tasks
-- Current phase and wave
-- Any open blockers
-- Recommend next command
+1. Read `.orbit/state/STATE.md`. If it exists, also read `.orbit/state/pre-compact-snapshot.md`.
+2. Run `git log --oneline -5` to confirm what was last committed.
+3. Output a status summary:
+   - Active milestone + phase
+   - Last 5 completed tasks
+   - Open todos for current milestone
+   - Any blockers
 
-Then continue work without requiring re-briefing.
+4. **Infer and output the Next Command block** using this decision table (first matching rule wins):
+
+| STATE.md signal | Primary recommendation |
+|----------------|----------------------|
+| Active `/orbit:build [N]` in progress (wave incomplete) | `/orbit:build [N]` — continue wave execution |
+| Build complete, no `/orbit:review` recorded for current phase | `/orbit:review` — required before ship |
+| Review done, phase not yet shipped | `/orbit:ship [N]` — open PR and deploy |
+| Last completed task was `/orbit:quick`, open issues remain in active milestone | `/orbit:quick #NNN <title>` — next unblocked issue |
+| All milestone issues complete, next milestone defined | `/orbit:plan` — begin next milestone |
+| No active work / truly ambiguous | `/orbit:next` — let Orbit auto-detect |
+
+Output format (always append this block):
+```
+---
+## Recommended Next Command
+
+**Primary**: /orbit:quick #NNN <issue title>
+**Why**: <one sentence — current milestone state + why this is next>
+
+**Alternatives**:
+- /orbit:progress — review full milestone status
+- /orbit:next — let Orbit auto-detect based on full state analysis
+```
+
+5. Continue work without requiring re-briefing.

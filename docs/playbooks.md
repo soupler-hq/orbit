@@ -1,3 +1,10 @@
+---
+id: playbooks-v1
+status: Final
+version: v1
+last_updated: 2026-03-30
+---
+
 # Orbit Workflow Playbooks
 > Pre-defined execution paths for common project archetypes
 

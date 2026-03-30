@@ -1,3 +1,10 @@
+---
+id: mcp-guide-v1
+status: Final
+version: v1
+last_updated: 2026-03-30
+---
+
 # MCP Integration Guide
 > Model Context Protocol — extending Claude Code with external tools
 

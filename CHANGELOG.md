@@ -4,6 +4,32 @@ All notable changes to the Orbit framework will be documented in this file. The 
 
 ## [Unreleased]
 
+## [2.8.1] - 2026-03-30
+
+### Added
+
+- **`docs/architecture.md`**: Control plane overview, three-pillars table, wave execution model, model routing, repo layout, kernel/userland design, Nexus mode, and Sentinel CI gates — extracted from README to a dedicated architecture reference.
+- **`docs/concepts.md`**: Full conceptual reference for agents, skills, wave execution, STATE.md, hooks, Agent Forge, and workflows.
+- **`docs/error-codes.md`**: ERR-ORBIT-001 through ERR-ORBIT-006 registry with structured runbooks.
+- **`metadata.yml`**: IDP contract for the Soupler engineering-standards platform strategy engine.
+- **`orbit:resume` next-command inference**: The resume output now includes a recommended next command inferred from STATE.md phase, wave, and blocker state — six-rule decision table defined in `commands/commands.md`.
+- **YAML frontmatter** (`id`, `status`, `version`, `last_updated`) added to all `docs/*.md` files for IDP indexing.
+
+### Changed
+
+- **README restructured**: Reduced from 679 → 124 lines. Product pitch, install, slash commands, and docs index only. All technical depth moved to `docs/`.
+- **`bin/eval.sh`**: Compliance checks split — positioning sections checked in `README.md`, architecture diagram sections checked in `docs/architecture.md`.
+- **`CLAUDE.md` git discipline**: Branch naming (`type/NNN-description`), mandatory `git pull` before branch cut, rebase instruction, and `(#NNN)` issue reference in all commit messages.
+- **`bin/orchestrator.js`**: ERR-ORBIT error codes on all three throw paths (ERR-ORBIT-003, ERR-ORBIT-004, ERR-ORBIT-006).
+
+### Fixed
+
+- **License**: `package.json` corrected from `MIT` to `Apache-2.0`. `bin/validate-config.sh` now asserts this at `[6/6]`.
+- **`package-lock.json`**: Committed and tracked; `.gitignore` entry removed. Sentinel CI uses `npm ci` with a `lock-check` gate.
+- **`AGENTS.md`**: Suppressed in `.gitignore` — was a stale manually-maintained copy, replaced by runtime-specific generation.
+- **Issue auto-close**: Added `.github/workflows/close-issues-on-merge.yml` — GitHub only auto-closes on merge to default branch; this workflow handles `develop`.
+- **`bin/validate-config.sh`**: All check headers corrected to `[N/6]`; `[ERR-ORBIT-006]` prefix added to model ID failure message.
+
 ### Fixed
 
 - **Self-audit branch guard**: `bin/validate-config.sh` now treats `pull_request` runs as valid for protected release branches, so the `develop -> main` Sentinel PR no longer fails the self-audit gate.

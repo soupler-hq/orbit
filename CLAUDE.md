@@ -2,6 +2,10 @@
 > Production-grade agentic system: design, build, deploy, monitor — any domain
 > Version 2.0 | Soupler Engineering Standard
 
+> **First time?** Slash commands require a one-time install before they work.
+> VS Code: `bash install.sh --local --tool claude` | Terminal: `bash install.sh --global --tool claude`
+> Then open a new session. See README → Installation & Setup for full details.
+
 Canonical machine-readable control plane: `orbit.registry.json` and `orbit.config.json`.
 Human operator views: `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md`, `CLAUDE.md`.
 
@@ -187,13 +191,21 @@ Rule: if STATE.md missing → create before doing anything else.
 ### Branch-first — non-negotiable
 **Before writing a single line of code:**
 1. Check current branch: `git branch --show-current`
-2. If on `main` or `develop` → create a feature branch immediately:
+2. If on `main` or `develop` → pull first, then cut a feature branch:
    ```
-   git checkout -b fix/issue-N-short-description   # for bug fixes
-   git checkout -b feat/short-description           # for features
-   git checkout -b chore/short-description          # for maintenance
+   git checkout develop
+   git pull origin develop          ← always pull first — no exceptions
+   git checkout -b fix/92-description    # for bug fixes   (type/NNN-description)
+   git checkout -b feat/64-description   # for features
+   git checkout -b chore/78-description  # for maintenance
    ```
 3. Never commit directly to `main` or `develop`. No exceptions.
+
+**Returning to an in-progress branch after other work merged:**
+```
+git fetch origin
+git rebase origin/develop          ← rebase, not merge — keeps history clean
+```
 
 **After work is done and committed on the feature branch — mandatory sequence:**
 ```
@@ -207,15 +219,15 @@ The PR goes through Sentinel CI before merging. Code does not exist until it is 
 `/orbit:review` is not optional. If skipped, the PR template will be missing the ship decision and the reviewer will flag it.
 
 ### Commit format
-Every task → atomic commit immediately on completion:
+Every task → atomic commit immediately on completion. **Always include the issue number.**
 ```
-feat(scope): <what was built>
-fix(scope): <what was fixed>
-arch(scope): <architecture decision>
-docs(scope): <documentation added>
-refactor(scope): <what was improved>
-test(scope): <what was tested>
-chore(scope): <maintenance>
+feat(scope): <what was built> (#NNN)
+fix(scope): <what was fixed> (#NNN)
+arch(scope): <architecture decision> (#NNN)
+docs(scope): <documentation added> (#NNN)
+refactor(scope): <what was improved> (#NNN)
+test(scope): <what was tested> (#NNN)
+chore(scope): <maintenance> (#NNN)
 ```
 Never commit partial work. Every commit independently reviewable.
 Use git worktrees for parallel wave execution: `skills/git-worktree.md`

@@ -23,7 +23,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # ── 0. Branch convention — never commit directly to protected branches ─────────
-echo "[ 0/5 ] Branch convention"
+echo "[ 0/6 ] Branch convention"
 CURRENT_BRANCH="${GITHUB_HEAD_REF:-$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")}"
 CURRENT_EVENT="${GITHUB_EVENT_NAME:-local}"
 CURRENT_BASE_BRANCH="${GITHUB_BASE_REF:-}"
@@ -41,7 +41,7 @@ else
 fi
 
 # ── 1. Version: orbit.config.json must NOT contain a "version" field ──────────
-echo "[ 1/5 ] Version field in orbit.config.json"
+echo "[ 1/6 ] Version field in orbit.config.json"
 if jq -e '.version' "$ROOT/orbit.config.json" > /dev/null 2>&1; then
   CONFIG_VER=$(jq -r '.version' "$ROOT/orbit.config.json")
   PKG_VER=$(jq -r '.version' "$ROOT/package.json")
@@ -54,7 +54,7 @@ fi
 
 # ── 2. Changelog entry matches package.json version ───────────────────────────
 echo ""
-echo "[ 2/5 ] CHANGELOG version alignment"
+echo "[ 2/6 ] CHANGELOG version alignment"
 PKG_VER=$(jq -r '.version' "$ROOT/package.json")
 if grep -q "## \[$PKG_VER\]" "$ROOT/CHANGELOG.md"; then
   pass "CHANGELOG.md contains entry for v$PKG_VER"
@@ -65,7 +65,7 @@ fi
 
 # ── 3. Hook flags in orbit.config.json must match what install.sh registers ───
 echo ""
-echo "[ 3/5 ] Hook config vs install.sh registration"
+echo "[ 3/6 ] Hook config vs install.sh registration"
 
 check_hook() {
   local config_key="$1"   # e.g. post_tool_use
@@ -106,11 +106,11 @@ check_hook "stop"          "Stop"
 
 # ── 4. No hardcoded model IDs in agents/ or skills/ ───────────────────────────
 echo ""
-echo "[ 4/5 ] Hardcoded model IDs in agents/ and skills/"
+echo "[ 4/6 ] Hardcoded model IDs in agents/ and skills/"
 MODEL_PATTERN="claude-haiku-[0-9]|claude-sonnet-[0-9]|claude-opus-[0-9]"
 HITS=$(grep -rn --include="*.md" -E "$MODEL_PATTERN" "$ROOT/agents/" "$ROOT/skills/" 2>/dev/null || true)
 if [ -n "$HITS" ]; then
-  fail "Hardcoded model IDs found — use semantic aliases from orbit.config.json → models.routing:"
+  fail "[ERR-ORBIT-006] Hardcoded model IDs found — use semantic aliases from orbit.config.json → models.routing:"
   echo "$HITS" | while IFS= read -r line; do echo "     $line"; done
 else
   pass "No hardcoded model IDs in agents/ or skills/"
@@ -118,7 +118,7 @@ fi
 
 # ── 5. Vertical domain skills in kernel ───────────────────────────────────────
 echo ""
-echo "[ 5/5 ] Vertical domain skills in kernel (skills/)"
+echo "[ 5/6 ] Vertical domain skills in kernel (skills/)"
 VERTICAL_SKILLS=("ecommerce")
 for skill in "${VERTICAL_SKILLS[@]}"; do
   if [ -f "$ROOT/skills/$skill.md" ]; then
@@ -128,6 +128,17 @@ for skill in "${VERTICAL_SKILLS[@]}"; do
     pass "skills/$skill.md not in kernel"
   fi
 done
+
+# ── 6. License: package.json must declare Apache-2.0 ─────────────────────────
+echo ""
+echo "[ 6/6 ] License declaration in package.json"
+PKG_LICENSE=$(jq -r '.license // "missing"' "$ROOT/package.json")
+if [ "$PKG_LICENSE" = "Apache-2.0" ]; then
+  pass "package.json license is Apache-2.0"
+else
+  fail "package.json license is \"$PKG_LICENSE\" — must be \"Apache-2.0\" (LICENSE file and docs declare Apache 2.0)."
+  echo "     Fix: set \"license\": \"Apache-2.0\" in package.json."
+fi
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 echo ""
