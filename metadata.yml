@@ -1,0 +1,46 @@
+apiVersion: platform.soupler.com/v1alpha1
+kind: Service
+
+metadata:
+  name: orbit
+
+  annotations:
+    platform.soupler.com/profile: standard
+
+spec:
+  # Live fields — actively consumed by the platform strategy engine
+  type: standard
+  runtime: node
+
+  topology:
+    type: single-service
+
+  workload:
+    # Orbit is a published npm package (framework/library), not a deployed service
+    kind: library
+
+  runtime_config:
+    language: node
+    build_tool: npm
+    package_manager: npm
+
+  policy:
+    profile: standard
+    secret_scanning: true    # pre-commit hook scans for secrets on every commit
+    owasp_dependency_check: false
+    sonarqube:
+      enabled: false
+
+  provider:
+    pipeline: github-actions
+
+  delivery:
+    strategy: recreate
+
+  observability:
+    logging:
+      provider: none
+    metrics:
+      provider: none
+    tracing:
+      provider: none
