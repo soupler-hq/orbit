@@ -25,8 +25,16 @@ echo ""
 # ── 0. Branch convention — never commit directly to protected branches ─────────
 echo "[ 0/5 ] Branch convention"
 CURRENT_BRANCH="${GITHUB_HEAD_REF:-$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")}"
-if [[ "$CURRENT_BRANCH" == "develop" || "$CURRENT_BRANCH" == "main" ]]; then
-  fail "Running on protected branch '$CURRENT_BRANCH'. Changes must go through a feature branch and PR."
+CURRENT_EVENT="${GITHUB_EVENT_NAME:-local}"
+CURRENT_BASE_BRANCH="${GITHUB_BASE_REF:-}"
+
+# Release PRs intentionally come from protected integration branches such as
+# develop -> main. In GitHub Actions this script runs in pull_request context,
+# so only direct pushes / local runs should be blocked for protected branches.
+if [[ "$CURRENT_EVENT" == "pull_request" ]]; then
+  pass "Pull request context ($CURRENT_BRANCH -> ${CURRENT_BASE_BRANCH:-unknown}) allows protected release branches"
+elif [[ "$CURRENT_BRANCH" == "develop" || "$CURRENT_BRANCH" == "main" ]]; then
+  fail "Running on protected branch '$CURRENT_BRANCH' outside pull_request context. Changes must go through a feature branch and PR."
   echo "     Convention: fix/issue-N-description or feat/description → PR → merge"
 else
   pass "Branch '$CURRENT_BRANCH' is a feature branch (not a protected branch)"

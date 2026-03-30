@@ -6,6 +6,7 @@ All notable changes to the Orbit framework will be documented in this file. The 
 
 ### Fixed
 
+- **Self-audit branch guard**: `bin/validate-config.sh` now treats `pull_request` runs as valid for protected release branches, so the `develop -> main` Sentinel PR no longer fails the self-audit gate.
 - **Model routing in `bin/orchestrator.js`**: task dispatch now resolves models from the registry's `domains` array and routing aliases instead of a nonexistent `agent.domain` field.
 - **Installer consolidation**: `bin/install.js` now delegates install flows to `install.sh` instead of maintaining a second installer implementation. The Claude command path stays aligned with `commands/orbit`.
 - **Installer drift in `bin/install.js`**: removed the stale `AGENTS.md` copy step and aligned the Claude command path with `commands/orbit`.

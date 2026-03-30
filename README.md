@@ -597,6 +597,7 @@ Every commit to the Orbit core is guarded by the **Orbit Sentinel** (`.github/wo
 - **Semantic Linting**: Validates registry and agent consistency.
 - **SOTA Compliance**: Ensures the framework meets the Soupler Engineering Standard.
 - **Safety Audit**: Automated adversarial testing against prompt injections.
+- **Self-Audit Gate**: `bin/validate-config.sh` checks version, hook, and model consistency; release PRs from protected branches are allowed, but direct pushes to `develop` or `main` still fail.
 
 ---
 
