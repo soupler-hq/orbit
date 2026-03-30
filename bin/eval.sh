@@ -8,22 +8,34 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 bash "$ROOT_DIR/bin/validate.sh" >/dev/null
 
-required_patterns=(
+# Sections that must exist in README.md (product positioning)
+readme_patterns=(
   "What is Orbit?"
-  "### Compatibility"
-  "### Architecture"
-  "### Flow Diagram"
-  "### Component Diagram"
-  "## Complex Scenario: Secure Feature Delivery"
   "## Why Use This Framework"
   "### With Orbit"
   "### Without Orbit"
   "## Sample Eval Set"
 )
 
-for pattern in "${required_patterns[@]}"; do
+for pattern in "${readme_patterns[@]}"; do
   if ! grep -q "$pattern" "$ROOT_DIR/README.md"; then
     printf 'README missing required section: %s\n' "$pattern" >&2
+    exit 1
+  fi
+done
+
+# Sections that must exist in docs/architecture.md
+arch_patterns=(
+  "### Compatibility"
+  "### Architecture"
+  "### Flow Diagram"
+  "### Component Diagram"
+  "## Complex Scenario: Secure Feature Delivery"
+)
+
+for pattern in "${arch_patterns[@]}"; do
+  if ! grep -q "$pattern" "$ROOT_DIR/docs/architecture.md"; then
+    printf 'docs/architecture.md missing required section: %s\n' "$pattern" >&2
     exit 1
   fi
 done
