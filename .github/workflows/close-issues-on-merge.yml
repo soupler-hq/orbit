@@ -1,0 +1,49 @@
+name: Close linked issues on develop merge
+
+# GitHub auto-closes issues via "Closes #N" only when a PR merges into the
+# default branch (main). Since active development targets develop, this workflow
+# fires on PR merge to develop and closes any issues referenced with the standard
+# closing keywords in the PR body.
+#
+# Supported keywords (case-insensitive):
+#   close, closes, closed, fix, fixes, fixed, resolve, resolves, resolved
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [develop]
+
+jobs:
+  close-linked-issues:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: read
+
+    steps:
+      - name: Close issues referenced in PR body
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Extract issue numbers from closing keywords in the PR body
+          ISSUES=$(echo "$PR_BODY" | grep -oiE '(close[sd]?|fix(e[sd])?|resolve[sd]?)\s+#[0-9]+' | grep -oE '#[0-9]+' | tr -d '#' | sort -u)
+
+          if [ -z "$ISSUES" ]; then
+            echo "No closing keywords found in PR #$PR_NUMBER body."
+            exit 0
+          fi
+
+          echo "PR #$PR_NUMBER merged into develop. Closing linked issues: $ISSUES"
+
+          for ISSUE in $ISSUES; do
+            echo "Closing issue #$ISSUE..."
+            gh issue close "$ISSUE" \
+              --repo "$REPO" \
+              --comment "Closed via PR #$PR_NUMBER merged into \`develop\`." \
+              && echo "  ✓ #$ISSUE closed" \
+              || echo "  ⚠ Could not close #$ISSUE (may already be closed)"
+          done
