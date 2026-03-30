@@ -110,7 +110,7 @@ echo "[ 4/6 ] Hardcoded model IDs in agents/ and skills/"
 MODEL_PATTERN="claude-haiku-[0-9]|claude-sonnet-[0-9]|claude-opus-[0-9]"
 HITS=$(grep -rn --include="*.md" -E "$MODEL_PATTERN" "$ROOT/agents/" "$ROOT/skills/" 2>/dev/null || true)
 if [ -n "$HITS" ]; then
-  fail "Hardcoded model IDs found — use semantic aliases from orbit.config.json → models.routing:"
+  fail "[ERR-ORBIT-006] Hardcoded model IDs found — use semantic aliases from orbit.config.json → models.routing:"
   echo "$HITS" | while IFS= read -r line; do echo "     $line"; done
 else
   pass "No hardcoded model IDs in agents/ or skills/"

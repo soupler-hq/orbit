@@ -1,3 +1,10 @@
+---
+id: runtime-adapters-v1
+status: Final
+version: v1
+last_updated: 2026-03-30
+---
+
 # Runtime Adapters
 
 > How non-native agent runtimes can use Orbit without changing the core control plane

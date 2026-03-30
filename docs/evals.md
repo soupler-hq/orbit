@@ -1,3 +1,10 @@
+---
+id: evals-v1
+status: Final
+version: v1
+last_updated: 2026-03-30
+---
+
 # Evaluation Framework
 
 > Lightweight eval criteria for routing quality, workflow compliance, and runtime portability
