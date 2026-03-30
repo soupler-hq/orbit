@@ -327,10 +327,36 @@ Then show session token usage if available from STATE.md or context metadata.
 
 ## PROCESS
 
-Read STATE.md. Summarize:
-- Last 5 completed tasks
-- Current phase and wave
-- Any open blockers
-- Recommend next command
+1. Read `.orbit/state/STATE.md`. If it exists, also read `.orbit/state/pre-compact-snapshot.md`.
+2. Run `git log --oneline -5` to confirm what was last committed.
+3. Output a status summary:
+   - Active milestone + phase
+   - Last 5 completed tasks
+   - Open todos for current milestone
+   - Any blockers
 
-Then continue work without requiring re-briefing.
+4. **Infer and output the Next Command block** using this decision table (first matching rule wins):
+
+| STATE.md signal | Primary recommendation |
+|----------------|----------------------|
+| Active `/orbit:build [N]` in progress (wave incomplete) | `/orbit:build [N]` — continue wave execution |
+| Build complete, no `/orbit:review` recorded for current phase | `/orbit:review` — required before ship |
+| Review done, phase not yet shipped | `/orbit:ship [N]` — open PR and deploy |
+| Last completed task was `/orbit:quick`, open issues remain in active milestone | `/orbit:quick #NNN <title>` — next unblocked issue |
+| All milestone issues complete, next milestone defined | `/orbit:plan` — begin next milestone |
+| No active work / truly ambiguous | `/orbit:next` — let Orbit auto-detect |
+
+Output format (always append this block):
+```
+---
+## Recommended Next Command
+
+**Primary**: /orbit:quick #NNN <issue title>
+**Why**: <one sentence — current milestone state + why this is next>
+
+**Alternatives**:
+- /orbit:progress — review full milestone status
+- /orbit:next — let Orbit auto-detect based on full state analysis
+```
+
+5. Continue work without requiring re-briefing.
