@@ -41,7 +41,7 @@
     "automation"
   ],
   "author": "Soupler Engineering",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/soupler-hq/orbit"
