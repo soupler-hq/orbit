@@ -28,6 +28,47 @@ class OrbitOrchestrator {
   }
 
   /**
+   * Resolve the best model for a task based on the agent registry and routing aliases.
+   * Falls back to the implement profile so older fixtures remain compatible.
+   */
+  resolveModelForAgent(agent) {
+    const primaryDomain = (agent.domains && agent.domains[0]) || agent.domain || '';
+    const domainToProfile = {
+      ENGINEERING: 'implement',
+      REVIEW: 'implement',
+      OPERATIONS: 'implement',
+      DESIGN: 'implement',
+      PRODUCT: 'implement',
+      RESEARCH: 'architect',
+      SYNTHESIS: 'architect',
+      SECURITY: 'security',
+    };
+    const agentToRoutingAlias = {
+      architect: 'reasoning',
+      strategist: 'reasoning',
+      researcher: 'reasoning',
+      forge: 'reasoning',
+      'security-engineer': 'security',
+      'safety-evaluator': 'security',
+      engineer: 'standard',
+      reviewer: 'standard',
+      devops: 'standard',
+      designer: 'standard',
+      'data-engineer': 'standard',
+    };
+
+    const profileKey = domainToProfile[String(primaryDomain).toUpperCase()] || 'implement';
+    const routingAlias = agentToRoutingAlias[agent.name] || 'standard';
+
+    return (
+      this.config.models?.routing?.[routingAlias] ||
+      this.config.models?.profiles?.[profileKey]?.model ||
+      this.config.models?.profiles?.implement?.model ||
+      'claude-sonnet-4-6'
+    );
+  }
+
+  /**
    * Acquire an atomic lock on the state directory.
    */
   acquireStateLock() {
@@ -98,9 +139,7 @@ class OrbitOrchestrator {
         if (!agent) throw new Error(`Agent ${task.agent} not found in registry`);
 
         // 1. Model Routing Enforcement (Task 2.1)
-        const profile =
-          this.config.models?.profiles?.[agent.domain] || this.config.models?.profiles?.implement;
-        const modelEnv = profile ? profile.model : 'claude-sonnet-4-6';
+        const modelEnv = this.resolveModelForAgent(agent);
 
         // 2. Git Worktree Handoff (Task 2.2)
         const taskName = `task_${waveId}_${index}`;

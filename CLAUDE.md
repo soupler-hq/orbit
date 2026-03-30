@@ -66,16 +66,14 @@ The registry below mirrors `orbit.registry.json`. Keep both in sync.
 ### Specialist Agents (dispatch directly for precision)
 | Agent | Triggers On |
 |-------|------------|
-| `typescript-reviewer` | Review of .ts/.tsx/.js/.jsx code, React, Next.js, NestJS |
-| `python-reviewer` | Review of .py code, FastAPI, Django, data science |
-| `go-reviewer` | Review of .go code, goroutines, interfaces |
+| `reviewer` (with language) | Code review with language-specific axes: TypeScript (.ts/.tsx/.js/.jsx), Python (.py), Go (.go) |
 | `security-engineer` | Security audits, threat modeling, OWASP, `/orbit:audit` |
 | `data-engineer` | ETL/ELT pipelines, dbt, Kafka, Spark, warehousing |
 
 ### Selection Logic
 ```
 Single clear match → dispatch that agent
-TypeScript/Python/Go code review → dispatch language-specific reviewer
+TypeScript/Python/Go code review → dispatch `reviewer` with language context (activates language-specific axes)
 Security concern → always dispatch security-engineer (parallel with other agents)
 PR touches .github/workflows/ → always dispatch devops agent for pipeline architecture review
 Spans 2-3 domains → parallel wave, merge results
@@ -156,10 +154,9 @@ Repeat PHASE per phase until milestone complete
 | Reviewing or authoring CI/CD workflows | `skills/workflow-audit.md` |
 | Starting a project | `skills/brainstorming.md` |
 | Monitoring | `skills/observability.md` |
-| E-commerce | `skills/ecommerce.md` |
 | AI/ML systems | `skills/ai-systems.md` |
-| IDP/Auth | `skills/identity.md` |
-| Security audit / threat model | `skills/security.md` + `skills/prompt-safety.md` |
+| IDP/Auth | `skills/security-and-identity.md` |
+| Security audit / threat model | `skills/security-and-identity.md` + `skills/prompt-safety.md` |
 | Parallel task execution | `skills/git-worktree.md` |
 | Context getting long / new session | `skills/context-management.md` |
 | Ambiguous requirements | `skills/riper.md` |
@@ -187,12 +184,35 @@ Rule: if STATE.md missing → create before doing anything else.
 
 ## GIT DISCIPLINE
 
+### Branch-first — non-negotiable
+**Before writing a single line of code:**
+1. Check current branch: `git branch --show-current`
+2. If on `main` or `develop` → create a feature branch immediately:
+   ```
+   git checkout -b fix/issue-N-short-description   # for bug fixes
+   git checkout -b feat/short-description           # for features
+   git checkout -b chore/short-description          # for maintenance
+   ```
+3. Never commit directly to `main` or `develop`. No exceptions.
+
+**After work is done and committed on the feature branch — mandatory sequence:**
+```
+1. /orbit:review          ← run reviewer agent on all changed files
+2. address CRITICAL/HIGH  ← fix findings, commit fixes on same branch
+3. git push -u origin <branch>
+4. gh pr create --base develop --title "..." --body "..."
+                          ← include ship decision + findings in PR body
+```
+The PR goes through Sentinel CI before merging. Code does not exist until it is reviewed.
+`/orbit:review` is not optional. If skipped, the PR template will be missing the ship decision and the reviewer will flag it.
+
+### Commit format
 Every task → atomic commit immediately on completion:
 ```
-feat(phase-N): <what was built>
-fix(task-X): <what was fixed>
-arch(design): <architecture decision>
-docs(spec): <documentation added>
+feat(scope): <what was built>
+fix(scope): <what was fixed>
+arch(scope): <architecture decision>
+docs(scope): <documentation added>
 refactor(scope): <what was improved>
 test(scope): <what was tested>
 chore(scope): <maintenance>
