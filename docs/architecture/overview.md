@@ -1,5 +1,6 @@
 ---
 id: architecture-v1
+doc_type: overview
 status: Final
 version: v1
 last_updated: 2026-03-30
@@ -95,7 +96,7 @@ agents/                 ← specialist agent definitions
 skills/                 ← reusable process frameworks (lazy-loaded)
 hooks/                  ← lifecycle and safety gates
 commands/               ← /orbit:* command surface
-state/                  ← STATE.md templates and persistence layer
+templates/              ← generated instruction + STATE template source files
 ```
 
 ### Three Pillars
@@ -167,9 +168,9 @@ hooks/                         ← lifecycle hooks (pre-tool-use, pre-compact, s
 commands/                      ← /orbit:* slash command definitions
 docs/plans/                    ← implementation blueprints and wave plans
 templates/                     ← orbit.base.md source of truth for generated files
-state/                         ← STATE.md template and persistence format
+templates/                     ← generated instruction + STATE template source files
 examples/                      ← model routing config, skill examples
-docs/                          ← architecture, concepts, playbooks, error codes
+docs/                          ← foldered architecture, operations, quality, integrations, governance
 bin/                           ← orchestrator, eval runner, validators, generators
 tests/                         ← Vitest unit tests
 install.sh                     ← canonical install engine

@@ -29,7 +29,8 @@
     "test:coverage": "vitest run --coverage",
     "promote": "bash bin/promote.sh",
     "generate": "node bin/generate-instructions.js --runtime claude --output .claude/CLAUDE.md",
-    "generate:views": "node bin/generate-instructions.js --human-views"
+    "generate:views": "node bin/generate-instructions.js --human-views",
+    "generate:plans": "node bin/generate-plan-index.js"
   },
   "keywords": [
     "ai-agents",

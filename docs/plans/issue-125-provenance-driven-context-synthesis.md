@@ -1,3 +1,18 @@
+---
+id: issue-125-provenance-driven-context-synthesis
+doc_type: plan
+status: Active
+version: v1
+last_updated: 2026-03-31
+scope: issue-125
+phase: Recovery
+rank: 020
+priority: P1
+depends_on:
+  - issue-130
+blocks: []
+---
+
 # Provenance-Driven Context Synthesis
 
 > Detailed implementation plan for a self-healing context engine
@@ -33,7 +48,7 @@ The repo should keep a clear hierarchy:
 
 1. Git history, commit metadata, and the working tree
 2. GitHub issues and PRs
-3. Project docs such as `README.md`, `RELEASE_NOTES.md`, and architecture docs
+3. Project docs such as `README.md`, `docs/releases/release-notes.md`, and architecture docs
 4. Materialized views such as `context.db` and `STATE.md`
 
 GitHub Wiki can be used as a mirror or collaboration surface if needed, but not as the canonical store. It is detached from code review, commit history, and release automation.
@@ -236,17 +251,17 @@ Conflict resolution should prefer:
 ### Wave 5: Documentation and navigation
 
 - Update `README.md` with the new recovery model
-- Update `docs/architecture.md` with the source hierarchy
-- Update `docs/concepts.md` with the ledger/view split
-- Update `docs/playbooks.md` with recovery and drift recovery steps
+- Update `docs/architecture/overview.md` with the source hierarchy
+- Update `docs/architecture/core-concepts.md` with the ledger/view split
+- Update `docs/operations/playbooks.md` with recovery and drift recovery steps
 - Update `templates/orbit.base.md` and runtime docs so the guidance matches the model
 
 ## Suggested File Layout
 
 - `docs/plans/` for implementation blueprints and wave plans
 - `docs/specs/` for architecture RFCs and durable design decisions
-- `docs/playbooks.md` for operator procedures
-- `docs/architecture.md` for control-plane design
+- `docs/operations/playbooks.md` for operator procedures
+- `docs/architecture/overview.md` for control-plane design
 
 This keeps generated and planning artifacts out of the repo root without relying on an external wiki.
 

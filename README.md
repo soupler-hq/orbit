@@ -21,7 +21,7 @@ Supported runtimes can infer workflow intent from plain prompts. Users do not ha
 
 ### Compatibility
 
-Orbit works across runtimes — Claude Code (native), Codex (stable), Antigravity (experimental). Any agent that can read markdown instructions and run repo-local scripts can use the same registry, skills, and workflows without changes. See [docs/runtime-adapters.md](docs/runtime-adapters.md).
+Orbit works across runtimes — Claude Code (native), Codex (stable), Antigravity (experimental). Any agent that can read markdown instructions and run repo-local scripts can use the same registry, skills, and workflows without changes. See [docs/architecture/runtime-adapters.md](docs/architecture/runtime-adapters.md).
 
 ---
 
@@ -54,7 +54,7 @@ npm install
 bash install.sh --local --tool claude
 ```
 
-Core development follows Orbit-on-Orbit rules: create or identify the issue, cut a feature branch from freshly pulled `develop`, use an Orbit workflow command as the task entrypoint, run review on the feature branch, and open a PR using the repo's standard body structure.
+Core development follows Orbit-on-Orbit rules: create or identify the issue, cut a feature branch from freshly pulled `develop`, use an Orbit workflow command as the task entrypoint, run review on the feature branch, and open a PR using the repo's standard body structure. If the branch scope changes after the PR is opened, update the PR body in the same pass so `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` remain truthful.
 
 ---
 
@@ -85,22 +85,25 @@ Core development follows Orbit-on-Orbit rules: create or identify the issue, cut
 
 | Doc                                                                                                    | Contents                                                                            |
 | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| [docs/architecture.md](docs/architecture.md)                                                           | Control plane, wave execution model, model routing, repo layout, Nexus, Sentinel CI |
-| [docs/concepts.md](docs/concepts.md)                                                                   | Agents, skills, workflows, STATE.md, hooks, Agent Forge                             |
-| [docs/token-optimization.md](docs/token-optimization.md)                                               | Six-layer token strategy, cost estimates, model profiles                            |
-| [docs/security-model.md](docs/security-model.md)                                                       | Integrity verification, hook safety, prompt injection defense, SCA                  |
-| [docs/runtime-adapters.md](docs/runtime-adapters.md)                                                   | Claude (native), Codex (stable), Antigravity (experimental) adapter contracts       |
-| [docs/playbooks.md](docs/playbooks.md)                                                                 | Runbooks for common scenarios                                                       |
-| [docs/evals.md](docs/evals.md)                                                                         | Eval framework and scoring methodology                                              |
-| [docs/eval-dataset.md](docs/eval-dataset.md)                                                           | Representative prompt set for regression testing                                    |
-| [docs/plans/provenance-driven-context-synthesis.md](docs/plans/provenance-driven-context-synthesis.md) | Detailed recovery-engine plan and implementation waves                              |
+| [docs/architecture/overview.md](docs/architecture/overview.md)                                         | Control plane, wave execution model, model routing, repo layout, Nexus, Sentinel CI |
+| [docs/architecture/core-concepts.md](docs/architecture/core-concepts.md)                               | Agents, skills, workflows, STATE.md, hooks, Agent Forge                             |
+| [docs/architecture/token-optimization.md](docs/architecture/token-optimization.md)                     | Six-layer token strategy, cost estimates, model profiles                            |
+| [docs/architecture/security-model.md](docs/architecture/security-model.md)                             | Integrity verification, hook safety, prompt injection defense, SCA                  |
+| [docs/architecture/runtime-adapters.md](docs/architecture/runtime-adapters.md)                         | Claude (native), Codex (stable), Antigravity (experimental) adapter contracts       |
+| [docs/operations/playbooks.md](docs/operations/playbooks.md)                                           | Runbooks for common scenarios                                                       |
+| [docs/quality/evaluation-framework.md](docs/quality/evaluation-framework.md)                           | Eval framework and scoring methodology                                              |
+| [docs/quality/eval-dataset.md](docs/quality/eval-dataset.md)                                           | Representative prompt set for regression testing                                    |
+| [docs/plans/issue-125-provenance-driven-context-synthesis.md](docs/plans/issue-125-provenance-driven-context-synthesis.md) | Detailed recovery-engine plan and implementation waves |
 | [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md)                       | Naming, placement, and traceability rules for plans, releases, and issue docs       |
-| [docs/mcp-guide.md](docs/mcp-guide.md)                                                                 | MCP server integration                                                              |
-| [docs/error-codes.md](docs/error-codes.md)                                                             | ERR-ORBIT-NNN registry with runbooks                                                |
-| [CONTRIBUTING.md](CONTRIBUTING.md)                                                                     | How to add skills, agents, or patterns                                              |
+| [docs/integrations/mcp-guide.md](docs/integrations/mcp-guide.md)                                       | MCP server integration                                                              |
+| [docs/operations/error-codes.md](docs/operations/error-codes.md)                                       | ERR-ORBIT-NNN registry with runbooks                                                |
+| [docs/governance/contributing.md](docs/governance/contributing.md)                                     | How to add skills, agents, or patterns                                              |
+| [docs/governance/code-of-conduct.md](docs/governance/code-of-conduct.md)                               | Community behavior and enforcement expectations                                     |
+| [docs/releases/release-notes.md](docs/releases/release-notes.md)                                       | Top-level release notes used for GitHub releases                                    |
 | [SECURITY.md](SECURITY.md)                                                                             | Vulnerability reporting and threat model                                            |
 
-Planning artifacts belong in `docs/plans/`. Release support artifacts belong in `docs/releases/`. Durable issue briefs belong in `docs/issues/` only when needed. Naming and ordering rules live in `docs/standards/artifact-conventions.md`.
+Planning artifacts belong in `docs/plans/`. Release support artifacts belong in `docs/releases/`. Durable issue briefs belong in `docs/issues/` only when needed. Canonical documentation is grouped by intent under `docs/architecture/`, `docs/operations/`, `docs/quality/`, `docs/integrations/`, and `docs/governance/`. Naming and ordering rules live in `docs/standards/artifact-conventions.md`.
+The repo root is intentionally a thin contract: public entrypoints, generated runtime-facing artifacts, and top-level metadata stay in root; new durable docs should default to `docs/`.
 
 ---
 
@@ -125,7 +128,7 @@ Planning artifacts belong in `docs/plans/`. Release support artifacts belong in 
 
 ## Sample Eval Set
 
-Use [docs/eval-dataset.md](docs/eval-dataset.md) to verify routing, workflow, and portability claims after changes. Representative prompts: add rate limiting to auth endpoints · design a multi-region active-active architecture · review a React auth component · create a CI/CD rollback plan · unknown domain with high uncertainty.
+Use [docs/quality/eval-dataset.md](docs/quality/eval-dataset.md) to verify routing, workflow, and portability claims after changes. Representative prompts: add rate limiting to auth endpoints · design a multi-region active-active architecture · review a React auth component · create a CI/CD rollback plan · unknown domain with high uncertainty.
 
 ---
 

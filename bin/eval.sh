@@ -24,7 +24,7 @@ for pattern in "${readme_patterns[@]}"; do
   fi
 done
 
-# Sections that must exist in docs/architecture.md
+# Sections that must exist in docs/architecture/overview.md
 arch_patterns=(
   "### Compatibility"
   "### Architecture"
@@ -34,8 +34,8 @@ arch_patterns=(
 )
 
 for pattern in "${arch_patterns[@]}"; do
-  if ! grep -q "$pattern" "$ROOT_DIR/docs/architecture.md"; then
-    printf 'docs/architecture.md missing required section: %s\n' "$pattern" >&2
+  if ! grep -q "$pattern" "$ROOT_DIR/docs/architecture/overview.md"; then
+    printf 'docs/architecture/overview.md missing required section: %s\n' "$pattern" >&2
     exit 1
   fi
 done
@@ -45,7 +45,7 @@ if grep -q "Comparison with Similar Projects" "$ROOT_DIR/README.md"; then
   exit 1
 fi
 
-if ! grep -q "# Sample Eval Dataset" "$ROOT_DIR/docs/eval-dataset.md"; then
+if ! grep -q "# Sample Eval Dataset" "$ROOT_DIR/docs/quality/eval-dataset.md"; then
   printf 'missing eval dataset\n' >&2
   exit 1
 fi

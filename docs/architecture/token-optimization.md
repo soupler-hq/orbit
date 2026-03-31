@@ -1,5 +1,6 @@
 ---
 id: token-optimization-v1
+doc_type: guide
 status: Final
 version: v1
 last_updated: 2026-03-30

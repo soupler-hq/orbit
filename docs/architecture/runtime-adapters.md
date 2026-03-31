@@ -1,5 +1,6 @@
 ---
 id: runtime-adapters-v1
+doc_type: reference
 status: Final
 version: v1
 last_updated: 2026-03-30
@@ -76,7 +77,7 @@ This installs to `.codex/` (local) or `~/.codex/` (global) with:
 - `policy.md` — injected system context pointing to the Orbit control plane
 - `orbit.registry.json`, `orbit.config.json` — registry and config
 - `agents/`, `skills/` — full agent and skill library
-- `state/STATE.template.md` — state template
+- `templates/STATE.md` — source state template copied into runtime state directories during install
 
 **Adapter Contract:**
 

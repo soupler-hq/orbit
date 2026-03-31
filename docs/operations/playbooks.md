@@ -1,5 +1,6 @@
 ---
 id: playbooks-v1
+doc_type: runbook
 status: Final
 version: v1
 last_updated: 2026-03-30

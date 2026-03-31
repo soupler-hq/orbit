@@ -2,7 +2,7 @@
 /**
  * Orbit Eval Runner (Issue #13)
  * Checks routing accuracy, workflow coverage, registry integrity, and portability.
- * Reads docs/eval-dataset.md as the ground truth and validates against live registry/files.
+ * Reads docs/quality/eval-dataset.md as the ground truth and validates against live registry/files.
  * Exits 1 if overall pass rate < 80%.
  *
  * Usage:  node bin/eval-runner.js [--json]
@@ -78,14 +78,14 @@ if (!registryText) {
 }
 const registry = JSON.parse(registryText);
 
-const datasetText = readFile('docs/eval-dataset.md');
+const datasetText = readFile('docs/quality/eval-dataset.md');
 if (!datasetText) {
-  console.error('ERROR: docs/eval-dataset.md not found');
+  console.error('ERROR: docs/quality/eval-dataset.md not found');
   process.exit(2);
 }
 const evalCases = parseEvalDataset(datasetText);
 
-const adapterText = readFile('docs/runtime-adapters.md') || '';
+const adapterText = readFile('docs/architecture/runtime-adapters.md') || '';
 const commandsText = readFile('commands/commands.md') || '';
 const configText = readFile('orbit.config.json');
 const config = configText ? JSON.parse(configText) : { runtimes: {} };
@@ -273,14 +273,14 @@ const promptRoutingCapabilityResults = [
     pass: adapterText.includes('Supported via generated `INSTRUCTIONS.md` + `policy.md`'),
     reason: adapterText.includes('Supported via generated `INSTRUCTIONS.md` + `policy.md`')
       ? 'ok'
-      : 'docs/runtime-adapters.md missing Codex prompt-routing support note',
+      : 'docs/architecture/runtime-adapters.md missing Codex prompt-routing support note',
   },
   {
     check: 'runtime adapter docs describe Antigravity prompt routing limitation',
     pass: adapterText.includes('Plain-prompt Orbit workflow routing is not currently supported'),
     reason: adapterText.includes('Plain-prompt Orbit workflow routing is not currently supported')
       ? 'ok'
-      : 'docs/runtime-adapters.md missing Antigravity prompt-routing limitation',
+      : 'docs/architecture/runtime-adapters.md missing Antigravity prompt-routing limitation',
   },
   {
     check: 'install path teaches Codex policy to infer tracked plain prompts',
