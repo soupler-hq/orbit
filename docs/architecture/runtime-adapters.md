@@ -1,5 +1,6 @@
 ---
 id: runtime-adapters-v1
+doc_type: reference
 status: Final
 version: v1
 last_updated: 2026-03-30

@@ -10,8 +10,8 @@ Orbit is a repo-native agent orchestration framework. It routes work to speciali
 
 - `orbit.registry.json` is the machine-readable source of truth for agents, skills, and workflows.
 - `orbit.config.json` is the runtime configuration source of truth.
-- `docs/runtime-adapters.md` defines native vs compatible runtime support.
-- `docs/evals.md` defines the eval rubric for routing, workflow compliance, and portability.
+- `docs/architecture/runtime-adapters.md` defines native vs compatible runtime support.
+- `docs/quality/evaluation-framework.md` defines the eval rubric for routing, workflow compliance, and portability.
 - `CLAUDE.md` is the Claude-oriented orchestrator view; other runtimes receive their generated instruction file at install time.
 - `INSTRUCTIONS.md`, `SKILLS.md`, and `WORKFLOWS.md` are the modular operator references.
 

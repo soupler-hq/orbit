@@ -1,7 +1,7 @@
 ## [2.7.0]
 
 ### Added
-- **bin/promote.sh**: `/orbit:promote` implementation - validates a forged agent or skill against the structural contract, checks for core conflicts, and prints a ready-to-use PR draft for upstreaming to soupler-hq/orbit. Wired as `npm run promote`. Documented in `docs/CONTRIBUTING.md §Promoting a Forged Agent or Skill`.
+- **bin/promote.sh**: `/orbit:promote` implementation - validates a forged agent or skill against the structural contract, checks for core conflicts, and prints a ready-to-use PR draft for upstreaming to soupler-hq/orbit. Wired as `npm run promote`. Documented in `docs/governance/contributing.md §Promoting a Forged Agent or Skill`.
 - **Forge integrity metric**: `bin/eval-runner.js` now includes a `forge_integrity` metric (5th metric area). If `forge/` exists, all `.md` files are checked for required sections. If `forge/` is absent, the check passes as a valid empty state.
 - **npm publish dry-run**: `publish-dry-run` gate added to `orbit-sentinel.yml` - runs `npm publish --dry-run` on every PR to validate the package is publishable without actually publishing.
 
@@ -18,14 +18,14 @@
 
 ### Added
 - **install.sh Integration Tests**: `tests/install.test.sh` - 33 assertions covering flag matrix (`--tool claude`, `--tool codex`, `--all`), idempotency, STATE.md merge preservation, `--skip-verify`, hook executability, and `.gitignore` injection. Wired as `install-test` required gate in Orbit Sentinel CI.
-- **Eval Runner**: `bin/eval-runner.js` - machine-executable eval suite reading `docs/eval-dataset.md`. Checks routing accuracy, workflow coverage, registry integrity, and runtime portability across 79 assertions. Fails CI if overall pass rate < 80%. Publishes `eval-report.json` artifact. Wired as `quality` gate in Orbit Sentinel CI.
-- **Codex Runtime Adapter**: `install_for_codex()` in `install.sh` maps the Orbit control plane to Codex's operator surface (`INSTRUCTIONS.md` + `policy.md`). `--tool codex` and `--all` flags install to `.codex/`. Adapter contract documented in `docs/runtime-adapters.md`.
+- **Eval Runner**: `bin/eval-runner.js` - machine-executable eval suite reading `docs/quality/eval-dataset.md`. Checks routing accuracy, workflow coverage, registry integrity, and runtime portability across 79 assertions. Fails CI if overall pass rate < 80%. Publishes `eval-report.json` artifact. Wired as `quality` gate in Orbit Sentinel CI.
+- **Codex Runtime Adapter**: `install_for_codex()` in `install.sh` maps the Orbit control plane to Codex's operator surface (`INSTRUCTIONS.md` + `policy.md`). `--tool codex` and `--all` flags install to `.codex/`. Adapter contract documented in `docs/architecture/runtime-adapters.md`.
 - **Model Routing UX**: `orbit.config.json` `models.routing` semantic aliases (`classify/standard/reasoning/security`) documented in `README.md §Model Routing`, `/orbit:cost` command, and `examples/model-routing.config.json`.
 
 ### Changed
 - `orbit.registry.json`: Antigravity marked `experimental` with honest constraints; Codex marked `stable` with `install_fn: "install_for_codex"`.
-- `docs/runtime-adapters.md`: Full rewrite - support levels table (native/stable/experimental/planned), Codex full adapter contract, Antigravity experimental constraints and manual setup.
-- `docs/eval-dataset.md`: E06 routing corrected - ML inference tasks route via `forge` agent which instantiates `forge/ml-engineer.md` specialist.
+- `docs/architecture/runtime-adapters.md`: Full rewrite - support levels table (native/stable/experimental/planned), Codex full adapter contract, Antigravity experimental constraints and manual setup.
+- `docs/quality/eval-dataset.md`: E06 routing corrected - ML inference tasks route via `forge` agent which instantiates `forge/ml-engineer.md` specialist.
 
 ---
 
@@ -35,13 +35,13 @@
 - **Model Routing Config**: `orbit.config.json` now has a `models.routing` object with semantic aliases (`classify`, `standard`, `reasoning`, `security`). `CLAUDE.md` references aliases instead of raw model IDs, preventing silent staleness on model deprecations.
 - **SCA Pipeline**: `npm audit --audit-level=high` added as required `sca` gate in Orbit Sentinel CI. Dependabot configured for weekly npm and GitHub Actions updates targeting `develop`. CodeQL static analysis runs on every PR and weekly.
 - **SHASUM256 Manifest**: Every release now generates and publishes `SHASUM256.txt` covering all installable framework files. `install.sh` verifies checksums before writing files to the destination.
-- **Security Model Docs**: New `docs/security-model.md` documents the full threat model, integrity verification process, hook safety, prompt injection defense, and SCA controls.
+- **Security Model Docs**: New `docs/architecture/security-model.md` documents the full threat model, integrity verification process, hook safety, prompt injection defense, and SCA controls.
 - **`--skip-verify` flag**: `install.sh` accepts `--skip-verify` for local development (prints a prominent warning).
 
 ### Changed
 - `orbit.config.schema.json`: `models.routing` type updated from `string` to a structured object with required `classify/standard/reasoning/security` keys.
 - `bin/validate.sh`: Added model ID hygiene check - warns if hardcoded `claude-*` model strings appear in `CLAUDE.md`.
-- `docs/CONTRIBUTING.md`: SCA gate documented; local checklist updated to include `npm audit --audit-level=high`.
+- `docs/governance/contributing.md`: SCA gate documented; local checklist updated to include `npm audit --audit-level=high`.
 
 ---
 
@@ -58,6 +58,6 @@
 - **`.gitignore`**: Added `coverage/`, `package-lock.json`, and `.claude/settings.local.json`.
 
 ### Fixed
-- Removed hardcoded contributor filesystem paths (`/Users/sunnysrivastava/...`) from `README.md` and `docs/evals.md`.
+- Removed hardcoded contributor filesystem paths (`/Users/sunnysrivastava/...`) from `README.md` and `docs/quality/evaluation-framework.md`.
 - Fixed `eval.sh` compliance check to match emoji-prefixed README heading `## 🌌 What is Orbit?`.
 - Fixed PII scan step in Sentinel CI self-matching its own grep pattern in the workflow file.

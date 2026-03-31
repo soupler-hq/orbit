@@ -1,5 +1,6 @@
 ---
 id: eval-dataset-v1
+doc_type: dataset
 status: Final
 version: v1
 last_updated: 2026-03-30

@@ -1,5 +1,6 @@
 ---
 id: evals-v1
+doc_type: standard
 status: Final
 version: v1
 last_updated: 2026-03-30
@@ -60,7 +61,7 @@ Can the same control plane work across runtimes?
 4. `review this auth change for security issues`
 5. `for this unfamiliar domain, propose a safe first pass`
 
-For a richer example corpus, see [docs/eval-dataset.md](eval-dataset.md).
+For a richer example corpus, see [eval-dataset.md](eval-dataset.md).
 
 ## Scoring Rubric
 

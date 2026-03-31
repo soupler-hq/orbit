@@ -9,14 +9,20 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 required_files=(
   "templates/orbit.base.md"
   "README.md"
+  "docs/README.md"
+  "docs/architecture/README.md"
+  "docs/operations/README.md"
+  "docs/quality/README.md"
+  "docs/integrations/README.md"
+  "docs/governance/README.md"
   "INSTRUCTIONS.md"
   "SKILLS.md"
   "WORKFLOWS.md"
   "orbit.registry.json"
   "orbit.config.schema.json"
-  "docs/runtime-adapters.md"
-  "docs/evals.md"
-  "docs/eval-dataset.md"
+  "docs/architecture/runtime-adapters.md"
+  "docs/quality/evaluation-framework.md"
+  "docs/quality/eval-dataset.md"
   "commands/commands.md"
   "commands/orbit/eval.md"
   "hooks/HOOKS.md"
@@ -71,9 +77,9 @@ const configPath = path.join(root, 'orbit.config.json');
 const registryPath = path.join(root, 'orbit.registry.json');
 const schemaPath = path.join(root, 'orbit.config.schema.json');
 const packagePath = path.join(root, 'package.json');
-const runtimeAdaptersPath = path.join(root, 'docs', 'runtime-adapters.md');
-const evalsPath = path.join(root, 'docs', 'evals.md');
-const evalDatasetPath = path.join(root, 'docs', 'eval-dataset.md');
+const runtimeAdaptersPath = path.join(root, 'docs', 'architecture', 'runtime-adapters.md');
+const evalsPath = path.join(root, 'docs', 'quality', 'evaluation-framework.md');
+const evalDatasetPath = path.join(root, 'docs', 'quality', 'eval-dataset.md');
 const evalCommandPath = path.join(root, 'commands', 'orbit', 'eval.md');
 
 JSON.parse(fs.readFileSync(configPath, 'utf8'));

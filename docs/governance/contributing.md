@@ -1,16 +1,24 @@
+---
+id: contributing-v1
+doc_type: guide
+status: Final
+version: v1
+last_updated: 2026-03-31
+---
+
 # Contributing to Orbit
 
 Thank you for your interest in contributing. Orbit is an open-source project and welcomes contributions of all kinds: new agents, skills, bug fixes, documentation improvements, and new runtime adapters.
 
 ## Before You Start
 
-- Read [CLAUDE.md](../CLAUDE.md) to understand the framework's philosophy and architecture.
+- Read [CLAUDE.md](../../CLAUDE.md) to understand the framework's philosophy and architecture.
 - Check [open issues](https://github.com/soupler-hq/orbit/issues) to see if your idea is already tracked.
 - For significant changes (new agents, new skills, workflow changes), open an issue first to align on direction before investing time in an implementation.
 
 ## Security Disclosures
 
-Do **not** open a public GitHub issue for security vulnerabilities. See [SECURITY.md](../SECURITY.md) for the responsible disclosure process.
+Do **not** open a public GitHub issue for security vulnerabilities. See [SECURITY.md](../../SECURITY.md) for the responsible disclosure process.
 
 ---
 

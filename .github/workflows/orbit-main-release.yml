@@ -224,7 +224,7 @@ jobs:
         with:
           tag_name: ${{ steps.version.outputs.tag }}
           name: Orbit ${{ steps.version.outputs.tag }}
-          body_path: docs/RELEASE_NOTES.md
+          body_path: docs/releases/release-notes.md
           files: SHASUM256.txt
           draft: false
           prerelease: false
