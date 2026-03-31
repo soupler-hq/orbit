@@ -347,7 +347,7 @@ If the user gives a plain prompt that implies a tracked implementation task, Orb
    ```
 4. Execute with relevant skill loaded
 5. Verify, commit, update STATE.md
-6. If the task is review-ready, push branch and run `/orbit:review`
+6. If the task is review-ready, push branch, refresh the PR body if the branch scope changed, and then run `/orbit:review`
 
 **After completion, emit:**
 
@@ -386,6 +386,8 @@ Load `agents/forge.md`. Then:
 ## PROCESS
 
 Use `/orbit:review` on the active feature branch before opening or finalizing the PR for that branch. Use a second `/orbit:review` on `develop` only for accumulated wave or milestone integration review.
+
+Before requesting review again after follow-up commits, refresh the PR body so `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` still match the branch truth.
 
 Load `agents/reviewer.md`. Spawn reviewer subagent with:
 

@@ -10,6 +10,7 @@
 
 > This framework reviews other projects' code. It must review its own.
 > Run the relevant agent before raising this PR. Record the verdict below.
+> If you push follow-up commits after opening the PR, refresh this body before requesting review again.
 
 ### Agent Review Verdict
 
@@ -31,6 +32,7 @@
 ### Branch
 - [ ] This PR is from a feature branch, NOT a direct push to `develop` or `main`
 - [ ] Branch name follows convention: `fix/issue-N-description` or `feat/description`
+- [ ] If this PR changed after opening, the `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` sections were refreshed before re-review
 
 ### Code
 - [ ] Tests added or updated for changed behaviour
