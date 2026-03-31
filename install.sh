@@ -10,6 +10,8 @@ PROJECT_DIR="${PWD}"
 SKIP_VERIFY=0
 GREEN='\033[0;32m'; BLUE='\033[0;34m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BOLD='\033[1m'; NC='\033[0m'
 
+QUIET=0
+
 while [[ $# -gt 0 ]]; do
   case $1 in
     --global|-g)   INSTALL_MODE="global"; shift ;;
@@ -18,9 +20,16 @@ while [[ $# -gt 0 ]]; do
     --all)         TOOL="all"; shift ;;
     --hooks-only)  INSTALL_HOOKS_ONLY=1; shift ;;
     --skip-verify) SKIP_VERIFY=1; shift ;;
+    --quiet|-q)    QUIET=1; shift ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
+
+# When --quiet: suppress banner, per-file progress, and summary.
+# Still print errors (>&2). Used by setup.sh to avoid output mixing.
+qecho() { [[ "$QUIET" -eq 0 ]] && echo -e "$@" || true; }
+# qrun: run a command, suppressing stdout when quiet (stderr still visible for errors)
+qrun() { if [[ "$QUIET" -eq 1 ]]; then "$@" >/dev/null; else "$@"; fi; }
 
 if [[ "$INSTALL_MODE" == "global" ]]; then
   CLAUDE_DIR="$HOME/.claude"
@@ -28,12 +37,12 @@ else
   CLAUDE_DIR="$PROJECT_DIR/.claude"
 fi
 
-echo -e "${BOLD}"
-echo "╔════════════════════════════════════════╗"
-echo "║   Orbit Installer v2.0.0   ║"
-echo "║   Soupler AI Engineering Standard      ║"
-echo "╚════════════════════════════════════════╝"
-echo -e "${NC}"
+qecho "${BOLD}"
+qecho "╔════════════════════════════════════════╗"
+qecho "║   Orbit Installer v2.0.0   ║"
+qecho "║   Soupler AI Engineering Standard      ║"
+qecho "╚════════════════════════════════════════╝"
+qecho "${NC}"
 
 # ─── Checksum Verification ───────────────────────────────────────────────────
 # Verifies framework files against the published SHASUM256.txt manifest.
@@ -43,17 +52,17 @@ verify_checksums() {
   local manifest="$FRAMEWORK_DIR/SHASUM256.txt"
 
   if [[ "$SKIP_VERIFY" -eq 1 ]]; then
-    echo -e "${YELLOW}⚠️  WARNING: --skip-verify flag is set. Checksum verification SKIPPED.${NC}"
-    echo -e "${YELLOW}   Only use this in local development. Never skip in production installs.${NC}"
+    qecho "${YELLOW}⚠️  WARNING: --skip-verify flag is set. Checksum verification SKIPPED.${NC}"
+    qecho "${YELLOW}   Only use this in local development. Never skip in production installs.${NC}"
     return 0
   fi
 
   # If a local manifest exists (e.g. cloned repo), verify against it
   if [[ -f "$manifest" ]]; then
-    echo -e "${YELLOW}▶ Verifying framework file integrity...${NC}"
+    qecho "${YELLOW}▶ Verifying framework file integrity...${NC}"
     # Run shasum check from the framework dir so relative paths resolve
     if (cd "$FRAMEWORK_DIR" && shasum -a 256 --check SHASUM256.txt --quiet 2>&1); then
-      echo -e "${GREEN}  ✅ All checksums verified${NC}"
+      qecho "${GREEN}  ✅ All checksums verified${NC}"
     else
       echo -e "${RED}  ❌ Checksum mismatch detected — aborting installation.${NC}" >&2
       echo -e "${RED}     One or more framework files do not match the published manifest.${NC}" >&2
@@ -62,13 +71,13 @@ verify_checksums() {
     fi
   else
     # No local manifest — skip silently (expected for source checkouts without a release)
-    echo -e "${BLUE}  ℹ  No SHASUM256.txt found — skipping integrity check (source install).${NC}"
+    qecho "${BLUE}  ℹ  No SHASUM256.txt found — skipping integrity check (source install).${NC}"
   fi
 }
 
 # ─── Install for Claude Code ──────────────────────────────────────────────────
 install_for_claude() {
-  echo -e "${YELLOW}▶ Installing for Claude Code...${NC}"
+  qecho "${YELLOW}▶ Installing for Claude Code...${NC}"
 
   # Core directories
   mkdir -p \
@@ -82,15 +91,15 @@ install_for_claude() {
   # Written to .claude/CLAUDE.md (Claude Code's project-level instructions)
   # Also written to the project root so Claude Code auto-detects it on open.
   # Both are gitignored — this file is always generated, never committed.
-  node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
+  qrun node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
     --runtime claude --output "$CLAUDE_DIR/CLAUDE.md"
-  node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
+  qrun node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
     --runtime claude --output "$PROJECT_DIR/CLAUDE.md"
-  echo "  ✓ CLAUDE.md (generated for Claude runtime → .claude/ + project root)"
+  qecho "  ✓ CLAUDE.md (generated for Claude runtime → .claude/ + project root)"
 
   # ── Human-view files (generated from registry + templates at install time) ─
-  node "$FRAMEWORK_DIR/bin/generate-instructions.js" --human-views
-  echo "  ✓ INSTRUCTIONS.md, SKILLS.md, WORKFLOWS.md (generated from registry)"
+  qrun node "$FRAMEWORK_DIR/bin/generate-instructions.js" --human-views
+  qecho "  ✓ INSTRUCTIONS.md, SKILLS.md, WORKFLOWS.md (generated from registry)"
 
   # ── Control Plane ─────────────────────────────────────────────────────────
   cp "$FRAMEWORK_DIR/INSTRUCTIONS.md" "$CLAUDE_DIR/INSTRUCTIONS.md"
@@ -98,14 +107,15 @@ install_for_claude() {
   cp "$FRAMEWORK_DIR/WORKFLOWS.md" "$CLAUDE_DIR/WORKFLOWS.md"
   cp "$FRAMEWORK_DIR/orbit.registry.json" "$CLAUDE_DIR/orbit.registry.json"
   cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$CLAUDE_DIR/orbit.config.schema.json"
-  echo "  ✓ control plane docs + registry + schema"
+  qecho "  ✓ control plane docs + registry + schema"
 
   # ── Core Agents ───────────────────────────────────────────────────────────
   for f in "$FRAMEWORK_DIR"/agents/*.md; do
     name=$(basename "$f")
     cp "$f" "$CLAUDE_DIR/agents/$name"
-    echo "  ✓ agents/$name"
+    qecho "  ✓ agents/$name"
   done
+  qecho "  ✓ agents/ ($(ls "$FRAMEWORK_DIR/agents/"*.md | wc -l | tr -d ' ') files)"
 
   # ── Forged Specialist Agents ───────────────────────────────────────────────
   if [[ -d "$FRAMEWORK_DIR/forge" ]]; then
@@ -113,7 +123,7 @@ install_for_claude() {
     for f in "$FRAMEWORK_DIR"/forge/*.md; do
       name=$(basename "$f")
       cp "$f" "$CLAUDE_DIR/agents/forge/$name"
-      echo "  ✓ agents/forge/$name"
+      qecho "  ✓ agents/forge/$name"
     done
   fi
 
@@ -121,12 +131,13 @@ install_for_claude() {
   for f in "$FRAMEWORK_DIR"/skills/*.md; do
     name=$(basename "$f")
     cp "$f" "$CLAUDE_DIR/skills/$name"
-    echo "  ✓ skills/$name"
+    qecho "  ✓ skills/$name"
   done
+  qecho "  ✓ skills/ ($(ls "$FRAMEWORK_DIR/skills/"*.md | wc -l | tr -d ' ') files)"
 
   # ── Commands ──────────────────────────────────────────────────────────────
   cp "$FRAMEWORK_DIR/commands/commands.md" "$CLAUDE_DIR/commands/orbit/commands.md"
-  echo "  ✓ commands/orbit/commands.md"
+  qecho "  ✓ commands/orbit/commands.md"
 
   # Generate individual command files
   local commands=(
@@ -145,34 +156,35 @@ Read \$CLAUDE_DIR/commands/orbit/commands.md for this command's exact process sp
 If STATE.md exists at .orbit/state/STATE.md, read it for project context.
 Execute: /orbit:${cmd} \$ARGUMENTS — follow the exact process defined, no shortcuts.
 CMDEOF
-    echo "  ✓ /orbit:${cmd}"
+    qecho "  ✓ /orbit:${cmd}"
   done
+  qecho "  ✓ commands/ (${#commands[@]} commands)"
 
   # ── State Template ────────────────────────────────────────────────────────
   cp "$FRAMEWORK_DIR/state/STATE.template.md" "$CLAUDE_DIR/state/STATE.template.md"
-  echo "  ✓ state/STATE.template.md"
+  qecho "  ✓ state/STATE.template.md"
 
   # ── Hook Scripts ──────────────────────────────────────────────────────────
-  echo ""
-  echo -e "${YELLOW}▶ Installing lifecycle hooks...${NC}"
+  qecho ""
+  qecho "${YELLOW}▶ Installing lifecycle hooks...${NC}"
   for f in "$FRAMEWORK_DIR"/hooks/scripts/*.sh; do
     name=$(basename "$f")
     cp "$f" "$CLAUDE_DIR/orbit/hooks/$name"
     chmod +x "$CLAUDE_DIR/orbit/hooks/$name"
-    echo "  ✓ hooks/$name"
+    qecho "  ✓ hooks/$name"
   done
 
   # ── Claude Code Settings (hooks registration) ─────────────────────────────
-  echo ""
-  echo -e "${YELLOW}▶ Configuring Claude Code settings...${NC}"
+  qecho ""
+  qecho "${YELLOW}▶ Configuring Claude Code settings...${NC}"
   install_claude_settings
 
-  echo -e "${GREEN}  ✅ Claude Code installation complete${NC}"
+  qecho "${GREEN}  ✅ Claude Code installation complete${NC}"
 }
 
 # ─── Install for Codex ───────────────────────────────────────────────────────
 install_for_codex() {
-  echo -e "${YELLOW}▶ Installing for Codex...${NC}"
+  qecho "${YELLOW}▶ Installing for Codex...${NC}"
 
   local codex_dir
   if [[ "$INSTALL_MODE" == "global" ]]; then
@@ -184,7 +196,7 @@ install_for_codex() {
   mkdir -p "$codex_dir/agents" "$codex_dir/skills" "$codex_dir/state"
 
   # Codex operator prompt generated from template at install time.
-  node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
+  qrun node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
     --runtime codex --output "$codex_dir/INSTRUCTIONS.md"
   cp "$FRAMEWORK_DIR/SKILLS.md"                "$codex_dir/SKILLS.md"
   cp "$FRAMEWORK_DIR/WORKFLOWS.md"             "$codex_dir/WORKFLOWS.md"
@@ -192,17 +204,17 @@ install_for_codex() {
   cp "$FRAMEWORK_DIR/orbit.config.json"        "$codex_dir/orbit.config.json"
   cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$codex_dir/orbit.config.schema.json"
   cp "$FRAMEWORK_DIR/state/STATE.template.md"  "$codex_dir/state/STATE.template.md"
-  echo "  ✓ operator surface + registry + config + state template"
+  qecho "  ✓ operator surface + registry + config + state template"
 
   for f in "$FRAMEWORK_DIR"/agents/*.md; do
     cp "$f" "$codex_dir/agents/$(basename "$f")"
   done
-  echo "  ✓ agents/ ($(ls "$FRAMEWORK_DIR/agents/"*.md | wc -l | tr -d ' ') files)"
+  qecho "  ✓ agents/ ($(ls "$FRAMEWORK_DIR/agents/"*.md | wc -l | tr -d ' ') files)"
 
   for f in "$FRAMEWORK_DIR"/skills/*.md; do
     cp "$f" "$codex_dir/skills/$(basename "$f")"
   done
-  echo "  ✓ skills/ ($(ls "$FRAMEWORK_DIR/skills/"*.md | wc -l | tr -d ' ') files)"
+  qecho "  ✓ skills/ ($(ls "$FRAMEWORK_DIR/skills/"*.md | wc -l | tr -d ' ') files)"
 
   # Codex policy: injected system context pointing to the Orbit control plane.
   cat > "$codex_dir/policy.md" << 'POLICY_EOF'
@@ -217,8 +229,48 @@ Read state/STATE.md on start, write it on session end.
 /orbit: command equivalents — follow the matching section in WORKFLOWS.md:
   plan → WORKFLOWS.md §plan  |  build → §build  |  verify → §verify  |  ship → §ship
 POLICY_EOF
-  echo "  ✓ policy.md (Orbit adapter context)"
-  echo -e "${GREEN}  ✅ Codex installation complete → $codex_dir${NC}"
+  qecho "  ✓ policy.md (Orbit adapter context)"
+  qecho "${GREEN}  ✅ Codex installation complete → $codex_dir${NC}"
+}
+
+# ─── Install for Antigravity ──────────────────────────────────────────────────
+# Antigravity reads CLAUDE.md from .antigravity/ — same format as Claude adapter.
+install_for_antigravity() {
+  qecho "${YELLOW}▶ Installing for Antigravity...${NC}"
+
+  local ag_dir
+  if [[ "$INSTALL_MODE" == "global" ]]; then
+    ag_dir="$HOME/.antigravity"
+  else
+    ag_dir="$PROJECT_DIR/.antigravity"
+  fi
+
+  mkdir -p "$ag_dir/agents" "$ag_dir/skills" "$ag_dir/state"
+
+  # Antigravity reads CLAUDE.md — generated from the same Claude-compatible template.
+  qrun node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
+    --runtime claude --output "$ag_dir/CLAUDE.md"
+  qecho "  ✓ CLAUDE.md (generated for Antigravity — Claude-compatible format)"
+
+  cp "$FRAMEWORK_DIR/SKILLS.md"                "$ag_dir/SKILLS.md"
+  cp "$FRAMEWORK_DIR/WORKFLOWS.md"             "$ag_dir/WORKFLOWS.md"
+  cp "$FRAMEWORK_DIR/orbit.registry.json"      "$ag_dir/orbit.registry.json"
+  cp "$FRAMEWORK_DIR/orbit.config.json"        "$ag_dir/orbit.config.json"
+  cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$ag_dir/orbit.config.schema.json"
+  cp "$FRAMEWORK_DIR/state/STATE.template.md"  "$ag_dir/state/STATE.template.md"
+  qecho "  ✓ control plane docs + registry + config + state template"
+
+  for f in "$FRAMEWORK_DIR"/agents/*.md; do
+    cp "$f" "$ag_dir/agents/$(basename "$f")"
+  done
+  qecho "  ✓ agents/ ($(ls "$FRAMEWORK_DIR/agents/"*.md | wc -l | tr -d ' ') files)"
+
+  for f in "$FRAMEWORK_DIR"/skills/*.md; do
+    cp "$f" "$ag_dir/skills/$(basename "$f")"
+  done
+  qecho "  ✓ skills/ ($(ls "$FRAMEWORK_DIR/skills/"*.md | wc -l | tr -d ' ') files)"
+
+  qecho "${GREEN}  ✅ Antigravity installation complete → $ag_dir${NC}"
 }
 
 # ─── Write Claude Code settings.json with hooks ───────────────────────────────
@@ -271,13 +323,13 @@ install_claude_settings() {
 
   local active_hooks="PreToolUse, PreCompact, Stop"
   [[ "$hook_post_tool_use" == true ]] && active_hooks="PreToolUse, PostToolUse, PreCompact, Stop"
-  echo "  ✓ settings.json (hooks: ${active_hooks})"
+  qecho "  ✓ settings.json (hooks: ${active_hooks})"
 }
 
 # ─── Initialize project state directory ───────────────────────────────────────
 init_project_state() {
-  echo ""
-  echo -e "${YELLOW}▶ Initializing project state...${NC}"
+  qecho ""
+  qecho "${YELLOW}▶ Initializing project state...${NC}"
 
   local state_dir="$PROJECT_DIR/.orbit/state"
   local hooks_dir="$PROJECT_DIR/.orbit/hooks"
@@ -287,9 +339,9 @@ init_project_state() {
   # Copy STATE template if no STATE.md yet
   if [[ ! -f "$state_dir/STATE.md" ]]; then
     cp "$FRAMEWORK_DIR/state/STATE.template.md" "$state_dir/STATE.md"
-    echo "  ✓ .orbit/state/STATE.md (from template)"
+    qecho "  ✓ .orbit/state/STATE.md (from template)"
   else
-    echo "  ✓ .orbit/state/STATE.md (already exists — preserved)"
+    qecho "  ✓ .orbit/state/STATE.md (already exists — preserved)"
   fi
 
   # Copy hook scripts to project-local .orbit/hooks/
@@ -298,12 +350,12 @@ init_project_state() {
     cp "$f" "$hooks_dir/$name"
     chmod +x "$hooks_dir/$name"
   done
-  echo "  ✓ .orbit/hooks/ (lifecycle scripts)"
+  qecho "  ✓ .orbit/hooks/ (lifecycle scripts)"
 
   # Copy config if not present
   if [[ ! -f "$PROJECT_DIR/orbit.config.json" ]]; then
     cp "$FRAMEWORK_DIR/orbit.config.json" "$PROJECT_DIR/orbit.config.json"
-    echo "  ✓ orbit.config.json (framework configuration)"
+    qecho "  ✓ orbit.config.json (framework configuration)"
   fi
 
   # Add Orbit state dirs to .gitignore
@@ -319,11 +371,11 @@ init_project_state() {
 .orbit/state/compact.log
 .worktrees/
 GITIGNORE_EOF
-      echo "  ✓ .gitignore (Orbit entries added)"
+      qecho "  ✓ .gitignore (Orbit entries added)"
     fi
   fi
 
-  echo -e "${GREEN}  ✅ Project state initialized${NC}"
+  qecho "${GREEN}  ✅ Project state initialized${NC}"
 }
 
 # ─── Main ────────────────────────────────────────────────────────────────────
@@ -334,25 +386,26 @@ if [[ "$INSTALL_MODE" == "local" ]]; then
 fi
 
 case "$TOOL" in
-  claude) install_for_claude ;;
-  codex)  install_for_codex ;;
-  all)    install_for_claude; install_for_codex ;;
+  claude)      install_for_claude ;;
+  codex)       install_for_codex ;;
+  antigravity) install_for_antigravity ;;
+  all)         install_for_claude; install_for_codex; install_for_antigravity ;;
 esac
 
 # ─── Summary ─────────────────────────────────────────────────────────────────
-echo ""
-echo -e "${BOLD}Installation complete!${NC}"
-echo ""
-echo -e "Installed to: ${BLUE}$CLAUDE_DIR${NC}"
-echo ""
-echo -e "Framework:"
-echo -e "  Agents:  $(ls "$FRAMEWORK_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ') core agents"
-echo -e "  Skills:  $(ls "$FRAMEWORK_DIR/skills/"*.md 2>/dev/null | wc -l | tr -d ' ') skills loaded"
-echo -e "  Hooks:   PreToolUse, PreCompact, Stop (PostToolUse: see orbit.config.json)"
-echo ""
-echo -e "Start with:"
-echo -e "  ${BLUE}/orbit:new-project${NC}   — start a new project from scratch"
-echo -e "  ${BLUE}/orbit:map-codebase${NC}  — analyze an existing repo before planning"
-echo -e "  ${BLUE}/orbit:resume${NC}        — continue from last session"
-echo ""
-echo -e "${YELLOW}Docs: https://github.com/soupler/orbit${NC}"
+qecho ""
+qecho "${BOLD}Installation complete!${NC}"
+qecho ""
+qecho "Installed to: ${BLUE}$CLAUDE_DIR${NC}"
+qecho ""
+qecho "Framework:"
+qecho "  Agents:  $(ls "$FRAMEWORK_DIR/agents/"*.md 2>/dev/null | wc -l | tr -d ' ') core agents"
+qecho "  Skills:  $(ls "$FRAMEWORK_DIR/skills/"*.md 2>/dev/null | wc -l | tr -d ' ') skills loaded"
+qecho "  Hooks:   PreToolUse, PreCompact, Stop (PostToolUse: see orbit.config.json)"
+qecho ""
+qecho "Start with:"
+qecho "  ${BLUE}/orbit:new-project${NC}   — start a new project from scratch"
+qecho "  ${BLUE}/orbit:map-codebase${NC}  — analyze an existing repo before planning"
+qecho "  ${BLUE}/orbit:resume${NC}        — continue from last session"
+qecho ""
+qecho "${YELLOW}Docs: https://github.com/soupler/orbit${NC}"

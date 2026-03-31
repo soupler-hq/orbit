@@ -83,15 +83,13 @@ install_tool() {
   local tool="$1"
   case "$tool" in
     claude)
-      bash "$FRAMEWORK_DIR/install.sh" --local --tool claude
+      bash "$FRAMEWORK_DIR/install.sh" --local --tool claude --quiet
       ;;
     codex)
-      bash "$FRAMEWORK_DIR/install.sh" --local --tool codex
+      bash "$FRAMEWORK_DIR/install.sh" --local --tool codex --quiet
       ;;
     antigravity)
-      # Antigravity uses the same instruction format as Claude
-      bash "$FRAMEWORK_DIR/install.sh" --local --tool claude
-      echo "  ℹ  Antigravity: using Claude-compatible adapter (best-effort until API stabilises)"
+      bash "$FRAMEWORK_DIR/install.sh" --local --tool antigravity --quiet
       ;;
     *)
       echo "  Unknown tool: $tool — skipping"
@@ -163,19 +161,19 @@ main() {
   trap "rm -rf '$tmp_dir'" EXIT
 
   for tool in "${tools[@]}"; do
-    echo -e "${B}Installing for ${tool}...${N}"
     # Run each tool install in a subshell so one failure doesn't abort others
     if (install_tool "$tool") 2>&1; then
       local adapter_abs
       adapter_abs="$(create_adapter_dir "$tool")"
       local adapter_rel="${adapter_abs#$FRAMEWORK_DIR/}"
       echo "$adapter_rel" > "$tmp_dir/${tool}.ok"
+      echo -e "  ${G}✓${N} ${tool}"
     else
       echo "failed" > "$tmp_dir/${tool}.fail"
-      echo -e "  ${R}✗ install failed for ${tool} — continuing with remaining tools${N}"
+      echo -e "  ${R}✗${N} ${tool} — install failed, continuing"
     fi
-    echo ""
   done
+  echo ""
 
   # Print summary table
   echo -e "  ${B}Tool         Detected   Installed   Adapter${N}"
@@ -239,7 +237,8 @@ main() {
         ;;
       antigravity)
         echo -e "  ${G}Antigravity:${N}"
-        echo "    Open this folder — read .antigravity/CLAUDE.md at session start."
+        echo "    Open this folder in Antigravity."
+        echo "    Orbit reads: .antigravity/CLAUDE.md (auto-loaded at session start)"
         echo "    First command: /orbit:resume"
         echo ""
         ;;
