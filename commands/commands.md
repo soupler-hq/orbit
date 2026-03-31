@@ -282,6 +282,8 @@ Read STATE.md + ROADMAP.md. Determine:
 
 ## PROCESS
 
+For Orbit framework work, `/orbit:quick` is the default entrypoint. Do not start freeform implementation on `develop` for work that should be tracked as an Orbit task.
+
 **Emit at start (classification block):**
 
 ```
@@ -295,7 +297,11 @@ Read STATE.md + ROADMAP.md. Determine:
 ```
 
 1. Classify: which agent handles this?
-2. Define single XML task:
+2. Confirm issue + branch discipline before edits:
+   - identify the issue number or create one if missing
+   - ensure work is on a feature branch from freshly pulled `develop`
+   - keep scope limited to that issue
+3. Define single XML task:
    ```xml
    <task type="...">
      <n>...</n>
@@ -305,8 +311,9 @@ Read STATE.md + ROADMAP.md. Determine:
      <done>...</done>
    </task>
    ```
-3. Execute with relevant skill loaded
-4. Verify, commit, update STATE.md
+4. Execute with relevant skill loaded
+5. Verify, commit, update STATE.md
+6. If the task is review-ready, push branch and run `/orbit:review`
 
 **After completion, emit:**
 
@@ -343,6 +350,8 @@ Load `agents/forge.md`. Then:
 > Full structured code + architecture review of current state
 
 ## PROCESS
+
+Use `/orbit:review` on the active feature branch before opening or finalizing the PR for that branch. Use a second `/orbit:review` on `develop` only for accumulated wave or milestone integration review.
 
 Load `agents/reviewer.md`. Spawn reviewer subagent with:
 

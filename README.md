@@ -50,6 +50,8 @@ npm install
 bash install.sh --local --tool claude
 ```
 
+Core development follows Orbit-on-Orbit rules: create or identify the issue, cut a feature branch from freshly pulled `develop`, use an Orbit workflow command as the task entrypoint, run review on the feature branch, and open a PR using the repo's standard body structure.
+
 ---
 
 ## Slash commands
@@ -92,6 +94,8 @@ bash install.sh --local --tool claude
 | [docs/error-codes.md](docs/error-codes.md)                                                             | ERR-ORBIT-NNN registry with runbooks                                                |
 | [CONTRIBUTING.md](CONTRIBUTING.md)                                                                     | How to add skills, agents, or patterns                                              |
 | [SECURITY.md](SECURITY.md)                                                                             | Vulnerability reporting and threat model                                            |
+
+Planning artifacts belong in `docs/plans/`. Avoid root-level scratch files when the existing docs tree can hold the artifact cleanly.
 
 ---
 

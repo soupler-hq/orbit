@@ -26,6 +26,8 @@ Orbit is a repo-native agent orchestration framework. It routes work to speciali
 7. **Commit** atomically with full traceability
 8. **Document** every logic change or new feature in `README.md` and `CHANGELOG.md` immediately. Undocumented code is "Silent Code"—it does not exist in the framework's mental model.
 
+When the active repository is Orbit itself, use Orbit workflows to evolve Orbit. Default to `/orbit:quick`, `/orbit:plan`, `/orbit:build`, `/orbit:review`, and `/orbit:ship` for framework changes instead of freeform execution.
+
 ## Routing Rules
 
 <!-- GENERATED:START routing_rules -->
@@ -61,6 +63,7 @@ Orbit is a repo-native agent orchestration framework. It routes work to speciali
 - Do not mix unrelated changes in one task.
 - Do not mark work complete without verification evidence.
 - Do not skip security or review steps for production-sensitive work.
+- For Orbit-on-Orbit work, start from an issue-backed Orbit command boundary whenever the task changes framework behavior, docs, hooks, skills, agents, workflows, or runtime adapters.
 - Run `/orbit:eval` or `bash bin/eval.sh` after changes to the control plane, registry, or runtime adapter docs.
 
 ## Git Rules
@@ -68,7 +71,17 @@ Orbit is a repo-native agent orchestration framework. It routes work to speciali
 - Prefer atomic commits that can be reviewed independently.
 - Use conventional commit messages.
 - Do not commit partial work.
+- Never work directly on `develop` or `main`; cut a feature branch from a freshly pulled `develop`.
+- Keep one issue scope per branch and carry the issue id through branch naming, PR, and STATE updates.
+- Open PRs using the repository's established PR structure: `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` when relevant.
 - Use git worktrees when parallel waves need isolated write spaces.
+
+## Docs Rules
+
+- Put durable planning artifacts in `docs/plans/`.
+- Put durable specifications in `docs/specs/` when that folder is introduced.
+- Avoid root-level scratch files when an existing docs location fits.
+- Regenerate human views after template or registry changes that affect generated instruction files.
 
 ## Safety Rules
 
