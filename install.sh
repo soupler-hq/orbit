@@ -127,7 +127,7 @@ install_for_claude() {
   local commands=(
     new-project plan build verify ship next quick forge review audit
     monitor debug map-codebase progress resume deploy rollback
-    riper worktree cost
+    riper worktree cost ask
   )
   for cmd in "${commands[@]}"; do
     cat > "$CLAUDE_DIR/commands/orbit/${cmd}.md" << CMDEOF
