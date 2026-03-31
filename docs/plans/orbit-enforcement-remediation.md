@@ -55,6 +55,49 @@ This remediation covers four linked execution tracks:
 3. Closed-loop workflow state enforcement for branch, test, review, and PR
 4. End-to-end test and eval coverage for the enforcement path
 
+## Execution Strategy
+
+This work should be executed as foundation-first remediation, not as four independent feature tracks.
+
+Recommended order:
+
+1. Fix the install and hook truth gap first
+2. Lock the real adapter capability boundary for plain-prompt routing
+3. Enforce the workflow state machine only after the runtime entrypoints are honest
+4. Harden the end-to-end evals last so they validate the final enforced behavior
+
+This keeps Orbit from reintroducing the same problem in a new form:
+
+- do not implement enforcement gates before the lifecycle plumbing is reliable
+- do not claim plain-prompt inference before adapter support is real
+- do not freeze eval expectations before runtime behavior has stabilized
+
+## Priority Order
+
+### P0: Runtime Truth
+
+- #134 — install lifecycle hooks by default and support worktrees
+
+This is the first task because it fixes a real runtime promise that currently does not hold for default users.
+
+### P1: Adapter Truth
+
+- #133 — implement implicit Orbit workflow routing for plain prompts
+
+This should start with an adapter capability matrix and a narrow supported-path implementation, not a blanket promise across all runtimes.
+
+### P2: Workflow Enforcement
+
+- #131 — enforce closed-loop branch-test-review-pr state machine
+
+This should build on the now-honest runtime entrypoints and should not assume capabilities the adapters do not yet provide.
+
+### P3: Enforcement Confidence
+
+- #132 — add end-to-end coverage for setup, routing, and review gates
+
+This wave should codify the final behavior so future documentation changes cannot outrun implementation again.
+
 ## Related Issues
 
 - [#130](https://github.com/soupler-hq/orbit/issues/130) — epic(runtime): enforcement-first orbit execution remediation
@@ -178,17 +221,24 @@ Exit criteria:
 - a default supported setup path installs lifecycle hooks
 - worktree installs do not fail on `.git` file layouts
 - adapter capability matrix is explicit
+- no docs claim installed lifecycle behavior that the default setup path does not actually activate
 
 ### Wave 2: Prompt Routing Enforcement
 
 Focus:
 
-- implement implicit workflow routing where technically feasible
+- implement implicit workflow routing only where technically feasible
 - update runtime contracts to match what the adapters can really do
 
 Issues:
 
 - #133
+
+Sequencing note:
+
+- start with capability discovery and contract tightening
+- implement one supported adapter path cleanly before broadening
+- remove or downgrade any over-broad docs claims if a runtime cannot support interception
 
 Exit criteria:
 
@@ -213,6 +263,7 @@ Exit criteria:
 - review and verification become executable gates
 - Orbit can report the current state and next allowed transition
 - PR progression is blocked when prerequisites are missing
+- the gate model reflects real runtime capabilities instead of aspirational workflow prose
 
 ### Wave 4: End-To-End Confidence
 
@@ -229,6 +280,36 @@ Exit criteria:
 
 - runtime enforcement is covered by tests
 - docs-only promises without implementation become detectable failures
+- install, routing, and review loops are validated as actual behavior, not inferred from file presence
+
+## Parallelism Policy
+
+Use limited parallelism here.
+
+Safe to run in parallel:
+
+- small discovery work for #133 while #134 is being implemented
+- test harness scaffolding for #132 once the first enforcement behaviors are stable
+
+Not safe to run in parallel:
+
+- #131 before the runtime and adapter truth layers settle
+- final #132 assertions before the enforcement behavior is implemented
+
+Rule of thumb:
+
+- build the lowest truthful layer first
+- only parallelize when the write paths and behavioral assumptions are clearly disjoint
+
+## Definition Of Done For The Epic
+
+The remediation epic should only be considered complete when all of the following are true:
+
+- the default setup path activates the lifecycle behavior Orbit documents
+- linked worktrees are supported where Orbit recommends worktrees
+- plain-prompt routing is either implemented for a runtime or explicitly documented as unsupported
+- the branch-test-review-fix-review-pr loop is enforced as a runtime progression model
+- evals fail when documentation gets ahead of implementation
 
 ## Changes Expected By Area
 
