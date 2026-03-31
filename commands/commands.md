@@ -424,7 +424,9 @@ Diff mode: show only what changed in STATE.md since session started — new deci
 
 ## PROCESS
 
-1. Read `.orbit/state/STATE.md`. If it exists, also read `.orbit/state/pre-compact-snapshot.md`.
+1. If `.orbit/context.db` exists: run `node bin/context.js --load minimal` for fast partial context load (~300 tokens).
+   Fallback: Read `.orbit/state/STATE.md` directly if context.db absent.
+   Also read `.orbit/state/pre-compact-snapshot.md` if it exists.
 2. Run `git log --oneline -5` to confirm what was last committed.
 3. Output a status summary:
    - Active milestone + phase
