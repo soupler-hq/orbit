@@ -8,6 +8,12 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const {
+  formatNextCommand,
+  formatProgressStatus,
+  formatWaveComplete,
+  formatWaveStart,
+} = require('./status');
 
 class OrbitOrchestrator {
   constructor(projectRoot) {
@@ -136,6 +142,7 @@ class OrbitOrchestrator {
    * Dispatches a wave of tasks to parallel subagents.
    */
   async executeWave(tasks, waveId = Date.now().toString()) {
+    console.log(formatWaveStart({ wave: waveId, taskCount: tasks.length }));
     console.log(`\n🚀 Starting Wave ${waveId} with ${tasks.length} agents...\n`);
 
     const results = await Promise.all(
@@ -173,6 +180,15 @@ class OrbitOrchestrator {
         );
 
         console.log(`[${task.agent}] Dispatched (Model: ${modelEnv}, Path: ${executionPath})`);
+        console.log(
+          formatProgressStatus({
+            command: `wave ${waveId}`,
+            agent: task.agent,
+            wave: waveId,
+            status: 'dispatched',
+            details: path.basename(executionPath),
+          })
+        );
 
         return {
           agent: task.agent,
@@ -234,6 +250,24 @@ class OrbitOrchestrator {
       const outputPath = path.join(this.stateDir, `WAVE_${waveId}_SUMMARY.md`);
       fs.writeFileSync(outputPath, finalSummary);
       console.log(`${status}. Wave summary written to ${outputPath}`);
+      console.log(
+        formatWaveComplete({
+          wave: waveId,
+          completed: foundAny ? taskDirs.length : 0,
+          blocked: consensusMet ? 0 : 1,
+          next: 'Run /orbit:verify before shipping',
+        })
+      );
+      console.log(
+        formatNextCommand({
+          primary: '/orbit:verify',
+          why: 'Wave output is ready for verification before shipping.',
+          alternatives: [
+            '/orbit:progress — review full milestone status',
+            '/orbit:resume — reload state if another session updated it',
+          ],
+        })
+      );
       return finalSummary;
     } finally {
       this.releaseStateLock();

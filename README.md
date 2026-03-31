@@ -17,6 +17,8 @@ Orbit is a tool-agnostic control plane that turns any compatible coding agent (C
 
 **Key capabilities:** smart agent routing · Agent Forge · wave execution · model-cost routing · prompt injection defense · 21 reusable skills · STATE.md persistence · multi-repo Nexus mode
 
+Orbit can also infer workflow intent from plain prompts. Users do not have to prefix every request with `/orbit:*`; explicit commands override inference, but normal chat requests should still route through the correct Orbit workflow.
+
 ### Compatibility
 
 Orbit works across runtimes — Claude Code (native), Codex (stable), Antigravity (experimental). Any agent that can read markdown instructions and run repo-local scripts can use the same registry, skills, and workflows without changes. See [docs/runtime-adapters.md](docs/runtime-adapters.md).
@@ -50,6 +52,8 @@ npm install
 bash install.sh --local --tool claude
 ```
 
+Core development follows Orbit-on-Orbit rules: create or identify the issue, cut a feature branch from freshly pulled `develop`, use an Orbit workflow command as the task entrypoint, run review on the feature branch, and open a PR using the repo's standard body structure.
+
 ---
 
 ## Slash commands
@@ -77,20 +81,24 @@ bash install.sh --local --tool claude
 
 ## Documentation
 
-| Doc | Contents |
-|-----|----------|
-| [docs/architecture.md](docs/architecture.md) | Control plane, wave execution model, model routing, repo layout, Nexus, Sentinel CI |
-| [docs/concepts.md](docs/concepts.md) | Agents, skills, workflows, STATE.md, hooks, Agent Forge |
-| [docs/token-optimization.md](docs/token-optimization.md) | Six-layer token strategy, cost estimates, model profiles |
-| [docs/security-model.md](docs/security-model.md) | Integrity verification, hook safety, prompt injection defense, SCA |
-| [docs/runtime-adapters.md](docs/runtime-adapters.md) | Claude (native), Codex (stable), Antigravity (experimental) adapter contracts |
-| [docs/playbooks.md](docs/playbooks.md) | Runbooks for common scenarios |
-| [docs/evals.md](docs/evals.md) | Eval framework and scoring methodology |
-| [docs/eval-dataset.md](docs/eval-dataset.md) | Representative prompt set for regression testing |
-| [docs/mcp-guide.md](docs/mcp-guide.md) | MCP server integration |
-| [docs/error-codes.md](docs/error-codes.md) | ERR-ORBIT-NNN registry with runbooks |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to add skills, agents, or patterns |
-| [SECURITY.md](SECURITY.md) | Vulnerability reporting and threat model |
+| Doc                                                                                                    | Contents                                                                            |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| [docs/architecture.md](docs/architecture.md)                                                           | Control plane, wave execution model, model routing, repo layout, Nexus, Sentinel CI |
+| [docs/concepts.md](docs/concepts.md)                                                                   | Agents, skills, workflows, STATE.md, hooks, Agent Forge                             |
+| [docs/token-optimization.md](docs/token-optimization.md)                                               | Six-layer token strategy, cost estimates, model profiles                            |
+| [docs/security-model.md](docs/security-model.md)                                                       | Integrity verification, hook safety, prompt injection defense, SCA                  |
+| [docs/runtime-adapters.md](docs/runtime-adapters.md)                                                   | Claude (native), Codex (stable), Antigravity (experimental) adapter contracts       |
+| [docs/playbooks.md](docs/playbooks.md)                                                                 | Runbooks for common scenarios                                                       |
+| [docs/evals.md](docs/evals.md)                                                                         | Eval framework and scoring methodology                                              |
+| [docs/eval-dataset.md](docs/eval-dataset.md)                                                           | Representative prompt set for regression testing                                    |
+| [docs/plans/provenance-driven-context-synthesis.md](docs/plans/provenance-driven-context-synthesis.md) | Detailed recovery-engine plan and implementation waves                              |
+| [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md)                       | Naming, placement, and traceability rules for plans, releases, and issue docs       |
+| [docs/mcp-guide.md](docs/mcp-guide.md)                                                                 | MCP server integration                                                              |
+| [docs/error-codes.md](docs/error-codes.md)                                                             | ERR-ORBIT-NNN registry with runbooks                                                |
+| [CONTRIBUTING.md](CONTRIBUTING.md)                                                                     | How to add skills, agents, or patterns                                              |
+| [SECURITY.md](SECURITY.md)                                                                             | Vulnerability reporting and threat model                                            |
+
+Planning artifacts belong in `docs/plans/`. Release support artifacts belong in `docs/releases/`. Durable issue briefs belong in `docs/issues/` only when needed. Naming and ordering rules live in `docs/standards/artifact-conventions.md`.
 
 ---
 
