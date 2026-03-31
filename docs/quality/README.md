@@ -6,5 +6,5 @@
 
 | Document | Type | Purpose |
 | --- | --- | --- |
-| [evaluation-framework.md](docs/quality/evaluation-framework.md) | standard | Quality dimensions, scoring, and expected checks |
-| [eval-dataset.md](docs/quality/eval-dataset.md) | dataset | Representative prompt set for regression and portability |
+| [evaluation-framework.md](evaluation-framework.md) | standard | Quality dimensions, scoring, and expected checks |
+| [eval-dataset.md](eval-dataset.md) | dataset | Representative prompt set for regression and portability |

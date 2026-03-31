@@ -6,11 +6,11 @@
 
 | Document | Type | Versioning mode | Purpose |
 | --- | --- | --- | --- |
-| [overview.md](docs/architecture/overview.md) | overview | Stable path + frontmatter version | System design, repo layout, and platform architecture |
-| [core-concepts.md](docs/architecture/core-concepts.md) | reference | Stable path + frontmatter version | Agents, skills, waves, state, and persistence concepts |
-| [runtime-adapters.md](docs/architecture/runtime-adapters.md) | reference | Stable path + frontmatter version | Runtime compatibility and adapter contracts |
-| [security-model.md](docs/architecture/security-model.md) | reference | Stable path + frontmatter version | Threat model, integrity, and guardrails |
-| [token-optimization.md](docs/architecture/token-optimization.md) | guide | Stable path + frontmatter version | Token/cost optimization strategy |
+| [overview.md](overview.md) | overview | Stable path + frontmatter version | System design, repo layout, and platform architecture |
+| [core-concepts.md](core-concepts.md) | reference | Stable path + frontmatter version | Agents, skills, waves, state, and persistence concepts |
+| [runtime-adapters.md](runtime-adapters.md) | reference | Stable path + frontmatter version | Runtime compatibility and adapter contracts |
+| [security-model.md](security-model.md) | reference | Stable path + frontmatter version | Threat model, integrity, and guardrails |
+| [token-optimization.md](token-optimization.md) | guide | Stable path + frontmatter version | Token/cost optimization strategy |
 
 ## Versioning Rule
 

@@ -86,7 +86,19 @@ function normalizePlan(relPath) {
   const content = readFile(absPath);
   const { meta, body } = parseFrontmatter(content, relPath);
   const title = extractTitle(body, relPath);
-  const required = ['id', 'doc_type', 'status', 'version', 'last_updated', 'scope', 'phase', 'rank', 'priority', 'depends_on', 'blocks'];
+  const required = [
+    'id',
+    'doc_type',
+    'status',
+    'version',
+    'last_updated',
+    'scope',
+    'phase',
+    'rank',
+    'priority',
+    'depends_on',
+    'blocks',
+  ];
 
   for (const key of required) {
     if (!(key in meta)) {
@@ -139,7 +151,7 @@ function formatList(items) {
 }
 
 function planLink(relPath) {
-  return `[${path.basename(relPath)}](${relPath.replace(/\\/g, '/')})`;
+  return `[${path.basename(relPath)}](${path.basename(relPath)})`;
 }
 
 function renderIndex(plans) {
@@ -178,7 +190,7 @@ function renderIndex(plans) {
 
 Use \`docs/plans/\` for plans that should remain reviewable and traceable in git.
 
-Naming rules are defined in [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md).
+Naming rules are defined in [artifact-conventions.md](../standards/artifact-conventions.md).
 
 ## Current Active Plans
 

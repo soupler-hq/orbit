@@ -4,7 +4,7 @@
 
 ## Canonical Sources
 
-- [release-notes.md](docs/releases/release-notes.md) is the canonical release notes document.
+- [release-notes.md](release-notes.md) is the canonical release notes document.
 - `docs/releases/` holds release-specific supporting artifacts such as checklists, retrospectives, and deep summaries.
 
 ## Naming Convention

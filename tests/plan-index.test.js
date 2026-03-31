@@ -27,7 +27,8 @@ describe('plan index generator', () => {
     expect(enforcementIndex).toBeLessThan(pdcsIndex);
     expect(rendered).toContain('| 010 | Foundations | P0 |');
     expect(rendered).toContain('| 020 | Recovery | P1 |');
-    expect(rendered).toContain('[issue-130-orbit-enforcement-remediation.md](docs/plans/issue-130-orbit-enforcement-remediation.md)');
+    expect(rendered).toContain('[issue-130-orbit-enforcement-remediation.md](issue-130-orbit-enforcement-remediation.md)');
+    expect(rendered).toContain('[artifact-conventions.md](../standards/artifact-conventions.md)');
     expect(rendered).not.toContain('/Users/');
   });
 
