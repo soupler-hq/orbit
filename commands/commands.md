@@ -58,6 +58,18 @@ Used by `/orbit:progress` and `/orbit:resume` when work is already in progress.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
+When the active task is tracked work, append the workflow gate block so Orbit explains the current lifecycle state and the next allowed transition:
+
+```
+━━━ Workflow Gate ━━━━━━━━━━━━━━━━━━━━━
+  State:    {state}
+  PR Gate:  {ready|blocked}
+  Next:     {next transition}
+  Command:  {next command}
+  Blocker:  {reason if blocked}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
 ### Completion footer
 
 Appended at the end of completed commands so the user has a concrete next step.
@@ -497,6 +509,8 @@ If called mid-session while a build or quick command is in progress, also emit:
   Status:   {in progress|waiting for subagent|blocked}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+For tracked work, append the workflow gate block after the execution block so the operator can see whether the task is still in implementation, ready for review, or ready for PR.
 
 Then append the recommended next command block from the runtime status contract.
 

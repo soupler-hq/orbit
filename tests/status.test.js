@@ -40,4 +40,19 @@ describe('status formatter', () => {
     expect(output).toContain('**Primary**: /orbit:verify');
     expect(output).toContain('- /orbit:progress');
   });
+
+  it('renders a workflow gate block', () => {
+    const output = status.formatWorkflowGate({
+      state: 'tests_green',
+      prGate: 'blocked',
+      nextTransition: 'review_required',
+      nextCommand: '/orbit:review',
+      blockers: ['Await review before opening a PR.'],
+    });
+
+    expect(output).toContain('Workflow Gate');
+    expect(output).toContain('State:    tests_green');
+    expect(output).toContain('PR Gate:  blocked');
+    expect(output).toContain('Command:  /orbit:review');
+  });
 });

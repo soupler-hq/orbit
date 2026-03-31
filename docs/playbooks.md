@@ -16,6 +16,7 @@ last_updated: 2026-03-30
 Orbit should expose live progress, not just end-state summaries.
 
 - `orbit:progress` should show the current command, agent, wave, and status when work is in flight
+- tracked work should also surface the workflow gate state, blockers, and next allowed transition
 - `orbit:resume` should surface a next-command footer after loading state so the user knows what to do next
 - command completion should end with a recommended next step, not a silent success
 

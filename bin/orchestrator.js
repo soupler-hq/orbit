@@ -11,9 +11,15 @@ const { execSync } = require('child_process');
 const {
   formatNextCommand,
   formatProgressStatus,
+  formatWorkflowGate,
   formatWaveComplete,
   formatWaveStart,
 } = require('./status');
+const {
+  assertPullRequestReady,
+  assertWorkflowTransition,
+  evaluateWorkflowState,
+} = require('./workflow-state');
 
 class OrbitOrchestrator {
   constructor(projectRoot) {
@@ -136,6 +142,34 @@ class OrbitOrchestrator {
         `[ERR-ORBIT-006] Repo ${repoName} not found in Nexus registry. Run: node bin/install.js nexus sync`
       );
     return path.resolve(this.projectRoot, repo.path, relativePath);
+  }
+
+  /**
+   * Evaluates the current tracked workflow state for a task or branch.
+   */
+  evaluateWorkflow(evidence) {
+    return evaluateWorkflowState(evidence);
+  }
+
+  /**
+   * Ensures the requested transition is the next valid workflow move.
+   */
+  assertWorkflowTransition(targetState, evidence) {
+    return assertWorkflowTransition(targetState, evidence);
+  }
+
+  /**
+   * Blocks PR creation until tests and review gates are satisfied.
+   */
+  assertPullRequestReady(evidence) {
+    return assertPullRequestReady(evidence);
+  }
+
+  /**
+   * Renders the workflow gate block for status output.
+   */
+  renderWorkflowGate(evidence) {
+    return formatWorkflowGate(this.evaluateWorkflow(evidence));
   }
 
   /**

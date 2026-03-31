@@ -224,6 +224,47 @@ describe('OrbitOrchestrator — executeWave', () => {
     const results = await orch.executeWave(tasks, 'w004');
     expect(results[0].model).toBe('claude-sonnet-4-5');
   });
+
+  it('explains the current workflow state and next transition', () => {
+    const orch = new OrbitOrchestrator(tmpDir);
+    const summary = orch.evaluateWorkflow({
+      issue: '#131',
+      branch: 'feat/131-enforce-workflow-state-machine',
+      implementationStatus: 'done',
+      testsStatus: 'passed',
+      reviewStatus: 'not_requested',
+    });
+
+    expect(summary.state).toBe('tests_green');
+    expect(summary.nextTransition).toBe('review_required');
+  });
+
+  it('blocks pull request readiness until review is approved', () => {
+    const orch = new OrbitOrchestrator(tmpDir);
+    expect(() =>
+      orch.assertPullRequestReady({
+        issue: '#131',
+        branch: 'feat/131-enforce-workflow-state-machine',
+        implementationStatus: 'done',
+        testsStatus: 'passed',
+        reviewStatus: 'pending',
+      })
+    ).toThrow('Pull request gate blocked');
+  });
+
+  it('renders a workflow gate block for status output', () => {
+    const orch = new OrbitOrchestrator(tmpDir);
+    const output = orch.renderWorkflowGate({
+      issue: '#131',
+      branch: 'feat/131-enforce-workflow-state-machine',
+      implementationStatus: 'done',
+      testsStatus: 'passed',
+      reviewStatus: 'approved',
+    });
+
+    expect(output).toContain('Workflow Gate');
+    expect(output).toContain('State:    pr_ready');
+  });
 });
 
 describe('OrbitOrchestrator — aggregateResults', () => {
