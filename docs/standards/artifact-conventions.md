@@ -78,17 +78,17 @@ Plans live in `docs/plans/`.
 
 Recommended patterns:
 
-- milestone or wave plan: `v<major>.<minor>.<patch>-wave-<n>-<slug>.md`
-- issue implementation plan: `issue-<nnn>-<slug>.md`
-- cross-cutting architecture plan: `issue-<nnn>-<slug>.md` unless the plan is intentionally milestone-wide
+- milestone or wave plan: `v<major>.<minor>.<patch>-wave-<n>-<slug>-v<revision>.md`
+- issue implementation plan: `issue-<nnn>-<slug>-v<revision>.md`
+- cross-cutting architecture plan: `issue-<nnn>-<slug>-v<revision>.md` unless the plan is intentionally milestone-wide
 
 Examples:
 
-- `v2.9.0-wave-0-release-bootstrap.md`
-- `issue-125-provenance-driven-context-synthesis.md`
-- `issue-125-provenance-driven-context-synthesis.md`
+- `v2.9.0-wave-0-release-bootstrap-v1.md`
+- `issue-125-provenance-driven-context-synthesis-v1.md`
+- `issue-130-orbit-enforcement-remediation-v1.md`
 
-Use the simpler named-initiative form only when the document is expected to stay relevant across multiple milestones and is not anchored to a single issue.
+Use `-v<revision>` for every new plan filename. Increment the revision suffix when the document is intentionally superseded by a new durable plan file instead of being updated in place.
 
 ### Releases
 
@@ -117,8 +117,8 @@ Recommended pattern:
 
 Examples:
 
-- `issue-78-repo-artifact-layout.md`
-- `issue-125-context-recovery-ledger.md`
+- `issue-78-repo-artifact-layout-v1.md`
+- `issue-125-context-recovery-ledger-v1.md`
 
 Do not mirror every GitHub issue into the repo. Create an issue doc only when it adds durable implementation value.
 
@@ -131,6 +131,8 @@ Ordering should be visible from the filename whenever sequence matters.
 - Use `issue-<nnn>` for issue-scoped documents.
 - Use suffixes like `-checklist`, `-review`, `-retrospective`, `-handoff` for lifecycle stage.
 - Every folder with more than one durable artifact should maintain a `README.md` index with current and historical ordering.
+- Issue numbers are traceability markers, not execution-order markers.
+- When execution order differs from issue creation order, represent the true sequence in plan metadata and the folder index.
 
 ## Versioning Rules
 
@@ -154,7 +156,9 @@ Plans and issue docs should include at minimum:
 - title
 - scope or linked issue / milestone
 - status
+- version
 - last updated
+- execution order or priority
 
 ## Required Content Structure
 
@@ -203,11 +207,11 @@ When a plan supersedes another artifact, add a short note pointing to the replac
 
 ## Current Transition Rules
 
-Orbit already has legacy artifacts such as `PHASE-0-PLAN.md`.
+Orbit already has historical artifacts such as `docs/plans/v2.9.0-wave-0-release-bootstrap-v1.md`.
 
 Transition policy:
 
-- do not rename stable historical artifacts just for cosmetic consistency
+- do not rename stable historical artifacts just for cosmetic consistency once they have been normalized into the canonical folders
 - all new durable artifacts should follow the conventions in this document
 - legacy files should be linked from the new directory indexes so the path remains reconstructable
 

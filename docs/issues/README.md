@@ -14,8 +14,8 @@ Use `docs/issues/` only when an issue needs durable repo-local design or executi
 
 Examples:
 
-- `issue-78-repo-artifact-layout.md`
-- `issue-125-context-recovery-ledger.md`
+- `issue-78-repo-artifact-layout-v1.md`
+- `issue-125-context-recovery-ledger-v1.md`
 
 ## When To Create One
 

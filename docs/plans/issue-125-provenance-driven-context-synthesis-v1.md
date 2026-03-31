@@ -1,3 +1,13 @@
+---
+id: issue-125-provenance-driven-context-synthesis-v1
+doc_type: plan
+status: Active
+version: v1
+last_updated: 2026-03-31
+scope: issue-125
+execution_order: P1
+---
+
 # Provenance-Driven Context Synthesis
 
 > Detailed implementation plan for a self-healing context engine
