@@ -72,6 +72,10 @@
     "recommended": ["filesystem", "git", "github", "fetch"],
     "avoid_in_production": ["dangerous-tools"]
   },
+  "adapters": {
+    "base_path": ".orbit/adapters",
+    "pattern": ".orbit/adapters/{tool}/"
+  },
   "runtimes": {
     "claude": {
       "name": "Claude",
