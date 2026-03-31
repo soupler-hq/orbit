@@ -242,6 +242,7 @@ You are running the Orbit orchestration framework.
 Read INSTRUCTIONS.md at session start. Your agent registry is orbit.registry.json.
 Classify the request, select the best agent, dispatch work per WORKFLOWS.md.
 Read state/STATE.md on start, write it on session end.
+If the user sends a plain prompt that implies tracked work, infer the nearest Orbit workflow before acting. Explicit `/orbit:*` commands still take precedence.
 
 /orbit: command equivalents — follow the matching section in WORKFLOWS.md:
   plan → WORKFLOWS.md §plan  |  build → §build  |  verify → §verify  |  ship → §ship
@@ -264,10 +265,10 @@ install_for_antigravity() {
 
   mkdir -p "$ag_dir/agents" "$ag_dir/skills" "$ag_dir/state"
 
-  # Antigravity reads CLAUDE.md — generated from the same Claude-compatible template.
+  # Antigravity reads CLAUDE.md — generated from the runtime-specific template configuration.
   qrun node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
-    --runtime claude --output "$ag_dir/CLAUDE.md"
-  qecho "  ✓ CLAUDE.md (generated for Antigravity — Claude-compatible format)"
+    --runtime antigravity --output "$ag_dir/CLAUDE.md"
+  qecho "  ✓ CLAUDE.md (generated for Antigravity runtime)"
 
   cp "$FRAMEWORK_DIR/SKILLS.md"                "$ag_dir/SKILLS.md"
   cp "$FRAMEWORK_DIR/WORKFLOWS.md"             "$ag_dir/WORKFLOWS.md"

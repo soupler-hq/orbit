@@ -132,7 +132,7 @@ Override model IDs via: `orbit.config.json` → `models.routing` or `models.prof
 
 ## MANDATORY WORKFLOW
 
-If the user does not explicitly prefix a request with an Orbit command, Orbit must still intervene and classify the intent into the nearest workflow. Explicit `/orbit:*` commands take precedence, but plain prompts should be treated as implicit Orbit requests whenever they ask for work, planning, review, debugging, shipping, or state transitions.
+{{IMPLICIT_ROUTING_RULE}}
 
 **QUICK**: classify → select → execute → verify → commit
 
@@ -156,7 +156,7 @@ Repeat PHASE per phase until milestone complete
 **SELF-HOSTING RULE**:
 
 - Orbit develops Orbit. If the repo being changed is Orbit itself, start from an Orbit command boundary instead of freeform execution.
-- If the user gives a plain prompt instead of a slash command, infer the correct Orbit workflow and act through that workflow boundary.
+- {{IMPLICIT_ROUTING_BULLET}}
 - Use plain prompts as direct Q&A only when the user is clearly asking for explanation, feedback, or lightweight guidance rather than requesting tracked work.
 - If no issue exists for framework work, create or identify the issue before implementation and carry that issue number through branch, commit, PR, and STATE updates.
 

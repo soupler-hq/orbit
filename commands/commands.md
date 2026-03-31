@@ -278,7 +278,7 @@ Read STATE.md + ROADMAP.md. Determine:
 
 # Orbit Rule: Implicit Routing For Plain Prompts
 
-> If the user does not type an explicit `/orbit:*` command, Orbit must still classify intent and choose the nearest workflow.
+> If the active runtime supports plain-prompt routing and the user does not type an explicit `/orbit:*` command, Orbit must still classify intent and choose the nearest workflow.
 
 ## PROCESS
 
@@ -292,7 +292,7 @@ Read STATE.md + ROADMAP.md. Determine:
 3. Proceed through the inferred workflow unless the user clearly asked only for explanation or feedback.
 4. If the prompt is ambiguous between two workflows, choose the lower-risk path and state the inferred workflow in the response.
 
-Explicit slash commands always override inferred routing.
+Explicit slash commands always override inferred routing. Runtimes without plain-prompt interception should require the documented explicit Orbit command path.
 
 ---
 

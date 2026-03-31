@@ -176,12 +176,23 @@ if (!runtimes[runtime]) {
 }
 
 const runtimeConfig = runtimes[runtime];
+const implicitPromptRouting = runtimeConfig.capabilities?.implicit_prompt_routing === true;
+const routingMechanism =
+  runtimeConfig.capabilities?.routing_mechanism || 'its runtime instruction surface';
+const implicitRoutingRule = implicitPromptRouting
+  ? `This runtime supports Orbit workflow inference for plain prompts via ${routingMechanism}. If the user does not explicitly prefix a request with an Orbit command, infer the nearest workflow and continue through that boundary. Explicit \`/orbit:*\` commands still take precedence.`
+  : `This runtime does not provide reliable plain-prompt interception. For tracked work, prefer explicit \`/orbit:*\` commands or the runtime's documented Orbit workflow equivalent. If a plain prompt arrives anyway, route conservatively and do not overstate native workflow interception.`;
+const implicitRoutingBullet = implicitPromptRouting
+  ? 'If the user gives a plain prompt instead of a slash command, infer the correct Orbit workflow and act through that workflow boundary.'
+  : "If the user gives a plain prompt instead of a slash command, prefer the runtime's documented explicit Orbit command path because this runtime does not guarantee plain-prompt interception.";
 
 const template = fs.readFileSync(templatePath, 'utf8');
 
 const output = template
   .replace(/\{\{RUNTIME_NAME\}\}/g, runtimeConfig.name)
-  .replace(/\{\{INSTRUCTION_FILE\}\}/g, runtimeConfig.instruction_file);
+  .replace(/\{\{INSTRUCTION_FILE\}\}/g, runtimeConfig.instruction_file)
+  .replace(/\{\{IMPLICIT_ROUTING_RULE\}\}/g, implicitRoutingRule)
+  .replace(/\{\{IMPLICIT_ROUTING_BULLET\}\}/g, implicitRoutingBullet);
 
 const dest = outputPath || runtimeConfig.instruction_file;
 const destDir = path.dirname(path.resolve(dest));

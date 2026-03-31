@@ -257,10 +257,10 @@ Orbit will flag and warn if:
 Each `orbit:quick` or `orbit:build` is a discrete task boundary.
 
 - **Follow-up questions / clarifications**: plain prompts are fine.
-- **Follow-up work that changes scope**: Orbit should infer a new task boundary even if the user does not type `/orbit:quick`.
-- **Rule of thumb**: if the output should produce a commit, Orbit should treat the prompt as an Orbit workflow request.
+- **Follow-up work that changes scope**: on runtimes that support plain-prompt routing, Orbit should infer a new task boundary even if the user does not type `/orbit:quick`.
+- **Rule of thumb**: if the output should produce a commit, Orbit should treat the prompt as an Orbit workflow request when the runtime supports implicit routing; otherwise require the explicit command path.
 
-When in doubt: if you would write a commit message for it, Orbit should route the prompt through an Orbit command path, whether explicit or implicit.
+When in doubt: if you would write a commit message for it, route the prompt through an Orbit command path, whether explicit or implicit for that runtime.
 
 ### Session Switching Protocol
 
