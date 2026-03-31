@@ -57,6 +57,17 @@ Load `skills/brainstorming.md`. Then:
 
 ## PROCESS
 
+**Emit at start:**
+```
+━━━ Orbit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Domain:     {DOMAIN}
+  Complexity: PHASE
+  Agent:      architect + researcher
+  Mode:       {COLLABORATIVE|AUTONOMOUS}
+  Milestone:  {active milestone}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
 Load `skills/planning.md`. If N not specified, use next unplanned phase from ROADMAP.md.
 
 1. Read STATE.md + ROADMAP.md + REQUIREMENTS.md
@@ -73,6 +84,17 @@ Load `skills/planning.md`. If N not specified, use next unplanned phase from ROA
 
 ## PROCESS
 
+**Emit at start:**
+```
+━━━ Orbit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Domain:     {DOMAIN}
+  Complexity: PHASE
+  Agent:      engineer (+ specialist agents per wave)
+  Mode:       {COLLABORATIVE|AUTONOMOUS}
+  Phase:      {N} — {phase name}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
 Read `PHASE-{N}-PLAN.md`. For each wave:
 
 **Dispatch subagents in parallel** (one per task in the wave):
@@ -82,7 +104,17 @@ Subagent instruction: Execute exactly this task. Load the skills it requires. TD
 Commit atomically when done. Write SUMMARY.md.
 ```
 
-After each wave: collect SUMMARY.md files. Check for blockers before next wave.
+**After each wave, emit:**
+```
+━━━ Wave {N} Complete ━━━━━━━━━━━━━━━━━━━
+  ✓ {task 1 title} — committed
+  ✓ {task 2 title} — committed
+  ✗ {task 3 title} — BLOCKED: {reason}  (if applicable)
+  Next: Wave {N+1} → {agent(s)}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Collect SUMMARY.md files. Check for blockers before next wave.
 
 After all waves: run verification subagent:
 ```
@@ -91,6 +123,14 @@ Check against REQUIREMENTS.md. Output: PHASE-{N}-VERIFICATION.md
 ```
 
 Update STATE.md with phase completion.
+
+**After completion, emit:**
+```
+---
+**What's next**: /orbit:verify {N} — run UAT and automated verification
+**Why**: build complete — verification required before ship
+```
+Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
 ---
 
@@ -109,6 +149,13 @@ Update STATE.md with phase completion.
    ```
 4. For any failures: spawn debug subagent to find root cause + create fix task
 5. Output: `PHASE-{N}-UAT.md` with results
+
+**After completion, emit:**
+```
+---
+**What's next**: /orbit:ship {N} — ship phase {N} (UAT passed)
+```
+Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
 ---
 
@@ -129,6 +176,14 @@ Load `skills/deployment.md`. Requires PHASE-{N}-UAT.md to exist and pass.
 5. Tag release: `v{milestone}.{phase}`
 6. Update STATE.md: phase marked shipped
 7. Output: deployment summary + next phase hint
+
+**After completion, emit:**
+```
+---
+**What's next**: /orbit:plan — begin next phase  (or /orbit:milestone if all phases shipped)
+**Why**: {one sentence — milestone state + what comes next}
+```
+Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
 ---
 
@@ -152,6 +207,17 @@ Read STATE.md + ROADMAP.md. Determine:
 
 ## PROCESS
 
+**Emit at start (classification block):**
+```
+━━━ Orbit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Domain:     {ENGINEERING|PRODUCT|DESIGN|OPERATIONS|RESEARCH|REVIEW|SYNTHESIS}
+  Complexity: QUICK
+  Agent:      {selected agent}
+  Mode:       {COLLABORATIVE|AUTONOMOUS}
+  Issue:      #{NNN}  (omit if no issue)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
 1. Classify: which agent handles this?
 2. Define single XML task:
    ```xml
@@ -165,6 +231,14 @@ Read STATE.md + ROADMAP.md. Determine:
    ```
 3. Execute with relevant skill loaded
 4. Verify, commit, update STATE.md
+
+**After completion, emit:**
+```
+---
+**What's next**: /orbit:quick #NNN — {next unblocked issue title}
+**Why**: {one sentence — current milestone state + why this is next}
+```
+Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
 ---
 
@@ -291,6 +365,16 @@ Blockers: {list or "none"}
 Next action: /orbit:build 3 to complete Wave 3
 ```
 
+If called mid-session while a build or quick command is in progress, also emit:
+```
+━━━ Current Execution ━━━━━━━━━━━━━━━━━━━
+  Command:  /orbit:{command}
+  Agent:    {active agent}
+  Wave:     {N} of {total}  (if applicable)
+  Status:   {in progress|waiting for subagent|blocked}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
 ---
 
 # Orbit Command: /orbit:cost
@@ -373,3 +457,5 @@ Output format (always append this block):
 ```
 
 5. Continue work without requiring re-briefing.
+
+> **Tip**: Use `orbit:quick` for new tasks. Plain prompts for questions. New scope = new orbit command.
