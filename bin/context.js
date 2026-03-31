@@ -85,7 +85,9 @@ function initSchema(db) {
 function loadMinimal(db) {
   const facts = db.prepare('SELECT key, value FROM state').all();
   const tasks = db
-    .prepare("SELECT issue_ref, title, status, blocker FROM tasks WHERE status IN ('open','blocked','in_progress') ORDER BY id")
+    .prepare(
+      "SELECT issue_ref, title, status, blocker FROM tasks WHERE status IN ('open','blocked','in_progress') ORDER BY id"
+    )
     .all();
 
   const factMap = Object.fromEntries(facts.map((r) => [r.key, r.value]));
@@ -104,8 +106,10 @@ function loadMinimal(db) {
     lines.push('_(none)_');
   } else {
     for (const t of tasks) {
-        const ref = t.issue_ref ? `${t.issue_ref} ` : '';
-      lines.push(`- [${t.status.toUpperCase()}] ${ref}${t.title}${t.blocker ? ` — ${t.blocker}` : ''}`);
+      const ref = t.issue_ref ? `${t.issue_ref} ` : '';
+      lines.push(
+        `- [${t.status.toUpperCase()}] ${ref}${t.title}${t.blocker ? ` — ${t.blocker}` : ''}`
+      );
     }
   }
 
@@ -209,22 +213,38 @@ function migrate(db) {
     'INSERT OR REPLACE INTO state (key, value, updated_at) VALUES (?, ?, unixepoch())'
   );
 
-  if (milestoneMatch) { upsertState.run('milestone', milestoneMatch[1].trim()); count.state++; }
-  if (phaseMatch)     { upsertState.run('phase', phaseMatch[1].trim()); count.state++; }
-  if (versionMatch)   { upsertState.run('version', versionMatch[1].trim()); count.state++; }
+  if (milestoneMatch) {
+    upsertState.run('milestone', milestoneMatch[1].trim());
+    count.state++;
+  }
+  if (phaseMatch) {
+    upsertState.run('phase', phaseMatch[1].trim());
+    count.state++;
+  }
+  if (versionMatch) {
+    upsertState.run('version', versionMatch[1].trim());
+    count.state++;
+  }
 
   // Parse decisions table (markdown format: | date | version | decision | rationale |)
   const decisionSection = text.match(/## Decisions Log\n([\s\S]*?)(?=\n##|$)/);
   if (decisionSection) {
-    const rows = decisionSection[1].split('\n').filter((l) => l.startsWith('|') && !l.includes('---') && !l.includes('Date'));
+    const rows = decisionSection[1]
+      .split('\n')
+      .filter((l) => l.startsWith('|') && !l.includes('---') && !l.includes('Date'));
     const insertDecision = db.prepare(
       'INSERT INTO decisions (date, version, decision, rationale) VALUES (?, ?, ?, ?)'
     );
     for (const row of rows) {
-      const cols = row.split('|').map((c) => c.trim()).filter(Boolean);
+      const cols = row
+        .split('|')
+        .map((c) => c.trim())
+        .filter(Boolean);
       if (cols.length >= 4) {
         // Check for duplicate
-        const existing = db.prepare('SELECT id FROM decisions WHERE date = ? AND decision = ?').get(cols[0], cols[2]);
+        const existing = db
+          .prepare('SELECT id FROM decisions WHERE date = ? AND decision = ?')
+          .get(cols[0], cols[2]);
         if (!existing) {
           insertDecision.run(cols[0], cols[1] || null, cols[2], cols[3]);
           count.decisions++;
@@ -305,21 +325,39 @@ function main() {
     case '--load': {
       let output;
       switch (level) {
-        case 'minimal':   output = loadMinimal(db); break;
-        case 'standard':  output = loadStandard(db); break;
-        case 'full':      output = loadFull(db); break;
-        case 'decisions': output = loadDecisions(db); break;
-        case 'blocked':   output = loadBlocked(db); break;
+        case 'minimal':
+          output = loadMinimal(db);
+          break;
+        case 'standard':
+          output = loadStandard(db);
+          break;
+        case 'full':
+          output = loadFull(db);
+          break;
+        case 'decisions':
+          output = loadDecisions(db);
+          break;
+        case 'blocked':
+          output = loadBlocked(db);
+          break;
         default:
-          console.error(`Unknown load level: ${level}. Use: minimal, standard, full, decisions, blocked`);
+          console.error(
+            `Unknown load level: ${level}. Use: minimal, standard, full, decisions, blocked`
+          );
           process.exit(1);
       }
       process.stdout.write(output + '\n');
       break;
     }
-    case '--save':    save(db); break;
-    case '--migrate': migrate(db); break;
-    case '--export':  exportStateFile(db); break;
+    case '--save':
+      save(db);
+      break;
+    case '--migrate':
+      migrate(db);
+      break;
+    case '--export':
+      exportStateFile(db);
+      break;
     default:
       console.error(`Unknown flag: ${flag}`);
       process.exit(1);
