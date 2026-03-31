@@ -93,7 +93,7 @@ Core development follows Orbit-on-Orbit rules: create or identify the issue, cut
 | [docs/operations/playbooks.md](docs/operations/playbooks.md)                                           | Runbooks for common scenarios                                                       |
 | [docs/quality/evaluation-framework.md](docs/quality/evaluation-framework.md)                           | Eval framework and scoring methodology                                              |
 | [docs/quality/eval-dataset.md](docs/quality/eval-dataset.md)                                           | Representative prompt set for regression testing                                    |
-| [docs/plans/issue-125-provenance-driven-context-synthesis-v1.md](docs/plans/issue-125-provenance-driven-context-synthesis-v1.md) | Detailed recovery-engine plan and implementation waves |
+| [docs/plans/issue-125-provenance-driven-context-synthesis.md](docs/plans/issue-125-provenance-driven-context-synthesis.md) | Detailed recovery-engine plan and implementation waves |
 | [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md)                       | Naming, placement, and traceability rules for plans, releases, and issue docs       |
 | [docs/integrations/mcp-guide.md](docs/integrations/mcp-guide.md)                                       | MCP server integration                                                              |
 | [docs/operations/error-codes.md](docs/operations/error-codes.md)                                       | ERR-ORBIT-NNN registry with runbooks                                                |

@@ -12,7 +12,7 @@
 | `docs/integrations/` | External integration guides such as MCP | [docs/integrations/README.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/integrations/README.md) |
 | `docs/governance/` | Contributor, conduct, and project-governance documents | [docs/governance/README.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/governance/README.md) |
 | `docs/releases/` | Release notes plus release-scoped supporting artifacts | [docs/releases/README.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/releases/README.md) |
-| `docs/plans/` | Active and historical implementation plans, with explicit priority and revisioning | [docs/plans/README.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/plans/README.md) |
+| `docs/plans/` | Active and historical implementation plans, with explicit rank, phase, priority, and dependency ordering | [docs/plans/README.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/plans/README.md) |
 | `docs/issues/` | Durable issue briefs when GitHub issue text is not enough | [docs/issues/README.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/issues/README.md) |
 | `docs/standards/` | Naming, metadata, and governance standards | [docs/standards/artifact-conventions.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/standards/artifact-conventions.md) |
 
