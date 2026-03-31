@@ -44,6 +44,8 @@ bash install.sh --all --tool claude
 
 Verify: open a Claude Code session and type `/orbit:help`.
 
+For local repo installs, Orbit also links git lifecycle hooks for `pre-commit`, `post-commit`, and `pre-push` when a Git worktree is detected, including linked worktrees.
+
 **Contributing / core development:**
 
 ```bash

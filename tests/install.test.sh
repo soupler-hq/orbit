@@ -27,6 +27,7 @@ assert() {
 assert_file()    { assert "$1 exists"        test -f "$2"; }
 assert_dir()     { assert "$1 exists"        test -d "$2"; }
 assert_exec()    { assert "$1 is executable" test -x "$2"; }
+assert_symlink() { assert "$1 is symlink"    test -L "$2"; }
 assert_contains(){ assert "$2 contains '$3'" grep -q "$3" "$2"; }
 assert_equal()   { assert "$1" [ "$2" = "$3" ]; }
 
@@ -41,6 +42,41 @@ run_install() {
   mkdir -p "$project_dir"
   ( cd "$project_dir" && HOME="$TMPDIR_ROOT/home" \
     bash "$FRAMEWORK_DIR/install.sh" --local --skip-verify "$@" >/dev/null 2>&1 ) || true
+}
+
+run_setup() {
+  local project_dir="$1"; shift
+  mkdir -p "$project_dir"
+  (
+    cd "$project_dir" &&
+    HOME="$TMPDIR_ROOT/home" \
+    bash "$FRAMEWORK_DIR/bin/setup.sh" --tool claude >/dev/null 2>&1
+  ) || true
+}
+
+git_init_repo() {
+  local repo_dir="$1"
+  mkdir -p "$repo_dir"
+  (
+    cd "$repo_dir"
+    git init >/dev/null 2>&1
+    git config user.name "Orbit Test"
+    git config user.email "orbit-tests@example.com"
+    touch README.md
+    git add README.md
+    git commit -m "init" >/dev/null 2>&1
+  )
+}
+
+resolve_hooks_dir() {
+  local repo_dir="$1"
+  local hooks_dir
+  hooks_dir=$(git -C "$repo_dir" rev-parse --git-path hooks)
+  if [[ "$hooks_dir" = /* ]]; then
+    printf '%s\n' "$hooks_dir"
+  else
+    printf '%s/%s\n' "$repo_dir" "$hooks_dir"
+  fi
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -130,6 +166,39 @@ echo "node_modules/" > "$PROJECT8/.gitignore"
 run_install "$PROJECT8" --tool claude
 assert_contains ".gitignore has .orbit/errors/" "$PROJECT8/.gitignore" ".orbit/errors/"
 assert_contains ".gitignore has .worktrees/"    "$PROJECT8/.gitignore" ".worktrees/"
+
+# ─────────────────────────────────────────────────────────────────────────────
+section "Local install wires git hooks in a normal repo"
+PROJECT9="$TMPDIR_ROOT/proj-git-hooks"
+git_init_repo "$PROJECT9"
+run_install "$PROJECT9" --tool claude
+HOOKS_DIR_9=$(git -C "$PROJECT9" rev-parse --git-path hooks)
+HOOKS_DIR_9=$(resolve_hooks_dir "$PROJECT9")
+assert_symlink "post-commit hook linked" "$HOOKS_DIR_9/post-commit"
+assert_symlink "pre-push hook linked"    "$HOOKS_DIR_9/pre-push"
+assert_symlink "pre-commit hook linked"  "$HOOKS_DIR_9/pre-commit"
+
+# ─────────────────────────────────────────────────────────────────────────────
+section "Local install wires git hooks in a linked worktree"
+PROJECT10_ROOT="$TMPDIR_ROOT/proj-worktree-root"
+PROJECT10_WT="$TMPDIR_ROOT/proj-worktree-copy"
+git_init_repo "$PROJECT10_ROOT"
+( cd "$PROJECT10_ROOT" && git worktree add "$PROJECT10_WT" -b feat/test-hooks >/dev/null 2>&1 )
+run_install "$PROJECT10_WT" --tool claude
+HOOKS_DIR_10=$(resolve_hooks_dir "$PROJECT10_WT")
+assert_symlink "worktree post-commit hook linked" "$HOOKS_DIR_10/post-commit"
+assert_symlink "worktree pre-push hook linked"    "$HOOKS_DIR_10/pre-push"
+assert_symlink "worktree pre-commit hook linked"  "$HOOKS_DIR_10/pre-commit"
+
+# ─────────────────────────────────────────────────────────────────────────────
+section "Setup path also ensures git hooks are active"
+PROJECT11="$TMPDIR_ROOT/proj-setup-hooks"
+git_init_repo "$PROJECT11"
+run_setup "$PROJECT11"
+HOOKS_DIR_11=$(resolve_hooks_dir "$PROJECT11")
+assert_symlink "setup post-commit hook linked" "$HOOKS_DIR_11/post-commit"
+assert_symlink "setup pre-push hook linked"    "$HOOKS_DIR_11/pre-push"
+assert_symlink "setup pre-commit hook linked"  "$HOOKS_DIR_11/pre-commit"
 
 # ─────────────────────────────────────────────────────────────────────────────
 echo ""
