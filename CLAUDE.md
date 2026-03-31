@@ -296,6 +296,7 @@ When no agent fits >60%:
 /orbit:worktree        — manage git worktrees for parallel execution
 /orbit:cost            — show token usage and estimated cost
 /orbit:promote         — propagate local patterns/agents to the Orbit Core
+/orbit:ask <question>  — query project state mid-session (decisions, todos, blockers)
 ```
 
 > **Scope rule**: Plain prompts between commands are for questions and clarifications only. New work that produces a commit needs a new orbit command.

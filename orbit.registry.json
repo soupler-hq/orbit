@@ -814,6 +814,17 @@
         "core repository PR",
         "registry update"
       ]
+    },
+    {
+      "name": "ask",
+      "command": "/orbit:ask",
+      "mode": "collaborative",
+      "inputs": [
+        "question about project state"
+      ],
+      "outputs": [
+        "answer from STATE.md or context.db with source citation"
+      ]
     }
   ]
 }
