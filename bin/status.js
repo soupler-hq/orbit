@@ -51,6 +51,19 @@ function formatProgressStatus({ command, agent, wave, status, details }) {
   return lines.join('\n');
 }
 
+function formatWorkflowGate({ state, prGate, nextTransition, nextCommand, blockers = [] }) {
+  const lines = [
+    '━━━ Workflow Gate ━━━━━━━━━━━━━━━━━━━━━',
+    `  State:    ${state}`,
+    `  PR Gate:  ${prGate}`,
+    `  Next:     ${nextTransition || 'complete'}`,
+  ];
+  if (nextCommand) lines.push(`  Command:  ${nextCommand}`);
+  if (blockers.length) lines.push(`  Blocker:  ${blockers.join(' ')}`);
+  lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  return lines.join('\n');
+}
+
 function formatNextCommand({ primary, why, alternatives = [] }) {
   const altLines = alternatives.map((alt) => `- ${alt}`);
   return [
@@ -69,6 +82,7 @@ module.exports = {
   formatClassification,
   formatNextCommand,
   formatProgressStatus,
+  formatWorkflowGate,
   formatWaveComplete,
   formatWaveStart,
 };

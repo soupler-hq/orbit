@@ -26,6 +26,9 @@ required_files=(
   "state/STATE.template.md"
   "bin/install.js"
   "bin/eval.sh"
+  "bin/progress.js"
+  "bin/ship.js"
+  "bin/workflow-state.js"
 )
 
 required_dirs=(
