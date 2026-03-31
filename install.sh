@@ -11,6 +11,7 @@ SKIP_VERIFY=0
 GREEN='\033[0;32m'; BLUE='\033[0;34m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; BOLD='\033[1m'; NC='\033[0m'
 
 QUIET=0
+INSTALL_HOOKS_ONLY=0
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -30,6 +31,22 @@ done
 qecho() { [[ "$QUIET" -eq 0 ]] && echo -e "$@" || true; }
 # qrun: run a command, suppressing stdout when quiet (stderr still visible for errors)
 qrun() { if [[ "$QUIET" -eq 1 ]]; then "$@" >/dev/null; else "$@"; fi; }
+
+install_git_lifecycle_hooks() {
+  if [[ "$INSTALL_MODE" != "local" ]]; then
+    return 0
+  fi
+
+  qecho ""
+  qecho "${YELLOW}▶ Installing git lifecycle hooks...${NC}"
+
+  if qrun bash "$FRAMEWORK_DIR/bin/install-hooks.sh" --project-dir "$PROJECT_DIR"; then
+    qecho "  ✓ git hooks linked for this repo"
+  else
+    echo -e "${YELLOW}⚠️  Orbit git hook installation failed for $PROJECT_DIR${NC}" >&2
+    echo -e "${YELLOW}   Run manually: bash bin/install-hooks.sh --project-dir \"$PROJECT_DIR\"${NC}" >&2
+  fi
+}
 
 if [[ "$INSTALL_MODE" == "global" ]]; then
   CLAUDE_DIR="$HOME/.claude"
@@ -381,8 +398,14 @@ GITIGNORE_EOF
 # ─── Main ────────────────────────────────────────────────────────────────────
 verify_checksums
 
+if [[ "$INSTALL_HOOKS_ONLY" -eq 1 ]]; then
+  install_git_lifecycle_hooks
+  exit 0
+fi
+
 if [[ "$INSTALL_MODE" == "local" ]]; then
   init_project_state
+  install_git_lifecycle_hooks
 fi
 
 case "$TOOL" in

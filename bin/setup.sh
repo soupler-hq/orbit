@@ -98,6 +98,15 @@ install_tool() {
   esac
 }
 
+ensure_repo_hooks() {
+  if bash "$FRAMEWORK_DIR/bin/install-hooks.sh" --project-dir "$FRAMEWORK_DIR" >/dev/null 2>&1; then
+    echo -e "  ${G}✓${N} git lifecycle hooks active"
+  else
+    echo -e "  ${Y}⚠${N} git lifecycle hooks skipped"
+    echo "     Run manually: bash bin/install-hooks.sh --project-dir \"$FRAMEWORK_DIR\""
+  fi
+}
+
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 main() {
@@ -210,6 +219,10 @@ main() {
     echo -e "  ${Y}⚠  bootstrap failed — context.db may be missing or stale${N}"
     echo "     Run manually: npm run bootstrap"
   fi
+
+  echo ""
+  echo -e "${B}Ensuring git lifecycle hooks...${N}"
+  ensure_repo_hooks
 
   echo ""
   echo -e "${B}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${N}"
