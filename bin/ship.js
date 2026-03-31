@@ -33,14 +33,19 @@ function renderShipDecision(args = {}) {
 
   try {
     assertPullRequestReady(evidence);
+    const prAlreadyOpen = summary.state === 'pr_open';
     return {
       exitCode: 0,
       output: [
         formatWorkflowGate(summary),
         formatNextCommand({
-          primary: '/orbit:ship',
-          why: 'Tests and review are green, so PR progression is allowed.',
-          alternatives: ['/orbit:progress', '/orbit:resume'],
+          primary: prAlreadyOpen ? '/orbit:progress' : '/orbit:ship',
+          why: prAlreadyOpen
+            ? 'The PR is already open, so the next step is to track progress instead of reopening ship.'
+            : 'Tests and review are green, so PR progression is allowed.',
+          alternatives: prAlreadyOpen
+            ? ['/orbit:resume', '/orbit:review']
+            : ['/orbit:progress', '/orbit:resume'],
         }),
       ].join('\n\n'),
     };

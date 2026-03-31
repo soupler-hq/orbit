@@ -89,4 +89,21 @@ describe('runtime enforcement entrypoints', () => {
     expect(result.output).toContain('PR Gate:  ready');
     expect(result.output).toContain('/orbit:ship');
   });
+
+  it('ship runtime recommends progress when the PR is already open', () => {
+    const result = ship.renderShipDecision({
+      json: JSON.stringify({
+        issue: '#131',
+        branch: 'feat/131-enforce-workflow-state-machine',
+        implementationStatus: 'done',
+        testsStatus: 'passed',
+        reviewStatus: 'approved',
+        prStatus: 'open',
+      }),
+    });
+
+    expect(result.exitCode).toBe(0);
+    expect(result.output).toContain('State:    pr_open');
+    expect(result.output).toContain('**Primary**: /orbit:progress');
+  });
 });
