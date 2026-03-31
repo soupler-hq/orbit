@@ -53,8 +53,12 @@ SNAPSHOT
 echo "[$TIMESTAMP] Context compacted on branch=$GIT_BRANCH commit=$GIT_COMMIT" >> "$COMPACT_LOG" 2>/dev/null || true
 
 # Refresh the structured cache before the next session resumes.
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-"$SCRIPT_DIR/sync-context.sh" || true
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+if [[ -z "$ROOT_DIR" ]]; then
+  ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+fi
+
+"$ROOT_DIR/hooks/scripts/sync-context.sh" || true
 
 echo "Orbit: Pre-compact snapshot saved to $SNAPSHOT_FILE" >&2
 exit 0
