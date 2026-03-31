@@ -45,6 +45,7 @@ Support level: `native`
 
 - Reads `CLAUDE.md` directly as the session orchestrator
 - Works with `/orbit:` slash commands natively
+- Supports plain-prompt Orbit workflow routing through the native instruction surface
 - Lifecycle hooks (`PreToolUse`, `PostToolUse`, `PreCompact`, `Stop`) run via `settings.json`
 - Best fit for the current control-plane layout
 
@@ -64,6 +65,7 @@ Codex does not read `CLAUDE.md`. Instead, Orbit maps the control plane to Codex'
 | Agent registry | `orbit.registry.json` | `orbit.registry.json` (same) |
 | Workflow definitions | `WORKFLOWS.md` | `WORKFLOWS.md` (same) |
 | Slash commands | `/orbit:` via `commands/` | Follow matching `WORKFLOWS.md` section |
+| Plain prompt routing | Native via `CLAUDE.md` | Supported via generated `INSTRUCTIONS.md` + `policy.md` |
 | Lifecycle hooks | `settings.json` hooks | Not mapped (Codex has no hook API) |
 | State persistence | `.orbit/state/STATE.md` | `.codex/state/STATE.md` |
 
@@ -81,8 +83,9 @@ This installs to `.codex/` (local) or `~/.codex/` (global) with:
 1. **Load instructions**: Codex reads `INSTRUCTIONS.md` as the system-level operator prompt at session start.
 2. **Agent selection**: Codex reads `orbit.registry.json` to select the appropriate agent for the task.
 3. **Workflow execution**: Codex follows the matching section in `WORKFLOWS.md` (e.g. for a multi-step task, follow the `plan → build → verify → ship` lifecycle).
-4. **State persistence**: Codex writes session state to `.codex/state/STATE.md` at session end.
-5. **Hooks**: Codex has no lifecycle hook API. Safety checks from `hooks/scripts/pre-tool-use.sh` are NOT enforced. Use Codex only in trusted environments.
+4. **Plain prompts**: Codex infers the nearest Orbit workflow from plain prompts via `INSTRUCTIONS.md` and `policy.md`; explicit `/orbit:*` commands still take precedence.
+5. **State persistence**: Codex writes session state to `.codex/state/STATE.md` at session end.
+6. **Hooks**: Codex has no lifecycle hook API. Safety checks from `hooks/scripts/pre-tool-use.sh` are NOT enforced. Use Codex only in trusted environments.
 
 ---
 
@@ -96,6 +99,7 @@ Antigravity can follow the Orbit control plane if it can read markdown instructi
 - No `install_for_antigravity()` in `install.sh` — manual setup required
 - Hook injection mechanism is unspecified in Antigravity's public docs
 - State persistence pathway is untested
+- Plain-prompt Orbit workflow routing is not currently supported as a reliable runtime capability
 
 **Manual setup (best-effort):**
 1. Point Antigravity at `INSTRUCTIONS.md` as its operator context.

@@ -80,17 +80,29 @@
     "claude": {
       "name": "Claude",
       "instruction_file": "CLAUDE.md",
-      "install_path": ".claude/CLAUDE.md"
+      "install_path": ".claude/CLAUDE.md",
+      "capabilities": {
+        "implicit_prompt_routing": true,
+        "routing_mechanism": "native instruction orchestration"
+      }
     },
     "codex": {
       "name": "Codex",
       "instruction_file": "INSTRUCTIONS.md",
-      "install_path": ".codex/INSTRUCTIONS.md"
+      "install_path": ".codex/INSTRUCTIONS.md",
+      "capabilities": {
+        "implicit_prompt_routing": true,
+        "routing_mechanism": "operator prompt and policy files"
+      }
     },
     "antigravity": {
       "name": "Antigravity",
       "instruction_file": "CLAUDE.md",
-      "install_path": ".antigravity/CLAUDE.md"
+      "install_path": ".antigravity/CLAUDE.md",
+      "capabilities": {
+        "implicit_prompt_routing": false,
+        "routing_mechanism": "not currently supported"
+      }
     }
   }
 }

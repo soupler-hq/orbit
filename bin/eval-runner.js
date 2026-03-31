@@ -87,6 +87,8 @@ const evalCases = parseEvalDataset(datasetText);
 
 const adapterText = readFile('docs/runtime-adapters.md') || '';
 const commandsText = readFile('commands/commands.md') || '';
+const configText = readFile('orbit.config.json');
+const config = configText ? JSON.parse(configText) : { runtimes: {} };
 
 // Build lookup sets from registry
 const registryAgentNames = new Set(registry.agents.map((a) => a.name));
@@ -238,7 +240,58 @@ const portabilityResults = REQUIRED_RUNTIMES.map((req) => {
   };
 });
 
-// ── Metric 6: Observability ────────────────────────────────────────────────
+// ── Metric 6: Prompt Routing Capability ────────────────────────────────────
+// Runtime claims about plain-prompt routing must match the documented adapter surface.
+
+const promptRoutingCapabilityResults = [
+  {
+    check: 'claude runtime declares implicit prompt routing support',
+    pass: config.runtimes?.claude?.capabilities?.implicit_prompt_routing === true,
+    reason:
+      config.runtimes?.claude?.capabilities?.implicit_prompt_routing === true
+        ? 'ok'
+        : 'orbit.config.json missing claude implicit_prompt_routing=true',
+  },
+  {
+    check: 'codex runtime declares implicit prompt routing support',
+    pass: config.runtimes?.codex?.capabilities?.implicit_prompt_routing === true,
+    reason:
+      config.runtimes?.codex?.capabilities?.implicit_prompt_routing === true
+        ? 'ok'
+        : 'orbit.config.json missing codex implicit_prompt_routing=true',
+  },
+  {
+    check: 'antigravity runtime declares no implicit prompt routing support',
+    pass: config.runtimes?.antigravity?.capabilities?.implicit_prompt_routing === false,
+    reason:
+      config.runtimes?.antigravity?.capabilities?.implicit_prompt_routing === false
+        ? 'ok'
+        : 'orbit.config.json missing antigravity implicit_prompt_routing=false',
+  },
+  {
+    check: 'runtime adapter docs describe Codex prompt routing support',
+    pass: adapterText.includes('Supported via generated `INSTRUCTIONS.md` + `policy.md`'),
+    reason: adapterText.includes('Supported via generated `INSTRUCTIONS.md` + `policy.md`')
+      ? 'ok'
+      : 'docs/runtime-adapters.md missing Codex prompt-routing support note',
+  },
+  {
+    check: 'runtime adapter docs describe Antigravity prompt routing limitation',
+    pass: adapterText.includes('Plain-prompt Orbit workflow routing is not currently supported'),
+    reason: adapterText.includes('Plain-prompt Orbit workflow routing is not currently supported')
+      ? 'ok'
+      : 'docs/runtime-adapters.md missing Antigravity prompt-routing limitation',
+  },
+  {
+    check: 'install path teaches Codex policy to infer tracked plain prompts',
+    pass: (readFile('install.sh') || '').includes('plain prompt that implies tracked work'),
+    reason: (readFile('install.sh') || '').includes('plain prompt that implies tracked work')
+      ? 'ok'
+      : 'install.sh missing Codex plain-prompt routing policy',
+  },
+];
+
+// ── Metric 7: Observability ────────────────────────────────────────────────
 // Commands quick, build, and plan must emit a structured classification block.
 // Wave completion block must be present in build command spec.
 
@@ -313,6 +366,7 @@ const metrics = {
   registry: score(integrityResults),
   forge: score(forgeIntegrityResults),
   portability: score(portabilityResults),
+  promptRouting: score(promptRoutingCapabilityResults),
   observability: score(observabilityResults),
 };
 
@@ -322,6 +376,7 @@ const allResults = [
   ...integrityResults,
   ...forgeIntegrityResults,
   ...portabilityResults,
+  ...promptRoutingCapabilityResults,
   ...observabilityResults,
 ];
 const overall = score(allResults);
@@ -343,6 +398,10 @@ const report = {
       ...metrics.portability,
       score: (metrics.portability.pct * 100).toFixed(1) + '%',
     },
+    promptRouting: {
+      ...metrics.promptRouting,
+      score: (metrics.promptRouting.pct * 100).toFixed(1) + '%',
+    },
     observability: {
       ...metrics.observability,
       score: (metrics.observability.pct * 100).toFixed(1) + '%',
@@ -355,6 +414,7 @@ const report = {
     registry: integrityResults,
     forge: forgeIntegrityResults,
     portability: portabilityResults,
+    promptRouting: promptRoutingCapabilityResults,
     observability: observabilityResults,
   },
 };
@@ -384,6 +444,9 @@ if (JSON_OUT) {
   console.log(`  Forge integrity     ${bar(metrics.forge).padEnd(30)}  ${pct(metrics.forge)}`);
   console.log(
     `  Portability         ${bar(metrics.portability).padEnd(30)}  ${pct(metrics.portability)}`
+  );
+  console.log(
+    `  Prompt routing      ${bar(metrics.promptRouting).padEnd(30)}  ${pct(metrics.promptRouting)}`
   );
   console.log(
     `  Observability       ${bar(metrics.observability).padEnd(30)}  ${pct(metrics.observability)}`

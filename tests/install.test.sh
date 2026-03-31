@@ -109,6 +109,8 @@ assert_file "STATE.template.md installed"   "$PROJECT2/.codex/state/STATE.templa
 assert_dir  "agents/ installed"             "$PROJECT2/.codex/agents"
 assert_dir  "skills/ installed"             "$PROJECT2/.codex/skills"
 assert_contains "policy.md mentions INSTRUCTIONS" "$PROJECT2/.codex/policy.md" "INSTRUCTIONS.md"
+assert_contains "policy.md mentions plain prompts" "$PROJECT2/.codex/policy.md" "plain prompt"
+assert_contains "INSTRUCTIONS.md mentions supported plain-prompt routing" "$PROJECT2/.codex/INSTRUCTIONS.md" "supports Orbit workflow inference for plain prompts"
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Flag matrix: --all (claude + codex)"
@@ -118,6 +120,8 @@ run_install "$PROJECT3" --all
 assert_file "Claude: CLAUDE.md"         "$PROJECT3/.claude/CLAUDE.md"
 assert_file "Codex: INSTRUCTIONS.md"    "$PROJECT3/.codex/INSTRUCTIONS.md"
 assert_file "Codex: policy.md"          "$PROJECT3/.codex/policy.md"
+assert_contains "Claude CLAUDE.md mentions supported plain-prompt routing" "$PROJECT3/.claude/CLAUDE.md" "supports Orbit workflow inference for plain prompts"
+assert_contains "Codex policy mentions plain prompts in --all" "$PROJECT3/.codex/policy.md" "plain prompt"
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Node wrapper smoke test: bin/install.js delegates to install.sh"
