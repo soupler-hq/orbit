@@ -17,6 +17,8 @@ Orbit is a tool-agnostic control plane that turns any compatible coding agent (C
 
 **Key capabilities:** smart agent routing · Agent Forge · wave execution · model-cost routing · prompt injection defense · 21 reusable skills · STATE.md persistence · multi-repo Nexus mode
 
+Orbit can also infer workflow intent from plain prompts. Users do not have to prefix every request with `/orbit:*`; explicit commands override inference, but normal chat requests should still route through the correct Orbit workflow.
+
 ### Compatibility
 
 Orbit works across runtimes — Claude Code (native), Codex (stable), Antigravity (experimental). Any agent that can read markdown instructions and run repo-local scripts can use the same registry, skills, and workflows without changes. See [docs/runtime-adapters.md](docs/runtime-adapters.md).

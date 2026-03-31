@@ -256,11 +256,11 @@ Orbit will flag and warn if:
 
 Each `orbit:quick` or `orbit:build` is a discrete task boundary.
 
-- **Follow-up questions / clarifications**: plain prompts are fine — no orbit command needed.
-- **Follow-up work that changes scope**: fire a new `orbit:quick` with the updated task.
-- **Rule of thumb**: if the output should produce a commit, it needs an orbit command.
+- **Follow-up questions / clarifications**: plain prompts are fine.
+- **Follow-up work that changes scope**: Orbit should infer a new task boundary even if the user does not type `/orbit:quick`.
+- **Rule of thumb**: if the output should produce a commit, Orbit should treat the prompt as an Orbit workflow request.
 
-When in doubt: if you would write a commit message for it, run an orbit command.
+When in doubt: if you would write a commit message for it, Orbit should route the prompt through an Orbit command path, whether explicit or implicit.
 
 ### Session Switching Protocol
 

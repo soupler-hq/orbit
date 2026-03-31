@@ -22,13 +22,14 @@ Orbit is a repo-native agent orchestration framework. It routes work to speciali
 ## Operating Order
 
 1. Classify the request by domain, complexity, and mode.
-2. Select the best existing agent.
-3. Forge a new agent if coverage is below the fit threshold.
-4. Plan with RIPER before executing non-trivial work.
-5. Dispatch with fresh subagent context.
-6. **Verify** every deliverable before marking complete
-7. **Commit** atomically with full traceability
-8. **Document** every logic change or new feature in `README.md` and `CHANGELOG.md` immediately. Undocumented code is "Silent Code"—it does not exist in the framework's mental model.
+2. If the request has no explicit `/orbit:*` prefix, infer the closest Orbit workflow before acting.
+3. Select the best existing agent.
+4. Forge a new agent if coverage is below the fit threshold.
+5. Plan with RIPER before executing non-trivial work.
+6. Dispatch with fresh subagent context.
+7. **Verify** every deliverable before marking complete
+8. **Commit** atomically with full traceability
+9. **Document** every logic change or new feature in `README.md` and `CHANGELOG.md` immediately. Undocumented code is "Silent Code"—it does not exist in the framework's mental model.
 
 When the active repository is Orbit itself, use Orbit workflows to evolve Orbit. Default to `/orbit:quick`, `/orbit:plan`, `/orbit:build`, `/orbit:review`, and `/orbit:ship` for framework changes instead of freeform execution.
 
@@ -79,6 +80,8 @@ When the active repository is Orbit itself, use Orbit workflows to evolve Orbit.
 - Do not mark work complete without verification evidence.
 - Do not skip security or review steps for production-sensitive work.
 - For Orbit-on-Orbit work, start from an issue-backed Orbit command boundary whenever the task changes framework behavior, docs, hooks, skills, agents, workflows, or runtime adapters.
+- When a user gives a plain chat prompt that implies work, planning, review, debugging, or shipping, infer the matching Orbit workflow instead of waiting for an explicit slash command.
+- Treat plain prompts as direct Q&A only when the user is clearly asking for explanation, feedback, or lightweight guidance.
 - Run `/orbit:eval` or `bash bin/eval.sh` after changes to the control plane, registry, or runtime adapter docs.
 
 ## Git Rules

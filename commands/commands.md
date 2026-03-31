@@ -276,6 +276,26 @@ Read STATE.md + ROADMAP.md. Determine:
 
 ---
 
+# Orbit Rule: Implicit Routing For Plain Prompts
+
+> If the user does not type an explicit `/orbit:*` command, Orbit must still classify intent and choose the nearest workflow.
+
+## PROCESS
+
+1. Inspect the plain prompt for intent:
+   - implementation or fix request → treat as `/orbit:quick`
+   - planning, roadmap, architecture direction, or large feature framing → treat as `/orbit:plan`
+   - review or audit request → treat as `/orbit:review` or `/orbit:audit`
+   - debugging or root-cause request → treat as `/orbit:debug`
+   - resume / status / what-next request → treat as `/orbit:resume`, `/orbit:progress`, or `/orbit:next`
+2. Emit the same classification/status framing Orbit would emit for the explicit command.
+3. Proceed through the inferred workflow unless the user clearly asked only for explanation or feedback.
+4. If the prompt is ambiguous between two workflows, choose the lower-risk path and state the inferred workflow in the response.
+
+Explicit slash commands always override inferred routing.
+
+---
+
 # Orbit Command: /orbit:quick <task description>
 
 > Ad-hoc task with Orbit quality guarantees, no full planning
@@ -283,6 +303,8 @@ Read STATE.md + ROADMAP.md. Determine:
 ## PROCESS
 
 For Orbit framework work, `/orbit:quick` is the default entrypoint. Do not start freeform implementation on `develop` for work that should be tracked as an Orbit task.
+
+If the user gives a plain prompt that implies a tracked implementation task, Orbit should implicitly route it here and say so in the classification block.
 
 **Emit at start (classification block):**
 
@@ -571,7 +593,7 @@ Output format (always append this block):
 
 6. Whenever a commit, push, stop, or pre-compact event occurs, refresh `context.db` from `STATE.md` so the structured cache stays current.
 
-> **Tip**: Use `orbit:quick` for new tasks. Plain prompts for questions. New scope = new orbit command.
+> **Tip**: Plain prompts are allowed. Orbit should infer the right workflow for tracked work. New scope still means a new Orbit task boundary, even when the user does not type the slash command explicitly.
 > If the session is mid-flight, emit the current execution block and the completion footer before continuing.
 
 ---
