@@ -360,3 +360,5 @@ Output format (always append this block):
 ```
 
 5. Continue work without requiring re-briefing.
+
+> **Tip**: Use `orbit:quick` for new tasks. Plain prompts for questions. New scope = new orbit command.
