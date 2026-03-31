@@ -12,6 +12,7 @@ Naming rules are defined in [docs/standards/artifact-conventions.md](/Users/sunn
 
 | Artifact | Scope | Status | Notes |
 | --- | --- | --- | --- |
+| [orbit-enforcement-remediation.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/plans/orbit-enforcement-remediation.md) | Enforcement-first runtime remediation | Active | Foundation plan for closing the implementation-vs-documentation gap |
 | [provenance-driven-context-synthesis.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/plans/provenance-driven-context-synthesis.md) | PDCS recovery architecture | Active | Cross-cutting initiative spanning multiple issues |
 | [PHASE-0-PLAN.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/PHASE-0-PLAN.md) | v2.9.0 Wave 0 bootstrap | Historical legacy location | Pre-convention plan retained in place for continuity |
 
