@@ -11,6 +11,8 @@
   },
   "scripts": {
     "setup": "bash bin/setup.sh",
+    "context": "node bin/context.js",
+    "bootstrap": "node bin/bootstrap.js",
     "install-local": "bash install.sh --local --tool claude",
     "install-global": "bash install.sh --global --tool claude",
     "install-all": "bash install.sh --global --all",
@@ -81,5 +83,8 @@
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.1",
     "vitest": "^4.1.2"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.8.0"
   }
 }

@@ -4,6 +4,8 @@
 .orbit/hooks/*
 !.orbit/hooks/.gitkeep
 .orbit/errors/
+.orbit/context.db
+.orbit/adapters/
 .orbit/state/sessions.log
 .orbit/state/tool-usage.log
 .orbit/state/compact.log
