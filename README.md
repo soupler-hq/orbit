@@ -77,20 +77,21 @@ bash install.sh --local --tool claude
 
 ## Documentation
 
-| Doc | Contents |
-|-----|----------|
-| [docs/architecture.md](docs/architecture.md) | Control plane, wave execution model, model routing, repo layout, Nexus, Sentinel CI |
-| [docs/concepts.md](docs/concepts.md) | Agents, skills, workflows, STATE.md, hooks, Agent Forge |
-| [docs/token-optimization.md](docs/token-optimization.md) | Six-layer token strategy, cost estimates, model profiles |
-| [docs/security-model.md](docs/security-model.md) | Integrity verification, hook safety, prompt injection defense, SCA |
-| [docs/runtime-adapters.md](docs/runtime-adapters.md) | Claude (native), Codex (stable), Antigravity (experimental) adapter contracts |
-| [docs/playbooks.md](docs/playbooks.md) | Runbooks for common scenarios |
-| [docs/evals.md](docs/evals.md) | Eval framework and scoring methodology |
-| [docs/eval-dataset.md](docs/eval-dataset.md) | Representative prompt set for regression testing |
-| [docs/mcp-guide.md](docs/mcp-guide.md) | MCP server integration |
-| [docs/error-codes.md](docs/error-codes.md) | ERR-ORBIT-NNN registry with runbooks |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to add skills, agents, or patterns |
-| [SECURITY.md](SECURITY.md) | Vulnerability reporting and threat model |
+| Doc                                                                                                    | Contents                                                                            |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| [docs/architecture.md](docs/architecture.md)                                                           | Control plane, wave execution model, model routing, repo layout, Nexus, Sentinel CI |
+| [docs/concepts.md](docs/concepts.md)                                                                   | Agents, skills, workflows, STATE.md, hooks, Agent Forge                             |
+| [docs/token-optimization.md](docs/token-optimization.md)                                               | Six-layer token strategy, cost estimates, model profiles                            |
+| [docs/security-model.md](docs/security-model.md)                                                       | Integrity verification, hook safety, prompt injection defense, SCA                  |
+| [docs/runtime-adapters.md](docs/runtime-adapters.md)                                                   | Claude (native), Codex (stable), Antigravity (experimental) adapter contracts       |
+| [docs/playbooks.md](docs/playbooks.md)                                                                 | Runbooks for common scenarios                                                       |
+| [docs/evals.md](docs/evals.md)                                                                         | Eval framework and scoring methodology                                              |
+| [docs/eval-dataset.md](docs/eval-dataset.md)                                                           | Representative prompt set for regression testing                                    |
+| [docs/plans/provenance-driven-context-synthesis.md](docs/plans/provenance-driven-context-synthesis.md) | Detailed recovery-engine plan and implementation waves                              |
+| [docs/mcp-guide.md](docs/mcp-guide.md)                                                                 | MCP server integration                                                              |
+| [docs/error-codes.md](docs/error-codes.md)                                                             | ERR-ORBIT-NNN registry with runbooks                                                |
+| [CONTRIBUTING.md](CONTRIBUTING.md)                                                                     | How to add skills, agents, or patterns                                              |
+| [SECURITY.md](SECURITY.md)                                                                             | Vulnerability reporting and threat model                                            |
 
 ---
 

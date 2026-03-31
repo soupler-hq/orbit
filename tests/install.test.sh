@@ -118,7 +118,7 @@ assert_file "Installed despite no manifest" "$PROJECT6/.claude/CLAUDE.md"
 section "Hook scripts are executable"
 PROJECT7="$TMPDIR_ROOT/proj-hooks"
 run_install "$PROJECT7" --tool claude
-for hook in pre-tool-use post-tool-use pre-compact stop; do
+for hook in pre-tool-use post-tool-use pre-compact stop sync-context post-commit pre-push; do
   assert_exec "hooks/$hook.sh is +x" "$PROJECT7/.claude/orbit/hooks/$hook.sh"
 done
 

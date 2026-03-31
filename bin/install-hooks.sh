@@ -18,8 +18,16 @@ echo "🛡️  Installing Orbit Governance Hooks..."
 ln -sf "$HOOKS_DIR/pre-commit.sh" "$GIT_DIR/hooks/pre-commit"
 chmod +x "$GIT_DIR/hooks/pre-commit"
 
+# Link post-commit so STATE.md deltas are mirrored into context.db after commits
+ln -sf "$HOOKS_DIR/post-commit.sh" "$GIT_DIR/hooks/post-commit"
+chmod +x "$GIT_DIR/hooks/post-commit"
+
+# Link pre-push so the structured cache is refreshed before shared history leaves the repo
+ln -sf "$HOOKS_DIR/pre-push.sh" "$GIT_DIR/hooks/pre-push"
+chmod +x "$GIT_DIR/hooks/pre-push"
+
 # Link pre-tool-use (for internal use by Antigravity if configured)
 ln -sf "$HOOKS_DIR/pre-tool-use.sh" "$GIT_DIR/hooks/pre-tool-use"
 chmod +x "$GIT_DIR/hooks/pre-tool-use"
 
-echo "✅ Orbit hooks installed. Governance is now enforced on every commit."
+echo "✅ Orbit hooks installed. Governance is now enforced on commits and pushes."

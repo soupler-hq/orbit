@@ -15,11 +15,11 @@ Orbit separates orchestration policy from runtime implementation. The repository
 
 ### Compatibility
 
-| Runtime | Support level | Notes |
-|---------|--------------|-------|
-| Claude Code | `native` | Reads `CLAUDE.md` directly; hooks and slash commands work natively |
-| Codex | `stable` | Uses `INSTRUCTIONS.md` + `policy.md`; no hook API |
-| Antigravity | `experimental` | Partial; no stable hook lifecycle published yet |
+| Runtime     | Support level  | Notes                                                              |
+| ----------- | -------------- | ------------------------------------------------------------------ |
+| Claude Code | `native`       | Reads `CLAUDE.md` directly; hooks and slash commands work natively |
+| Codex       | `stable`       | Uses `INSTRUCTIONS.md` + `policy.md`; no hook API                  |
+| Antigravity | `experimental` | Partial; no stable hook lifecycle published yet                    |
 
 See [runtime-adapters.md](runtime-adapters.md) for full adapter contracts.
 
@@ -100,11 +100,11 @@ state/                  ← STATE.md templates and persistence layer
 
 ### Three Pillars
 
-| Pillar | Responsibility | Core files |
-|--------|---------------|------------|
-| Control Plane | Routes requests, enforces safety, defines agent roles | `orbit.registry.json`, `CLAUDE.md` |
-| Execution Layer | Specialist agents and skills that perform the actual work | `agents/`, `skills/`, `forge/` |
-| Persistence Layer | Makes long-running work resumable, every change traceable | `STATE.md`, `hooks/`, git history |
+| Pillar            | Responsibility                                            | Core files                         |
+| ----------------- | --------------------------------------------------------- | ---------------------------------- |
+| Control Plane     | Routes requests, enforces safety, defines agent roles     | `orbit.registry.json`, `CLAUDE.md` |
+| Execution Layer   | Specialist agents and skills that perform the actual work | `agents/`, `skills/`, `forge/`     |
+| Persistence Layer | Makes long-running work resumable, every change traceable | `STATE.md`, `hooks/`, git history  |
 
 ### Flow
 
@@ -133,11 +133,11 @@ WAVE 3 (sequential): integration → verify → commit → STATE.md update
 
 ### Parallelism levels
 
-| Mode | How |
-|------|-----|
-| Single session | Waves run sequentially, one agent at a time (default) |
-| Multiple sessions + git worktrees | True parallelism via `skills/git-worktree.md` |
-| External orchestrator | Anthropic API called concurrently per subagent — production pattern |
+| Mode                              | How                                                                 |
+| --------------------------------- | ------------------------------------------------------------------- |
+| Single session                    | Waves run sequentially, one agent at a time (default)               |
+| Multiple sessions + git worktrees | True parallelism via `skills/git-worktree.md`                       |
+| External orchestrator             | Anthropic API called concurrently per subagent — production pattern |
 
 `recommended_parallel_sessions` in `orbit.config.json` sets the concurrency target for external orchestration.
 
@@ -145,12 +145,12 @@ WAVE 3 (sequential): integration → verify → commit → STATE.md update
 
 Tasks are routed to the minimum sufficient model. IDs are configured in `orbit.config.json → models.routing` — never hardcoded in agent or skill files.
 
-| Alias | Used for | Cost tier |
-|-------|---------|-----------|
-| `classify` | Intent routing, simple lookups | Cheapest (~20x cheaper) |
-| `standard` | Coding, debugging, most tasks | Default |
-| `reasoning` | Architecture, system design | Highest |
-| `security` | Threat modeling, adversarial analysis | Highest |
+| Alias       | Used for                              | Cost tier               |
+| ----------- | ------------------------------------- | ----------------------- |
+| `classify`  | Intent routing, simple lookups        | Cheapest (~20x cheaper) |
+| `standard`  | Coding, debugging, most tasks         | Default                 |
+| `reasoning` | Architecture, system design           | Highest                 |
+| `security`  | Threat modeling, adversarial analysis | Highest                 |
 
 Override: edit `orbit.config.json → models.routing`. See `examples/model-routing.config.json`.
 
@@ -165,6 +165,7 @@ agents/                        ← role-based agent definitions
 skills/                        ← reusable process frameworks
 hooks/                         ← lifecycle hooks (pre-tool-use, pre-compact, stop)
 commands/                      ← /orbit:* slash command definitions
+docs/plans/                    ← implementation blueprints and wave plans
 templates/                     ← orbit.base.md source of truth for generated files
 state/                         ← STATE.md template and persistence format
 examples/                      ← model routing config, skill examples
@@ -201,15 +202,15 @@ Cross-repo queries spawn wave subagents in each repo, aggregate findings in `NEX
 
 Every PR is guarded by `.github/workflows/orbit-sentinel.yml`:
 
-| Gate | What it checks |
-|------|---------------|
-| `lock-check` | `npm ci --dry-run` — lock file freshness |
-| `lint` | ESLint + Prettier |
-| `test` | Vitest unit tests (≥60% coverage) |
-| `validate` | `bin/validate.sh` — semantic registry consistency |
-| `compliance` | `bin/eval.sh` — SOTA compliance (≥80% eval score) |
-| `safety` | `bin/test-safety.sh` — adversarial / prompt injection |
-| `sca` | `npm audit --audit-level=high` |
-| `self-audit` | `bin/validate-config.sh` — version, hook, model ID, license checks |
+| Gate                | What it checks                                                          |
+| ------------------- | ----------------------------------------------------------------------- |
+| `lock-check`        | `npm ci --dry-run` — lock file freshness                                |
+| `lint`              | ESLint + Prettier                                                       |
+| `test`              | Vitest unit tests (≥60% coverage)                                       |
+| `validate`          | `bin/validate.sh` — semantic registry consistency                       |
+| `compliance`        | `bin/eval.sh` — SOTA compliance (≥80% eval score)                       |
+| `safety`            | `bin/test-safety.sh` — adversarial / prompt injection                   |
+| `sca`               | `npm audit --audit-level=high`                                          |
+| `self-audit`        | `bin/validate-config.sh` — version, hook, model ID, license checks      |
 | `human-views-drift` | Generated `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md` match registry |
-| `publish-dry-run` | Package is publishable |
+| `publish-dry-run`   | Package is publishable                                                  |

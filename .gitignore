@@ -31,6 +31,7 @@ RELEASE_NOTES.md
 .codex/
 .cursor/
 .windsurf/
+.antigravity/
 
 # AGENTS.md — eliminated in v2.8.0, replaced by generated CLAUDE.md/INSTRUCTIONS.md
 # Guard against accidental re-creation by old installers or manual copies

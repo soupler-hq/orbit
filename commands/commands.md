@@ -1,19 +1,21 @@
 # STATE.md Update Protocol
+
 > Standing rule — applies to every Orbit command, every session
 
 STATE.md is Orbit's memory. It must stay current without being asked. Update it automatically whenever any of the following occur:
 
-| Trigger | What to write |
-|---------|---------------|
-| Issue completed (PR merged or task done) | Move item from Todos to Last 5 Completed Tasks |
+| Trigger                                       | What to write                                                    |
+| --------------------------------------------- | ---------------------------------------------------------------- |
+| Issue completed (PR merged or task done)      | Move item from Todos to Last 5 Completed Tasks                   |
 | Decision made (architecture, scope, approach) | Add row to Decisions Log with date, version, decision, rationale |
-| New issue created | Add to appropriate wave/milestone in Todos |
-| Blocker encountered | Add to Todos with `BLOCKED:` prefix and reason |
-| Blocker resolved | Remove from Todos, add resolution to Decisions Log |
-| Milestone shipped | Update Active Milestone, Current Version, add to Decisions Log |
-| Session produces significant context | Update Project Context if active phase/milestone changed |
+| New issue created                             | Add to appropriate wave/milestone in Todos                       |
+| Blocker encountered                           | Add to Todos with `BLOCKED:` prefix and reason                   |
+| Blocker resolved                              | Remove from Todos, add resolution to Decisions Log               |
+| Milestone shipped                             | Update Active Milestone, Current Version, add to Decisions Log   |
+| Session produces significant context          | Update Project Context if active phase/milestone changed         |
 
 **Rules:**
+
 - Never wait to be asked. Update STATE.md as part of completing any task.
 - Decisions Log entries must include rationale — not just what was decided, but why.
 - Last 5 Completed Tasks: always most recent first, always include issue number if applicable.
@@ -21,7 +23,61 @@ STATE.md is Orbit's memory. It must stay current without being asked. Update it 
 
 ---
 
+# Orbit Runtime Status Contract
+
+> Standard live output emitted by Orbit commands and runtime helpers
+
+Orbit should always surface what it is doing, not just the final result.
+
+## Required blocks
+
+### Start banner
+
+Used by `/orbit:quick`, `/orbit:plan`, `/orbit:build`, and similar command entry points.
+
+```
+━━━ Orbit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Domain:     {DOMAIN}
+  Complexity: {COMPLEXITY}
+  Agent:      {AGENT}
+  Mode:       {MODE}
+  Issue:      #{NNN}  (if applicable)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Mid-session execution block
+
+Used by `/orbit:progress` and `/orbit:resume` when work is already in progress.
+
+```
+━━━ Current Execution ━━━━━━━━━━━━━━━━━━━
+  Command:  {command}
+  Agent:    {agent}
+  Wave:     {wave}
+  Status:   {status}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Completion footer
+
+Appended at the end of completed commands so the user has a concrete next step.
+
+```
+---
+## Recommended Next Command
+
+**Primary**: {next command}
+**Why**: {one sentence}
+
+**Alternatives**:
+- {alt 1}
+- {alt 2}
+```
+
+---
+
 # Orbit Command: /orbit:new-project
+
 > Initialize a brand new project from scratch
 
 ## PROCESS
@@ -31,6 +87,7 @@ Load `skills/brainstorming.md`. Then:
 1. **Intent extraction** — Ask up to 5 targeted questions to understand the full scope. Never start before understanding: who uses this, what success looks like, what constraints exist, what already exists.
 
 2. **Research** — Spawn a researcher subagent with this prompt:
+
    ```
    You are a Research Agent. Investigate the domain: {domain}.
    Research axes: ecosystem landscape, technology options, proven patterns, pitfalls at scale.
@@ -53,11 +110,13 @@ Load `skills/brainstorming.md`. Then:
 ---
 
 # Orbit Command: /orbit:plan [N]
+
 > Research + design + break into executable tasks for phase N
 
 ## PROCESS
 
 **Emit at start:**
+
 ```
 ━━━ Orbit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Domain:     {DOMAIN}
@@ -80,11 +139,13 @@ Load `skills/planning.md`. If N not specified, use next unplanned phase from ROA
 ---
 
 # Orbit Command: /orbit:build [N]
+
 > Execute phase N using parallel wave architecture
 
 ## PROCESS
 
 **Emit at start:**
+
 ```
 ━━━ Orbit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Domain:     {DOMAIN}
@@ -98,6 +159,7 @@ Load `skills/planning.md`. If N not specified, use next unplanned phase from ROA
 Read `PHASE-{N}-PLAN.md`. For each wave:
 
 **Dispatch subagents in parallel** (one per task in the wave):
+
 ```
 Subagent context: {task XML} + {relevant ARCH.md sections} + {STATE.md} + {tech stack}
 Subagent instruction: Execute exactly this task. Load the skills it requires. TDD always.
@@ -105,6 +167,7 @@ Commit atomically when done. Write SUMMARY.md.
 ```
 
 **After each wave, emit:**
+
 ```
 ━━━ Wave {N} Complete ━━━━━━━━━━━━━━━━━━━
   ✓ {task 1 title} — committed
@@ -117,6 +180,7 @@ Commit atomically when done. Write SUMMARY.md.
 Collect SUMMARY.md files. Check for blockers before next wave.
 
 After all waves: run verification subagent:
+
 ```
 Verify: does the codebase deliver everything Phase N promised?
 Check against REQUIREMENTS.md. Output: PHASE-{N}-VERIFICATION.md
@@ -125,16 +189,19 @@ Check against REQUIREMENTS.md. Output: PHASE-{N}-VERIFICATION.md
 Update STATE.md with phase completion.
 
 **After completion, emit:**
+
 ```
 ---
 **What's next**: /orbit:verify {N} — run UAT and automated verification
 **Why**: build complete — verification required before ship
 ```
+
 Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
 ---
 
 # Orbit Command: /orbit:verify [N]
+
 > Human + automated verification of phase N deliverables
 
 ## PROCESS
@@ -151,15 +218,18 @@ Logic: same decision table as `/orbit:resume` inference block — first matching
 5. Output: `PHASE-{N}-UAT.md` with results
 
 **After completion, emit:**
+
 ```
 ---
 **What's next**: /orbit:ship {N} — ship phase {N} (UAT passed)
 ```
+
 Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
 ---
 
 # Orbit Command: /orbit:ship [N]
+
 > Create PR, deploy to staging/prod, update release state
 
 ## PROCESS
@@ -178,21 +248,25 @@ Load `skills/deployment.md`. Requires PHASE-{N}-UAT.md to exist and pass.
 7. Output: deployment summary + next phase hint
 
 **After completion, emit:**
+
 ```
 ---
 **What's next**: /orbit:plan — begin next phase  (or /orbit:milestone if all phases shipped)
 **Why**: {one sentence — milestone state + what comes next}
 ```
+
 Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
 ---
 
 # Orbit Command: /orbit:next
+
 > Auto-detect current state and run the next logical step
 
 ## PROCESS
 
 Read STATE.md + ROADMAP.md. Determine:
+
 - No project initialized → run `/orbit:new-project`
 - Phase planned but not built → run `/orbit:build N`
 - Phase built but not verified → run `/orbit:verify N`
@@ -203,11 +277,13 @@ Read STATE.md + ROADMAP.md. Determine:
 ---
 
 # Orbit Command: /orbit:quick <task description>
+
 > Ad-hoc task with Orbit quality guarantees, no full planning
 
 ## PROCESS
 
 **Emit at start (classification block):**
+
 ```
 ━━━ Orbit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Domain:     {ENGINEERING|PRODUCT|DESIGN|OPERATIONS|RESEARCH|REVIEW|SYNTHESIS}
@@ -233,16 +309,19 @@ Read STATE.md + ROADMAP.md. Determine:
 4. Verify, commit, update STATE.md
 
 **After completion, emit:**
+
 ```
 ---
 **What's next**: /orbit:quick #NNN — {next unblocked issue title}
 **Why**: {one sentence — current milestone state + why this is next}
 ```
+
 Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
 ---
 
 # Orbit Command: /orbit:forge <description>
+
 > Build a new specialized agent for a task no current agent covers
 
 ## PROCESS
@@ -260,11 +339,13 @@ Load `agents/forge.md`. Then:
 ---
 
 # Orbit Command: /orbit:review
+
 > Full structured code + architecture review of current state
 
 ## PROCESS
 
 Load `agents/reviewer.md`. Spawn reviewer subagent with:
+
 - All changed files since last ship
 - ARCH.md (to verify architectural alignment)
 - REQUIREMENTS.md (to verify spec compliance)
@@ -275,6 +356,7 @@ CRITICAL findings must be fixed before next ship.
 ---
 
 # Orbit Command: /orbit:audit
+
 > Security + quality deep audit
 
 ## PROCESS
@@ -289,6 +371,7 @@ CRITICAL findings must be fixed before next ship.
 ---
 
 # Orbit Command: /orbit:eval
+
 > Evaluate routing accuracy, workflow compliance, portability, and docs/registry consistency
 
 ## PROCESS
@@ -303,26 +386,30 @@ CRITICAL findings must be fixed before next ship.
 ---
 
 # Orbit Command: /orbit:monitor
+
 > Observability + production health check
 
 ## PROCESS
 
 Load `skills/observability.md`. Check:
+
 - Health endpoints responding?
 - Key metrics within normal ranges?
 - Any alerts firing?
 - Error rate trends?
 - Latency trends?
-Output: `HEALTH-REPORT.md` with current state + any recommended actions
+  Output: `HEALTH-REPORT.md` with current state + any recommended actions
 
 ---
 
 # Orbit Command: /orbit:debug <issue description>
+
 > Systematic 4-phase root cause debugging
 
 ## PROCESS
 
 Load `skills/debugging.md`. Then:
+
 1. Reproduce: write a failing test that captures the bug
 2. Isolate: binary search the call stack
 3. Root cause: 5 whys analysis
@@ -331,11 +418,13 @@ Load `skills/debugging.md`. Then:
 ---
 
 # Orbit Command: /orbit:map-codebase
+
 > Deep analysis of existing repo before planning new work
 
 ## PROCESS
 
 Spawn parallel analysis subagents:
+
 - **Stack analyzer**: tech stack, frameworks, versions, dependencies
 - **Architecture analyzer**: component boundaries, data flows, coupling
 - **Quality analyzer**: test coverage, code smells, tech debt
@@ -346,11 +435,13 @@ Output: `CODEBASE-MAP.md` — comprehensive snapshot that feeds into planning.
 ---
 
 # Orbit Command: /orbit:progress
+
 > Current project status — where are we, what's next, what's blocked
 
 ## PROCESS
 
 Read STATE.md + ROADMAP.md. Output:
+
 ```
 Project: {name}
 Milestone: {M} — {name}
@@ -366,6 +457,7 @@ Next action: /orbit:build 3 to complete Wave 3
 ```
 
 If called mid-session while a build or quick command is in progress, also emit:
+
 ```
 ━━━ Current Execution ━━━━━━━━━━━━━━━━━━━
   Command:  /orbit:{command}
@@ -375,9 +467,12 @@ If called mid-session while a build or quick command is in progress, also emit:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
+Then append the recommended next command block from the runtime status contract.
+
 ---
 
 # Orbit Command: /orbit:cost
+
 > Show current model routing config and estimated token cost breakdown
 
 ## PROCESS
@@ -397,6 +492,7 @@ Example:  examples/model-routing.config.json
 ```
 
 If `orbit.config.json` is missing or has no `models.routing` key, warn:
+
 ```
 ⚠️  No models.routing found in orbit.config.json — using CLAUDE.md defaults.
    Run: cp examples/model-routing.config.json orbit.config.json
@@ -407,6 +503,7 @@ Then show session token usage if available from STATE.md or context metadata.
 ---
 
 # Orbit Command: /orbit:resume
+
 > Reload project state and continue from where we left off
 
 ## CALL MODES
@@ -416,11 +513,13 @@ Full resume: read STATE.md + pre-compact-snapshot + git log + output full status
 
 **Mid-session mode** (called while work is already in progress):
 Diff mode: show only what changed in STATE.md since session started — new decisions, new todos, new blockers. Flag externally-added items clearly. Skip git log and snapshot re-read.
+
 > Use mid-session mode when: another session may have merged a PR and updated STATE.md, or when switching context within the same session.
 
 **Cross-session protocol:**
+
 > **Switching sessions?** Always run `orbit:resume` first in the new session.
-> STATE.md is the source of truth. Any session that skips resume is working blind.
+> `context.db` is the fast structured cache; `STATE.md` is the human-readable ledger and fallback. Any session that skips resume is working blind.
 
 ## PROCESS
 
@@ -436,16 +535,17 @@ Diff mode: show only what changed in STATE.md since session started — new deci
 
 4. **Infer and output the Next Command block** using this decision table (first matching rule wins):
 
-| STATE.md signal | Primary recommendation |
-|----------------|----------------------|
-| Active `/orbit:build [N]` in progress (wave incomplete) | `/orbit:build [N]` — continue wave execution |
-| Build complete, no `/orbit:review` recorded for current phase | `/orbit:review` — required before ship |
-| Review done, phase not yet shipped | `/orbit:ship [N]` — open PR and deploy |
+| STATE.md signal                                                                | Primary recommendation                             |
+| ------------------------------------------------------------------------------ | -------------------------------------------------- |
+| Active `/orbit:build [N]` in progress (wave incomplete)                        | `/orbit:build [N]` — continue wave execution       |
+| Build complete, no `/orbit:review` recorded for current phase                  | `/orbit:review` — required before ship             |
+| Review done, phase not yet shipped                                             | `/orbit:ship [N]` — open PR and deploy             |
 | Last completed task was `/orbit:quick`, open issues remain in active milestone | `/orbit:quick #NNN <title>` — next unblocked issue |
-| All milestone issues complete, next milestone defined | `/orbit:plan` — begin next milestone |
-| No active work / truly ambiguous | `/orbit:next` — let Orbit auto-detect |
+| All milestone issues complete, next milestone defined                          | `/orbit:plan` — begin next milestone               |
+| No active work / truly ambiguous                                               | `/orbit:next` — let Orbit auto-detect              |
 
 Output format (always append this block):
+
 ```
 ---
 ## Recommended Next Command
@@ -460,11 +560,15 @@ Output format (always append this block):
 
 5. Continue work without requiring re-briefing.
 
+6. Whenever a commit, push, stop, or pre-compact event occurs, refresh `context.db` from `STATE.md` so the structured cache stays current.
+
 > **Tip**: Use `orbit:quick` for new tasks. Plain prompts for questions. New scope = new orbit command.
+> If the session is mid-flight, emit the current execution block and the completion footer before continuing.
 
 ---
 
 # Orbit Command: /orbit:ask <question>
+
 > Query project state mid-session — decisions, todos, blockers, version
 
 ## PROCESS
@@ -476,6 +580,7 @@ Output format (always append this block):
 4. If question references a decision, quote the rationale field verbatim.
 
 **Examples:**
+
 ```
 /orbit:ask what is blocking v2.9.0 wave 2?
 /orbit:ask why did we choose SQLite for context.db?

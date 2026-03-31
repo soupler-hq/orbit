@@ -33,5 +33,9 @@ if [[ -f "$STATE_FILE" ]]; then
   fi
 fi
 
+# Keep the structured cache aligned with the human-readable state file.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/sync-context.sh" || true
+
 echo "Orbit: Session recorded at $TIMESTAMP (branch=$GIT_BRANCH, commit=$GIT_COMMIT)" >&2
 exit 0

@@ -6,15 +6,27 @@ last_updated: 2026-03-30
 ---
 
 # Orbit Workflow Playbooks
+
 > Pre-defined execution paths for common project archetypes
 
 ---
+
+## Runtime Telemetry
+
+Orbit should expose live progress, not just end-state summaries.
+
+- `orbit:progress` should show the current command, agent, wave, and status when work is in flight
+- `orbit:resume` should surface a next-command footer after loading state so the user knows what to do next
+- command completion should end with a recommended next step, not a silent success
+
+The telemetry layer is documentation-backed in `commands/commands.md` and enforced by eval coverage.
 
 ## Playbook 1: Full-Stack SaaS Product
 
 **Typical phases**: Auth → Core Domain → Payments → Admin → Launch
 
 ### Phase Structure
+
 ```
 Phase 1: Foundation (Auth + User Model)
   Wave 1: Database schema migration | User model | Auth tokens schema
@@ -48,13 +60,14 @@ Phase 5: Production Launch
 ```
 
 ### Agents Used Per Phase
-| Phase | Primary Agent | Supporting Agents |
-|-------|--------------|-------------------|
-| 1 | engineer | architect (schema), reviewer (auth security) |
-| 2 | engineer | architect (domain model), strategist (scope) |
-| 3 | engineer | researcher (Stripe patterns), reviewer (payment security) |
-| 4 | devops | engineer (admin UI) |
-| 5 | devops | reviewer (security audit), architect (infra) |
+
+| Phase | Primary Agent | Supporting Agents                                         |
+| ----- | ------------- | --------------------------------------------------------- |
+| 1     | engineer      | architect (schema), reviewer (auth security)              |
+| 2     | engineer      | architect (domain model), strategist (scope)              |
+| 3     | engineer      | researcher (Stripe patterns), reviewer (payment security) |
+| 4     | devops        | engineer (admin UI)                                       |
+| 5     | devops        | reviewer (security audit), architect (infra)              |
 
 ---
 
@@ -63,6 +76,7 @@ Phase 5: Production Launch
 **Typical phases**: Agent Design → Core Tools → Orchestration → Evaluation → Production
 
 ### Phase Structure
+
 ```
 Phase 1: Agent Architecture
   Wave 1: Agent system prompt design | Tool schema definitions | Model routing config
@@ -96,13 +110,14 @@ Phase 5: Production + Cost Control
 ```
 
 ### Key Skills Per Phase
-| Phase | Skills Loaded |
-|-------|--------------|
-| 1 | `ai-systems.md`, `architecture.md` |
-| 2 | `tdd.md`, `ai-systems.md` |
-| 3 | `ai-systems.md`, `planning.md` |
-| 4 | `review.md`, `debugging.md` |
-| 5 | `observability.md`, `deployment.md` |
+
+| Phase | Skills Loaded                       |
+| ----- | ----------------------------------- |
+| 1     | `ai-systems.md`, `architecture.md`  |
+| 2     | `tdd.md`, `ai-systems.md`           |
+| 3     | `ai-systems.md`, `planning.md`      |
+| 4     | `review.md`, `debugging.md`         |
+| 5     | `observability.md`, `deployment.md` |
 
 ---
 
@@ -111,6 +126,7 @@ Phase 5: Production + Cost Control
 **Typical phases**: Catalog → Cart+Checkout → Payments → Orders → Fulfillment
 
 ### Phase Structure
+
 ```
 Phase 1: Catalog
   Wave 1: Product model | Category hierarchy | Variant system
@@ -144,6 +160,7 @@ Phase 5: Fulfillment
 ```
 
 ### Non-Negotiables (from `skills/ecommerce.md`)
+
 - Stripe idempotency keys on every payment operation
 - Inventory uses optimistic locking — no overselling
 - Order confirmation via queue — never inline
@@ -156,6 +173,7 @@ Phase 5: Fulfillment
 **Typical phases**: Core Auth → MFA → SSO → Multi-Tenancy → Compliance
 
 ### Phase Structure
+
 ```
 Phase 1: Core Authentication
   Wave 1: User model + password hashing (bcrypt cost=12)
@@ -195,8 +213,9 @@ Phase 5: Multi-Tenancy + RBAC
 For teams breaking apart a monolith or building a new distributed system.
 
 ### Decomposition Strategy
+
 ```
-Step 1: /orbit:map-codebase  
+Step 1: /orbit:map-codebase
   → Identify domain boundaries (Bounded Contexts)
   → Find the seams (low-coupling interfaces between domains)
   → Identify the strangler fig candidates (easiest to extract first)
@@ -220,10 +239,11 @@ Step 4: Cross-cutting concerns
 ```
 
 ### When NOT to Decompose
+
 ```
 Orbit will flag and warn if:
 - Team is <10 engineers (monolith is almost always better)
-- Domain boundaries are unclear (premature decomposition = a mess)  
+- Domain boundaries are unclear (premature decomposition = a mess)
 - You want to "scale" but haven't profiled the bottleneck
 - Latency between services is not measured/acceptable for your SLA
 ```
@@ -261,6 +281,7 @@ Parallel sessions → each runs orbit:resume independently
 Playbooks are not templates to follow blindly. They are starting points.
 
 When you run `/orbit:new-project`, Orbit will:
+
 1. Identify which playbook archetype fits best
 2. Present the relevant phase structure
 3. Ask what to customize for your specific context
@@ -268,6 +289,7 @@ When you run `/orbit:new-project`, Orbit will:
 5. Generate the actual ROADMAP.md from the customized playbook
 
 To use a playbook explicitly:
+
 ```
 /orbit:new-project --playbook saas
 /orbit:new-project --playbook ecommerce

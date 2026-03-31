@@ -264,6 +264,18 @@ const OBS_CHECKS = [
     section: '/orbit:build',
     keyword: 'Wave {N} Complete',
   },
+  {
+    id: 'OBS005',
+    check: 'orbit:progress emits current execution block',
+    section: '/orbit:progress',
+    keyword: '━━━ Current Execution',
+  },
+  {
+    id: 'OBS006',
+    check: 'orbit:resume emits recommended next command footer',
+    section: '/orbit:resume',
+    keyword: '## Recommended Next Command',
+  },
 ];
 
 const observabilityResults = OBS_CHECKS.map((obs) => {

@@ -52,5 +52,9 @@ SNAPSHOT
 # Append to compact log for audit trail
 echo "[$TIMESTAMP] Context compacted on branch=$GIT_BRANCH commit=$GIT_COMMIT" >> "$COMPACT_LOG" 2>/dev/null || true
 
+# Refresh the structured cache before the next session resumes.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/sync-context.sh" || true
+
 echo "Orbit: Pre-compact snapshot saved to $SNAPSHOT_FILE" >&2
 exit 0

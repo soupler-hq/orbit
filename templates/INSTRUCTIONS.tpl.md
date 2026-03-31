@@ -49,10 +49,10 @@ Orbit is a repo-native agent orchestration framework. It routes work to speciali
 
 ## State Rules
 
-- Read `.orbit/state/STATE.md` before acting on a project task.
+- Read `context.db` first when present, then `.orbit/state/STATE.md` as the human-readable fallback.
 - Write `.orbit/state/STATE.md` after meaningful progress.
 - Write `.orbit/state/pre-compact-snapshot.md` before compaction or session end.
-- Treat the state file as the source of truth for current project context.
+- Treat `STATE.md` as the human-readable ledger and `context.db` as the fast structured cache.
 
 ## Execution Rules
 
