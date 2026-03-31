@@ -139,8 +139,7 @@ function formatList(items) {
 }
 
 function planLink(relPath) {
-  const absPath = path.join(ROOT, relPath);
-  return `[${path.basename(relPath)}](${absPath})`;
+  return `[${path.basename(relPath)}](${relPath.replace(/\\/g, '/')})`;
 }
 
 function renderIndex(plans) {
@@ -179,7 +178,7 @@ function renderIndex(plans) {
 
 Use \`docs/plans/\` for plans that should remain reviewable and traceable in git.
 
-Naming rules are defined in [docs/standards/artifact-conventions.md](${path.join(ROOT, 'docs', 'standards', 'artifact-conventions.md')}).
+Naming rules are defined in [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md).
 
 ## Current Active Plans
 

@@ -27,6 +27,8 @@ describe('plan index generator', () => {
     expect(enforcementIndex).toBeLessThan(pdcsIndex);
     expect(rendered).toContain('| 010 | Foundations | P0 |');
     expect(rendered).toContain('| 020 | Recovery | P1 |');
+    expect(rendered).toContain('[issue-130-orbit-enforcement-remediation.md](docs/plans/issue-130-orbit-enforcement-remediation.md)');
+    expect(rendered).not.toContain('/Users/');
   });
 
   it('renders historical wave plans in the completed section', () => {

@@ -10,20 +10,20 @@
 
 Use `docs/plans/` for plans that should remain reviewable and traceable in git.
 
-Naming rules are defined in [docs/standards/artifact-conventions.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/standards/artifact-conventions.md).
+Naming rules are defined in [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md).
 
 ## Current Active Plans
 
 | Rank | Phase | Priority | Artifact | Depends on | Blocks | Status | Version | Last updated |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 010 | Foundations | P0 | [issue-130-orbit-enforcement-remediation.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/plans/issue-130-orbit-enforcement-remediation.md) | none | issue-125 | Active | v1 | 2026-03-31 |
-| 020 | Recovery | P1 | [issue-125-provenance-driven-context-synthesis.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/plans/issue-125-provenance-driven-context-synthesis.md) | issue-130 | none | Active | v1 | 2026-03-31 |
+| 010 | Foundations | P0 | [issue-130-orbit-enforcement-remediation.md](docs/plans/issue-130-orbit-enforcement-remediation.md) | none | issue-125 | Active | v1 | 2026-03-31 |
+| 020 | Recovery | P1 | [issue-125-provenance-driven-context-synthesis.md](docs/plans/issue-125-provenance-driven-context-synthesis.md) | issue-130 | none | Active | v1 | 2026-03-31 |
 
 ## Historical Wave And Completed Plans
 
 | Rank | Phase | Priority | Artifact | Depends on | Blocks | Status | Version |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 000 | Foundations | P0 | [v2.9.0-wave-0-release-bootstrap.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/plans/v2.9.0-wave-0-release-bootstrap.md) | none | none | Implemented | v1 |
+| 000 | Foundations | P0 | [v2.9.0-wave-0-release-bootstrap.md](docs/plans/v2.9.0-wave-0-release-bootstrap.md) | none | none | Implemented | v1 |
 
 ## Rule Of Thumb
 

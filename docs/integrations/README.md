@@ -6,4 +6,4 @@
 
 | Document | Purpose |
 | --- | --- |
-| [mcp-guide.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/integrations/mcp-guide.md) | MCP server setup and usage guidance |
+| [mcp-guide.md](docs/integrations/mcp-guide.md) | MCP server setup and usage guidance |
