@@ -43,6 +43,29 @@ describe('runtime enforcement entrypoints', () => {
     expect(evidence.prStatus).toBe('unknown');
   });
 
+  it('progress runtime keeps a clean tracked branch at branch_ready', () => {
+    const evidence = progress.buildEvidence(
+      {},
+      {
+        gitReader: (args) => {
+          if (args[0] === 'rev-parse') return 'feat/131-enforce-workflow-state-machine';
+          if (args[0] === 'status') return '';
+          return '';
+        },
+        githubReader: () => null,
+      }
+    );
+
+    const output = progress.renderProgress({
+      json: JSON.stringify(evidence),
+      command: '/orbit:progress',
+      agent: 'engineer',
+    });
+
+    expect(evidence.implementationStatus).toBe('not_started');
+    expect(output).toContain('State:    branch_ready');
+  });
+
   it('ship runtime blocks PR progression when review is incomplete', () => {
     const result = ship.renderShipDecision({
       json: JSON.stringify({

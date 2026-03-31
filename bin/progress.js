@@ -101,8 +101,7 @@ function buildEvidence(args = {}, deps = {}) {
   return {
     issue,
     branch,
-    implementationStatus:
-      args.implementationStatus || (dirty ? 'in_progress' : issue ? 'in_progress' : 'not_started'),
+    implementationStatus: args.implementationStatus || (dirty ? 'in_progress' : 'not_started'),
     testsStatus: args.testsStatus || inferTestsStatus(prData),
     reviewStatus: args.reviewStatus || inferReviewStatus(prData),
     prStatus: args.prStatus || inferPrStatus(prData),
