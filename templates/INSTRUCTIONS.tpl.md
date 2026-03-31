@@ -79,8 +79,12 @@ When the active repository is Orbit itself, use Orbit workflows to evolve Orbit.
 ## Docs Rules
 
 - Put durable planning artifacts in `docs/plans/`.
+- Put release-specific supporting artifacts in `docs/releases/`.
+- Put durable issue-supporting briefs in `docs/issues/` only when GitHub issue text is not enough.
 - Put durable specifications in `docs/specs/` when that folder is introduced.
 - Avoid root-level scratch files when an existing docs location fits.
+- Use lowercase kebab-case filenames.
+- Prefer `issue-<nnn>-<slug>.md` for issue docs and `v<major>.<minor>.<patch>-wave-<n>-<slug>.md` for ordered release plans.
 - Regenerate human views after template or registry changes that affect generated instruction files.
 
 ## Safety Rules

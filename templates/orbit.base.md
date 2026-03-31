@@ -233,9 +233,12 @@ chore/<issue>-<slug>
 Documentation and artifact placement rules:
 
 - Persistent plans go in `docs/plans/`
+- Release-specific support artifacts go in `docs/releases/`
+- Durable issue-supporting briefs go in `docs/issues/` only when the GitHub issue needs repo-local design context
 - Specifications go in `docs/specs/` when introduced
 - Runtime/operator docs stay in `docs/`
 - Do not create root-level scratch files like `PLAN.md` or ad-hoc release notes when an existing docs location fits
+- Use lowercase kebab-case filenames; prefer `issue-<nnn>-<slug>.md` for issue docs and `v<major>.<minor>.<patch>-wave-<n>-<slug>.md` for ordered milestone plans
 - Any template or registry change that affects generated views must regenerate the human views before commit
 
 Every task → atomic commit immediately on completion:

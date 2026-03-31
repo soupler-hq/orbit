@@ -90,12 +90,13 @@ Core development follows Orbit-on-Orbit rules: create or identify the issue, cut
 | [docs/evals.md](docs/evals.md)                                                                         | Eval framework and scoring methodology                                              |
 | [docs/eval-dataset.md](docs/eval-dataset.md)                                                           | Representative prompt set for regression testing                                    |
 | [docs/plans/provenance-driven-context-synthesis.md](docs/plans/provenance-driven-context-synthesis.md) | Detailed recovery-engine plan and implementation waves                              |
+| [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md)                       | Naming, placement, and traceability rules for plans, releases, and issue docs       |
 | [docs/mcp-guide.md](docs/mcp-guide.md)                                                                 | MCP server integration                                                              |
 | [docs/error-codes.md](docs/error-codes.md)                                                             | ERR-ORBIT-NNN registry with runbooks                                                |
 | [CONTRIBUTING.md](CONTRIBUTING.md)                                                                     | How to add skills, agents, or patterns                                              |
 | [SECURITY.md](SECURITY.md)                                                                             | Vulnerability reporting and threat model                                            |
 
-Planning artifacts belong in `docs/plans/`. Avoid root-level scratch files when the existing docs tree can hold the artifact cleanly.
+Planning artifacts belong in `docs/plans/`. Release support artifacts belong in `docs/releases/`. Durable issue briefs belong in `docs/issues/` only when needed. Naming and ordering rules live in `docs/standards/artifact-conventions.md`.
 
 ---
 
