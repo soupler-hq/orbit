@@ -97,7 +97,9 @@ Core development follows Orbit-on-Orbit rules: create or identify the issue, cut
 | [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md)                       | Naming, placement, and traceability rules for plans, releases, and issue docs       |
 | [docs/mcp-guide.md](docs/mcp-guide.md)                                                                 | MCP server integration                                                              |
 | [docs/error-codes.md](docs/error-codes.md)                                                             | ERR-ORBIT-NNN registry with runbooks                                                |
-| [CONTRIBUTING.md](CONTRIBUTING.md)                                                                     | How to add skills, agents, or patterns                                              |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)                                                           | How to add skills, agents, or patterns                                              |
+| [docs/CODE_OF_CONDUCT.md](docs/CODE_OF_CONDUCT.md)                                                     | Community behavior and enforcement expectations                                     |
+| [docs/RELEASE_NOTES.md](docs/RELEASE_NOTES.md)                                                         | Top-level release notes used for GitHub releases                                    |
 | [SECURITY.md](SECURITY.md)                                                                             | Vulnerability reporting and threat model                                            |
 
 Planning artifacts belong in `docs/plans/`. Release support artifacts belong in `docs/releases/`. Durable issue briefs belong in `docs/issues/` only when needed. Naming and ordering rules live in `docs/standards/artifact-conventions.md`.

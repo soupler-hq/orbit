@@ -1,10 +1,10 @@
 # Releases Index
 
-> Release-scoped artifacts live here when they need more depth than the root changelog.
+> Release-scoped artifacts live here when they need more depth than the canonical release notes document.
 
 ## Canonical Sources
 
-- [RELEASE_NOTES.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/RELEASE_NOTES.md) is the top-level changelog.
+- [docs/RELEASE_NOTES.md](/Users/sunnysrivastava/Documents/repos/Soupler/soupler-hq/orbit/docs/RELEASE_NOTES.md) is the canonical release notes document.
 - `docs/releases/` holds release-specific supporting artifacts such as checklists, retrospectives, and deep summaries.
 
 ## Naming Convention

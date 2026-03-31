@@ -39,7 +39,7 @@ Use `.orbit/state/` only for runtime state and session artifacts.
 - GitHub Issues remain the canonical tracker for issue status, discussion, and assignment.
 - `STATE.md` remains the canonical human-readable project ledger for current framework state.
 - `context.db` remains the fast structured cache.
-- `RELEASE_NOTES.md` remains the canonical top-level changelog.
+- `docs/RELEASE_NOTES.md` remains the canonical release-notes artifact consumed by the release pipeline.
 - Docs artifacts extend those systems; they do not replace them.
 
 ## Naming Rules
@@ -79,7 +79,7 @@ Examples:
 - `v2.9.0.md`
 - `v2.9.0-checklist.md`
 
-Keep the concise cross-release changelog in `RELEASE_NOTES.md`. Put deeper release-operating artifacts under `docs/releases/`.
+Keep the concise cross-release release notes in `docs/RELEASE_NOTES.md`. Put deeper release-operating artifacts under `docs/releases/`.
 
 ### Issues
 
@@ -119,7 +119,7 @@ When a plan supersedes another artifact, add a short note pointing to the replac
 
 ## Current Transition Rules
 
-Orbit already has legacy artifacts such as `PHASE-0-PLAN.md` and `RELEASE_NOTES.md`.
+Orbit already has legacy artifacts such as `PHASE-0-PLAN.md`.
 
 Transition policy:
 

@@ -4,13 +4,13 @@ Thank you for your interest in contributing. Orbit is an open-source project and
 
 ## Before You Start
 
-- Read [CLAUDE.md](CLAUDE.md) to understand the framework's philosophy and architecture.
+- Read [CLAUDE.md](../CLAUDE.md) to understand the framework's philosophy and architecture.
 - Check [open issues](https://github.com/soupler-hq/orbit/issues) to see if your idea is already tracked.
 - For significant changes (new agents, new skills, workflow changes), open an issue first to align on direction before investing time in an implementation.
 
 ## Security Disclosures
 
-Do **not** open a public GitHub issue for security vulnerabilities. See [SECURITY.md](SECURITY.md) for the responsible disclosure process.
+Do **not** open a public GitHub issue for security vulnerabilities. See [SECURITY.md](../SECURITY.md) for the responsible disclosure process.
 
 ---
 
@@ -18,7 +18,7 @@ Do **not** open a public GitHub issue for security vulnerabilities. See [SECURIT
 
 Orbit uses a **GitHub Flow / Release Candidate** model. All development happens on `develop`; `main` is reserved for stable tagged releases only.
 
-```
+```text
 main       ── v2.5.0 ─────────────────── v2.6.0 ──▶  (tagged releases)
                   \                        ↑
 develop    ─────── ──────────────────────────────▶  (integration branch)
@@ -112,54 +112,9 @@ All six Sentinel checks must be green: `lint`, `test`, `validate`, `compliance`,
 ### Bug Fix
 
 - Include a test that would have caught the bug.
-- Keep the fix minimal — don't refactor surrounding code unless directly related.
+- Keep the fix minimal - don't refactor surrounding code unless directly related.
 
 ### Documentation
 
 - Keep examples in `examples/` consistent with actual framework behavior.
 - If you change a workflow, update `WORKFLOWS.md` and the relevant `/orbit:` command doc in `commands/`.
-
----
-
-## Commit Style
-
-```
-feat(scope): short description
-fix(scope): short description
-docs(scope): short description
-test(scope): short description
-chore(scope): short description
-```
-
-- Present tense, imperative mood ("add" not "added").
-- Keep the subject under 72 characters.
-- Reference the issue number in the body if applicable: `Closes #123`.
-
----
-
-## Promoting a Forged Agent or Skill
-
-If you have built a domain-specific agent or skill in your project using `/orbit:forge` and believe it would benefit the broader community, you can propose it for inclusion in the Orbit core.
-
-**Rules:**
-- Forged agents live in your project — they are **not** added to `orbit.registry.json` by default (that is the kernel; forged agents are userland).
-- A forged agent becomes a promotion candidate when it is genuinely generalizable — useful across projects, not just your domain.
-
-**How to promote:**
-
-```bash
-# Validate your forged agent meets the structural contract
-npm run promote -- agents/my-agent.md --dry-run
-
-# If validation passes, follow the PR instructions printed above
-```
-
-The promote script checks for all required sections (`TRIGGERS ON`, `DOMAIN EXPERTISE`, `OPERATING RULES`, `SKILLS LOADED`, `OUTPUT FORMAT`) and prints a ready-to-use PR title and body. Open the PR against `soupler-hq/orbit` targeting `develop`.
-
----
-
-## Maintainer Review SLA
-
-- Maintainers aim to triage new PRs within **5 business days**.
-- PRs that pass all CI checks and follow this guide will be prioritized.
-- If you haven't heard back after 7 days, feel free to ping the issue thread.

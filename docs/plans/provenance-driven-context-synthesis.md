@@ -33,7 +33,7 @@ The repo should keep a clear hierarchy:
 
 1. Git history, commit metadata, and the working tree
 2. GitHub issues and PRs
-3. Project docs such as `README.md`, `RELEASE_NOTES.md`, and architecture docs
+3. Project docs such as `README.md`, `docs/RELEASE_NOTES.md`, and architecture docs
 4. Materialized views such as `context.db` and `STATE.md`
 
 GitHub Wiki can be used as a mirror or collaboration surface if needed, but not as the canonical store. It is detached from code review, commit history, and release automation.

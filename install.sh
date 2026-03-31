@@ -178,7 +178,7 @@ CMDEOF
   qecho "  ✓ commands/ (${#commands[@]} commands)"
 
   # ── State Template ────────────────────────────────────────────────────────
-  cp "$FRAMEWORK_DIR/state/STATE.template.md" "$CLAUDE_DIR/state/STATE.template.md"
+  cp "$FRAMEWORK_DIR/templates/STATE.md" "$CLAUDE_DIR/state/STATE.template.md"
   qecho "  ✓ state/STATE.template.md"
 
   # ── Hook Scripts ──────────────────────────────────────────────────────────
@@ -220,7 +220,7 @@ install_for_codex() {
   cp "$FRAMEWORK_DIR/orbit.registry.json"      "$codex_dir/orbit.registry.json"
   cp "$FRAMEWORK_DIR/orbit.config.json"        "$codex_dir/orbit.config.json"
   cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$codex_dir/orbit.config.schema.json"
-  cp "$FRAMEWORK_DIR/state/STATE.template.md"  "$codex_dir/state/STATE.template.md"
+  cp "$FRAMEWORK_DIR/templates/STATE.md"  "$codex_dir/state/STATE.template.md"
   qecho "  ✓ operator surface + registry + config + state template"
 
   for f in "$FRAMEWORK_DIR"/agents/*.md; do
@@ -275,7 +275,7 @@ install_for_antigravity() {
   cp "$FRAMEWORK_DIR/orbit.registry.json"      "$ag_dir/orbit.registry.json"
   cp "$FRAMEWORK_DIR/orbit.config.json"        "$ag_dir/orbit.config.json"
   cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$ag_dir/orbit.config.schema.json"
-  cp "$FRAMEWORK_DIR/state/STATE.template.md"  "$ag_dir/state/STATE.template.md"
+  cp "$FRAMEWORK_DIR/templates/STATE.md"  "$ag_dir/state/STATE.template.md"
   qecho "  ✓ control plane docs + registry + config + state template"
 
   for f in "$FRAMEWORK_DIR"/agents/*.md; do
@@ -356,7 +356,7 @@ init_project_state() {
 
   # Copy STATE template if no STATE.md yet
   if [[ ! -f "$state_dir/STATE.md" ]]; then
-    cp "$FRAMEWORK_DIR/state/STATE.template.md" "$state_dir/STATE.md"
+    cp "$FRAMEWORK_DIR/templates/STATE.md" "$state_dir/STATE.md"
     qecho "  ✓ .orbit/state/STATE.md (from template)"
   else
     qecho "  ✓ .orbit/state/STATE.md (already exists — preserved)"

@@ -12,7 +12,7 @@
  * --from The last published version (exclusive). If omitted, only --to is extracted.
  *
  * When --from is provided, all changelog sections in (from, to] are combined
- * in order (newest first) into RELEASE_NOTES.md. This covers the case where
+ * in order (newest first) into docs/RELEASE_NOTES.md. This covers the case where
  * multiple sprint versions have accumulated on develop before landing on main.
  *
  * Examples:
@@ -56,7 +56,7 @@ if (!toVersion) {
 // ── Parse CHANGELOG.md into version blocks ────────────────────────────────────
 
 const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
-const notesPath = path.join(process.cwd(), 'RELEASE_NOTES.md');
+const notesPath = path.join(process.cwd(), 'docs', 'RELEASE_NOTES.md');
 
 if (!fs.existsSync(changelogPath)) {
   console.error('❌ CHANGELOG.md not found');

@@ -23,7 +23,7 @@ required_files=(
   "install.sh"
   "package.json"
   "orbit.config.json"
-  "state/STATE.template.md"
+  "templates/STATE.md"
   "bin/install.js"
   "bin/eval.sh"
   "bin/progress.js"
@@ -38,7 +38,6 @@ required_dirs=(
   "hooks/scripts"
   "docs"
   "examples"
-  "state"
   "bin"
 )
 # forge/ is optional — it is userland (created on demand), not kernel
