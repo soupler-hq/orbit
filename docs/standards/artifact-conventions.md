@@ -39,6 +39,24 @@ Use `.orbit/state/` only for runtime state and session artifacts.
   tool-usage.log
 ```
 
+## Root Contract
+
+Keep the repository root intentionally thin.
+
+- The root contract is the small set of public entrypoints, generated runtime-facing artifacts, and top-level repo metadata that operators and adapters expect to find at stable paths.
+- The internal docs tree is everything under `docs/`, where durable architecture, operations, quality, governance, planning, and release artifacts should live by default.
+- New documentation should go into `docs/` unless it is explicitly part of the root contract.
+
+Allowed root surface:
+
+- public repo metadata: `README.md`, `CHANGELOG.md`, `SECURITY.md`, `LICENSE`
+- generated runtime-facing docs: `CLAUDE.md`, `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md`
+- control-plane/config artifacts: `orbit.registry.json`, `orbit.config.json`, `orbit.config.schema.json`
+- public install entrypoint: `install.sh`
+- package manifest surface: `package.json`, `package-lock.json`
+
+Everything else should live in the appropriate internal directory such as `docs/`, `bin/`, `templates/`, `commands/`, `hooks/`, or `tests/`.
+
 ## Source Of Truth
 
 - GitHub Issues remain the canonical tracker for issue status, discussion, and assignment.
@@ -229,6 +247,7 @@ Transition policy:
 ## Anti-Patterns
 
 - root-level scratch files like `PLAN.md`, `plan-final.md`, `notes-new.md`
+- new root-level markdown docs that are not part of the approved root contract
 - filenames that encode personal context instead of project context
 - duplicating issue state in both GitHub and repo docs without a clear reason
 - mixing runtime state files with durable design docs

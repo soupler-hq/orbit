@@ -196,6 +196,43 @@ node "$ROOT_DIR/bin/generate-plan-index.js" --check
 
 printf 'Orbit validation passed.\n'
 
+# ── Root markdown hygiene check ──────────────────────────────────────────────
+# Warn when new root-level markdown files appear outside the approved root
+# contract. This keeps docs discoverable without breaking historical flows.
+node <<'NODE'
+const fs = require('fs');
+const path = require('path');
+
+const root = process.cwd();
+const allowedRootMarkdown = new Set([
+  'README.md',
+  'CHANGELOG.md',
+  'CLAUDE.md',
+  'INSTRUCTIONS.md',
+  'SECURITY.md',
+  'SKILLS.md',
+  'WORKFLOWS.md',
+  'LICENSE.md'
+]);
+
+const entries = fs.readdirSync(root, { withFileTypes: true });
+const unexpected = entries
+  .filter(entry => entry.isFile())
+  .map(entry => entry.name)
+  .filter(name => name.endsWith('.md'))
+  .filter(name => !allowedRootMarkdown.has(name))
+  .sort();
+
+if (unexpected.length > 0) {
+  console.warn('\n⚠️  Warning: unexpected root-level markdown files found.');
+  console.warn('   Root markdown is reserved for the root contract.');
+  console.warn('   Move durable docs into docs/ unless they are intentional public entrypoints.');
+  for (const name of unexpected) {
+    console.warn(`   - ${name}`);
+  }
+}
+NODE
+
 # ── Model ID hygiene check ────────────────────────────────────────────────────
 # Warn if the orchestrator template contains raw Anthropic model IDs instead of routing aliases.
 # Check templates/orbit.base.md — the canonical source. CLAUDE.md is generated at install time.

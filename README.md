@@ -103,6 +103,7 @@ Core development follows Orbit-on-Orbit rules: create or identify the issue, cut
 | [SECURITY.md](SECURITY.md)                                                                             | Vulnerability reporting and threat model                                            |
 
 Planning artifacts belong in `docs/plans/`. Release support artifacts belong in `docs/releases/`. Durable issue briefs belong in `docs/issues/` only when needed. Canonical documentation is grouped by intent under `docs/architecture/`, `docs/operations/`, `docs/quality/`, `docs/integrations/`, and `docs/governance/`. Naming and ordering rules live in `docs/standards/artifact-conventions.md`.
+The repo root is intentionally a thin contract: public entrypoints, generated runtime-facing artifacts, and top-level metadata stay in root; new durable docs should default to `docs/`.
 
 ---
 
