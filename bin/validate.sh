@@ -32,6 +32,7 @@ required_files=(
   "templates/STATE.md"
   "bin/install.js"
   "bin/eval.sh"
+  "bin/generate-plan-index.js"
   "bin/progress.js"
   "bin/ship.js"
   "bin/workflow-state.js"
@@ -190,6 +191,8 @@ if (fs.existsSync(forgeDir)) {
   }
 }
 NODE
+
+node "$ROOT_DIR/bin/generate-plan-index.js" --check
 
 printf 'Orbit validation passed.\n'
 
