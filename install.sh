@@ -79,9 +79,14 @@ install_for_claude() {
     "$CLAUDE_DIR/orbit/hooks"
 
   # ── Orchestrator (generated from template at install time) ────────────────
+  # Written to .claude/CLAUDE.md (Claude Code's project-level instructions)
+  # Also written to the project root so Claude Code auto-detects it on open.
+  # Both are gitignored — this file is always generated, never committed.
   node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
     --runtime claude --output "$CLAUDE_DIR/CLAUDE.md"
-  echo "  ✓ CLAUDE.md (generated for Claude runtime)"
+  node "$FRAMEWORK_DIR/bin/generate-instructions.js" \
+    --runtime claude --output "$PROJECT_DIR/CLAUDE.md"
+  echo "  ✓ CLAUDE.md (generated for Claude runtime → .claude/ + project root)"
 
   # ── Human-view files (generated from registry + templates at install time) ─
   node "$FRAMEWORK_DIR/bin/generate-instructions.js" --human-views

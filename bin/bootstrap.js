@@ -7,26 +7,26 @@
  *   1. package.json     → name, version, description
  *   2. CHANGELOG.md     → milestone history, last shipped version (## [X.Y.Z] format)
  *   3. README.md        → project vision (first paragraph or ## About / ## Overview)
- *   4. git log -30      → recent work, infer active branch intent
+ *   4. git log -30      → recent commit count
  *   5. gh issue list    → populate tasks table (skip if gh unavailable)
- *   6. STATE.md         → if exists, migrate via context.js --migrate
+ *   6. STATE.md         → decisions log + active phase migration
  *   7. Defaults         → vision="new project", milestone="v1.0.0", phase=1
  *
  * Usage:
  *   node bin/bootstrap.js           # bootstrap from repo state
  *   node bin/bootstrap.js --force   # overwrite existing context.db without prompt
  *
- * Part of v2.9.0 Wave 3 (#101)
+ * Part of v2.9.0 (#101)
  */
 
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
+const { openDb, DB_PATH } = require('./db');
 
 const ROOT = path.resolve(__dirname, '..');
-const DB_PATH = path.join(ROOT, '.orbit', 'context.db');
 const STATE_PATH = path.join(ROOT, '.orbit', 'state', 'STATE.md');
 const ARGS = process.argv.slice(2);
 const FORCE = ARGS.includes('--force');
@@ -41,46 +41,6 @@ const D = '\x1b[2m';
 function log(symbol, label, value, source) {
   const src = source ? ` ${D}(from ${source})${N}` : '';
   console.log(`  ${symbol} ${label.padEnd(12)} → ${value}${src}`);
-}
-
-// ── Database setup ────────────────────────────────────────────────────────────
-
-function openDb() {
-  let Database;
-  try {
-    Database = require('better-sqlite3');
-  } catch {
-    console.error(
-      'ERROR: better-sqlite3 not installed.\n' +
-        '  Run: npm install better-sqlite3\n' +
-        '  Then re-run: node bin/bootstrap.js'
-    );
-    process.exit(1);
-  }
-
-  const dir = path.dirname(DB_PATH);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-  const db = new Database(DB_PATH);
-  db.pragma('journal_mode = WAL');
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS state (
-      key TEXT PRIMARY KEY, value TEXT NOT NULL,
-      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
-    );
-    CREATE TABLE IF NOT EXISTS decisions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      date TEXT NOT NULL, version TEXT,
-      decision TEXT NOT NULL, rationale TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS tasks (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      issue_ref TEXT, title TEXT NOT NULL,
-      status TEXT NOT NULL CHECK(status IN ('open','in_progress','complete','blocked')),
-      milestone TEXT, wave INTEGER, blocker TEXT
-    );
-  `);
-  return db;
 }
 
 // ── Source readers ─────────────────────────────────────────────────────────────
@@ -110,13 +70,13 @@ function readReadme() {
 function extractVision(readme) {
   if (!readme) return null;
 
-  // Try ## About or ## Overview section
+  // Try ## About or ## Overview section first
   const sectionMatch = readme.match(
     /^## (?:About|Overview)\s*\n+([\s\S]+?)(?=\n##|\n---|\n\n\n|$)/m
   );
   if (sectionMatch) return sectionMatch[1].trim().split('\n')[0].trim();
 
-  // Fall back to first non-heading, non-empty paragraph after any badges/shields
+  // Fall back to first non-heading, non-empty paragraph
   const lines = readme.split('\n');
   for (const line of lines) {
     const trimmed = line.trim();
@@ -137,7 +97,6 @@ function extractVision(readme) {
 
 function extractMilestoneFromChangelog(changelog) {
   if (!changelog) return null;
-  // Look for ## [X.Y.Z] — title or ## [Unreleased]
   const match = changelog.match(/^## \[([^\]]+)\](?:\s*[-—]\s*(.+))?/m);
   if (!match) return null;
   const version = match[1];
@@ -147,7 +106,12 @@ function extractMilestoneFromChangelog(changelog) {
 
 function runGitLog() {
   try {
-    return execSync('git log --oneline -30 2>/dev/null', { cwd: ROOT, encoding: 'utf8' });
+    const out = execFileSync('git', ['log', '--oneline', '-30'], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    return out.trim() || null;
   } catch {
     return null;
   }
@@ -155,11 +119,12 @@ function runGitLog() {
 
 function runGhIssueList() {
   try {
-    const output = execSync(
-      'gh issue list --limit 50 --state open --json number,title,labels 2>/dev/null',
-      { cwd: ROOT, encoding: 'utf8', timeout: 10000 }
+    const out = execFileSync(
+      'gh',
+      ['issue', 'list', '--limit', '50', '--state', 'open', '--json', 'number,title,labels'],
+      { cwd: ROOT, encoding: 'utf8', timeout: 10000, stdio: ['ignore', 'pipe', 'ignore'] }
     );
-    return JSON.parse(output);
+    return JSON.parse(out);
   } catch {
     return null; // gh not available or not authenticated — skip gracefully
   }
@@ -183,7 +148,7 @@ function main() {
   }
 
   const upsertResults = {};
-  const db = openDb();
+  const db = openDb(DB_PATH);
   const upsert = db.prepare(
     'INSERT OR REPLACE INTO state (key, value, updated_at) VALUES (?, ?, unixepoch())'
   );
@@ -198,7 +163,7 @@ function main() {
     if (pkg.name) {
       upsert.run('name', pkg.name);
     }
-    if (pkg.description && !upsertResults.vision) {
+    if (pkg.description) {
       upsert.run('vision', pkg.description);
       upsertResults.vision = {
         value: pkg.description.slice(0, 60) + '…',
@@ -226,12 +191,13 @@ function main() {
     };
   }
 
-  // 4. git log — recent work
+  // 4. git log — commit count only (no raw log stored; no consumer for it)
   const gitLog = runGitLog();
   if (gitLog) {
-    upsert.run('git_log_snapshot', gitLog.slice(0, 2000));
+    const commitCount = gitLog.split('\n').filter(Boolean).length;
+    upsert.run('git_commit_count', String(commitCount));
     upsertResults.git = {
-      value: `${gitLog.split('\n').filter(Boolean).length} commits`,
+      value: `${commitCount} recent commits`,
       source: 'git log',
     };
   }
@@ -250,12 +216,12 @@ function main() {
     upsertResults.issues = { value: `${issueCount} open issues`, source: 'gh issue list' };
   }
 
-  // 6. STATE.md — migrate if exists
+  // 6. STATE.md — migrate decisions + active phase if exists
   let migratedDecisions = 0;
   if (fs.existsSync(STATE_PATH)) {
     const text = fs.readFileSync(STATE_PATH, 'utf8');
 
-    // Decisions
+    // Decisions table
     const decisionSection = text.match(/## Decisions Log\n([\s\S]*?)(?=\n##|$)/);
     if (decisionSection) {
       const insertDecision = db.prepare(
@@ -281,7 +247,7 @@ function main() {
       }
     }
 
-    // Phase from STATE.md
+    // Active phase
     const phaseMatch = text.match(/\*\*Active Phase\*\*:\s*(.+)/);
     if (phaseMatch) {
       upsert.run('phase', phaseMatch[1].trim());
@@ -292,7 +258,7 @@ function main() {
 
   db.close();
 
-  // Print summary
+  // ── Print summary ─────────────────────────────────────────────────────────
   const symOk = `${G}✓${N}`;
   const symSkip = `${Y}—${N}`;
 
@@ -317,7 +283,7 @@ function main() {
   log(
     upsertResults.git ? symOk : symSkip,
     'git',
-    upsertResults.git?.value || '(not found)',
+    upsertResults.git?.value || '(skipped)',
     upsertResults.git?.source
   );
   if (upsertResults.issues) {

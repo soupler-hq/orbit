@@ -164,14 +164,15 @@ main() {
 
   for tool in "${tools[@]}"; do
     echo -e "${B}Installing for ${tool}...${N}"
-    if install_tool "$tool" 2>&1; then
+    # Run each tool install in a subshell so one failure doesn't abort others
+    if (install_tool "$tool") 2>&1; then
       local adapter_abs
       adapter_abs="$(create_adapter_dir "$tool")"
       local adapter_rel="${adapter_abs#$FRAMEWORK_DIR/}"
       echo "$adapter_rel" > "$tmp_dir/${tool}.ok"
     else
       echo "failed" > "$tmp_dir/${tool}.fail"
-      echo -e "  ${R}✗ install failed for ${tool}${N}"
+      echo -e "  ${R}✗ install failed for ${tool} — continuing with remaining tools${N}"
     fi
     echo ""
   done
@@ -201,17 +202,54 @@ main() {
 
   echo ""
 
-  # Check for context.db
-  if [[ -f "$ORBIT_DIR/context.db" ]]; then
-    echo -e "  ${G}✓ context.db found at .orbit/context.db${N}"
+  # ── Bootstrap context.db ────────────────────────────────────────────────────
+  # Always run after install so context.db reflects the current repo state.
+  # --force overwrites any existing db so setup is always idempotent.
+  echo -e "${B}Bootstrapping context.db...${N}"
+  if node "$FRAMEWORK_DIR/bin/bootstrap.js" --force 2>&1; then
+    echo -e "  ${G}✓ context.db ready at .orbit/context.db${N}"
   else
-    echo -e "  ${Y}ℹ  context.db not found.${N}"
-    echo "     Run: npm run bootstrap  (available after Wave 2 ships)"
+    echo -e "  ${Y}⚠  bootstrap failed — context.db may be missing or stale${N}"
+    echo "     Run manually: npm run bootstrap"
   fi
 
   echo ""
   echo -e "${B}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${N}"
-  echo -e "  ${G}Ready.${N} Run: /orbit:resume to load project context."
+  echo -e "  ${G}Setup complete.${N}"
+  echo ""
+  echo -e "  ${B}What to do next:${N}"
+  echo ""
+
+  # Tool-specific next steps
+  for tool in "${tools[@]}"; do
+    case "$tool" in
+      claude)
+        echo -e "  ${G}Claude Code (VS Code):${N}"
+        echo "    Open this folder in VS Code — Orbit context loads automatically."
+        echo "    First command: /orbit:resume"
+        echo ""
+        ;;
+      codex)
+        echo -e "  ${G}Codex:${N}"
+        echo "    Run:  codex"
+        echo "    Then: Read .codex/policy.md and .codex/INSTRUCTIONS.md to load Orbit context."
+        echo "          Read .orbit/state/STATE.md for project state."
+        echo "          Then: /orbit:resume"
+        echo ""
+        ;;
+      antigravity)
+        echo -e "  ${G}Antigravity:${N}"
+        echo "    Open this folder — read .antigravity/CLAUDE.md at session start."
+        echo "    First command: /orbit:resume"
+        echo ""
+        ;;
+    esac
+  done
+
+  echo -e "  ${B}Verify context:${N}"
+  echo "    node bin/context.js --load minimal"
+  echo ""
+  echo -e "${B}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${N}"
   echo ""
 }
 

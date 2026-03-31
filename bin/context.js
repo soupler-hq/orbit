@@ -21,64 +21,11 @@
 
 const fs = require('fs');
 const path = require('path');
+const { openDb, DB_PATH } = require('./db');
 
 const ROOT = path.resolve(__dirname, '..');
-const DB_PATH = path.join(ROOT, '.orbit', 'context.db');
 const STATE_PATH = path.join(ROOT, '.orbit', 'state', 'STATE.md');
 const ARGS = process.argv.slice(2);
-
-// ── Database helpers ──────────────────────────────────────────────────────────
-
-function openDb() {
-  let Database;
-  try {
-    Database = require('better-sqlite3');
-  } catch {
-    console.error(
-      'ERROR: better-sqlite3 not installed.\n' +
-        '  Run: npm install better-sqlite3\n' +
-        '  Then re-run: node bin/context.js'
-    );
-    process.exit(1);
-  }
-
-  const dir = path.dirname(DB_PATH);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-  const db = new Database(DB_PATH);
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
-  initSchema(db);
-  return db;
-}
-
-function initSchema(db) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS state (
-      key        TEXT PRIMARY KEY,
-      value      TEXT NOT NULL,
-      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
-    );
-
-    CREATE TABLE IF NOT EXISTS decisions (
-      id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      date       TEXT NOT NULL,
-      version    TEXT,
-      decision   TEXT NOT NULL,
-      rationale  TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS tasks (
-      id         INTEGER PRIMARY KEY AUTOINCREMENT,
-      issue_ref  TEXT,
-      title      TEXT NOT NULL,
-      status     TEXT NOT NULL CHECK(status IN ('open','in_progress','complete','blocked')),
-      milestone  TEXT,
-      wave       INTEGER,
-      blocker    TEXT
-    );
-  `);
-}
 
 // ── Load levels ───────────────────────────────────────────────────────────────
 
@@ -283,7 +230,7 @@ function migrate(db) {
   console.log(`  state facts:  ${count.state}`);
   console.log(`  decisions:    ${count.decisions}`);
   console.log(`  tasks:        ${count.tasks}`);
-  console.log(`  context.db:   ${DB_PATH}`);
+  console.log(`  context.db:   ${DB_PATH.replace(ROOT + '/', '')}`);
 }
 
 // ── Export: context.db → STATE.md text ───────────────────────────────────────
@@ -316,6 +263,13 @@ function main() {
   if (!flag) {
     console.error('Usage: node bin/context.js --load <level> | --save | --migrate | --export');
     console.error('Levels: minimal, standard, full, decisions, blocked');
+    process.exit(1);
+  }
+
+  // --load requires context.db to already exist — it must not silently create an empty one
+  if (flag === '--load' && !fs.existsSync(DB_PATH)) {
+    console.error('ERROR: context.db not found at .orbit/context.db');
+    console.error('  Run: npm run bootstrap  (or: node bin/bootstrap.js)');
     process.exit(1);
   }
 
