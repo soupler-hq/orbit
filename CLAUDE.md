@@ -295,3 +295,6 @@ When no agent fits >60%:
 /orbit:cost            — show token usage and estimated cost
 /orbit:promote         — propagate local patterns/agents to the Orbit Core
 ```
+
+> **Scope rule**: Plain prompts between commands are for questions and clarifications only. New work that produces a commit needs a new orbit command.
+> **Session rule**: Run `/orbit:resume` at the start of every session. Run it again mid-session if STATE.md may have been updated externally (another session merged a PR).

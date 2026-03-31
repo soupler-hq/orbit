@@ -230,6 +230,32 @@ Orbit will flag and warn if:
 
 ---
 
+## Operational Playbooks
+
+### One command per task
+
+Each `orbit:quick` or `orbit:build` is a discrete task boundary.
+
+- **Follow-up questions / clarifications**: plain prompts are fine — no orbit command needed.
+- **Follow-up work that changes scope**: fire a new `orbit:quick` with the updated task.
+- **Rule of thumb**: if the output should produce a commit, it needs an orbit command.
+
+When in doubt: if you would write a commit message for it, run an orbit command.
+
+### Session Switching Protocol
+
+Always run `orbit:resume` at the start of each new session. STATE.md is the source of truth — any session that skips resume is working blind.
+
+If STATE.md was updated externally while you were in a session (e.g., another session merged a PR and updated STATE.md), run `orbit:resume` again mid-session to reload.
+
+```
+New session → orbit:resume (always)
+Switching context mid-session → orbit:resume (reload)
+Parallel sessions → each runs orbit:resume independently
+```
+
+---
+
 ## Using Playbooks
 
 Playbooks are not templates to follow blindly. They are starting points.
