@@ -243,6 +243,8 @@ Use git worktrees for parallel wave execution: `skills/git-worktree.md`
 
 **To resume:** Run `/orbit:resume` — reads STATE.md + snapshot, checks git log, continues.
 
+**Mid-session reload:** `/orbit:resume` can also be called at any point during an active session to reload STATE.md context — use it when switching sessions or when STATE.md may have been updated externally (another session merged a PR).
+
 ---
 
 ## AGENT FORGE PROTOCOL
@@ -295,3 +297,6 @@ When no agent fits >60%:
 /orbit:cost            — show token usage and estimated cost
 /orbit:promote         — propagate local patterns/agents to the Orbit Core
 ```
+
+> **Scope rule**: Plain prompts between commands are for questions and clarifications only. New work that produces a commit needs a new orbit command.
+> **Session rule**: Run `/orbit:resume` at the start of every session. Run it again mid-session if STATE.md may have been updated externally (another session merged a PR).
