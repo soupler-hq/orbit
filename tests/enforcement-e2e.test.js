@@ -31,12 +31,17 @@ fi
 exit 1
 `;
 
-  const ghBody = JSON.stringify(prData ?? {});
-  const ghScript = `#!/usr/bin/env bash
+  const ghScript =
+    prData === null
+      ? `#!/usr/bin/env bash
+set -euo pipefail
+exit 1
+`
+      : `#!/usr/bin/env bash
 set -euo pipefail
 if [[ "$1" == "pr" && "$2" == "view" ]]; then
   cat <<'EOF'
-${ghBody}
+${JSON.stringify(prData)}
 EOF
   exit 0
 fi
@@ -53,6 +58,14 @@ exit 1
     },
     cleanup: () => fs.rmSync(tmpDir, { recursive: true, force: true }),
   };
+}
+
+function runCli(binName, runtime, args = []) {
+  return spawnSync('node', [path.join(ROOT, 'bin', binName), ...args], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    env: runtime.env,
+  });
 }
 
 describe('enforcement end-to-end command paths', () => {
@@ -133,6 +146,60 @@ describe('enforcement end-to-end command paths', () => {
       expect(result.stdout).toContain('/orbit:progress');
     } finally {
       runtime.cleanup();
+    }
+  });
+
+  it('walks the closed loop from implementation to review gate to PR-open tracking', () => {
+    const implementationRuntime = buildFakeRuntime({
+      branch: 'feat/132-enforcement-e2e',
+      dirty: true,
+      prData: null,
+    });
+    const reviewRuntime = buildFakeRuntime({
+      branch: 'feat/132-enforcement-e2e',
+      prData: {
+        state: 'CLOSED',
+        reviewDecision: 'REVIEW_REQUIRED',
+        statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+      },
+    });
+    const prOpenRuntime = buildFakeRuntime({
+      branch: 'feat/132-enforcement-e2e',
+      prData: {
+        state: 'OPEN',
+        reviewDecision: 'APPROVED',
+        statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+      },
+    });
+
+    try {
+      const implementation = runCli('progress.js', implementationRuntime, [
+        '--agent',
+        'engineer',
+        '--wave',
+        '1',
+      ]);
+      expect(implementation.status).toBe(0);
+      expect(implementation.stdout).toContain('State:    implementation_in_progress');
+
+      const reviewGate = runCli('progress.js', reviewRuntime, ['--agent', 'engineer', '--wave', '1']);
+      expect(reviewGate.status).toBe(0);
+      expect(reviewGate.stdout).toContain('State:    review_required');
+      expect(reviewGate.stdout).toContain('Command:  /orbit:review');
+
+      const blockedShip = runCli('ship.js', reviewRuntime);
+      expect(blockedShip.status).toBe(1);
+      expect(blockedShip.stderr).toContain('Pull request gate blocked');
+      expect(blockedShip.stderr).toContain('/orbit:review');
+
+      const prOpen = runCli('ship.js', prOpenRuntime);
+      expect(prOpen.status).toBe(0);
+      expect(prOpen.stdout).toContain('State:    pr_open');
+      expect(prOpen.stdout).toContain('**Primary**: /orbit:progress');
+    } finally {
+      implementationRuntime.cleanup();
+      reviewRuntime.cleanup();
+      prOpenRuntime.cleanup();
     }
   });
 });

@@ -11,7 +11,9 @@
 
 'use strict';
 
+const { execFileSync } = require('child_process');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -28,6 +30,62 @@ function readFile(rel) {
 
 function fileExists(rel) {
   return fs.existsSync(path.join(ROOT, rel));
+}
+
+function makeExecutable(filePath, content) {
+  fs.writeFileSync(filePath, content, { mode: 0o755 });
+}
+
+function buildFakeRuntime({ branch, dirty = false, prData = null }) {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-eval-runtime-'));
+  const binDir = path.join(tmpDir, 'bin');
+  fs.mkdirSync(binDir, { recursive: true });
+
+  const gitScript = `#!/usr/bin/env bash
+set -euo pipefail
+if [[ "$1" == "rev-parse" && "$2" == "--abbrev-ref" && "$3" == "HEAD" ]]; then
+  printf '%s\\n' '${branch}'
+  exit 0
+fi
+if [[ "$1" == "status" && "$2" == "--porcelain" ]]; then
+  if [[ "${dirty ? '1' : '0'}" == "1" ]]; then
+    printf ' M src/example.js\\n'
+  fi
+  exit 0
+fi
+exit 1
+`;
+
+  const ghBody = JSON.stringify(prData ?? {});
+  const ghScript = `#!/usr/bin/env bash
+set -euo pipefail
+if [[ "$1" == "pr" && "$2" == "view" ]]; then
+  cat <<'EOF'
+${ghBody}
+EOF
+  exit 0
+fi
+exit 1
+`;
+
+  makeExecutable(path.join(binDir, 'git'), gitScript);
+  makeExecutable(path.join(binDir, 'gh'), ghScript);
+
+  return {
+    env: {
+      ...process.env,
+      PATH: `${binDir}:${process.env.PATH}`,
+    },
+    cleanup: () => fs.rmSync(tmpDir, { recursive: true, force: true }),
+  };
+}
+
+function runNode(relPath, args = [], options = {}) {
+  return execFileSync('node', [path.join(ROOT, relPath), ...args], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    ...options,
+  });
 }
 
 /** Parse the eval-dataset.md Markdown table into case objects. */
@@ -295,10 +353,6 @@ const promptRoutingCapabilityResults = [
 // Distinguish executable enforcement from documentation/structural coverage.
 
 const installTestText = readFile('tests/install.test.sh') || '';
-const progressRuntimeText = readFile('bin/progress.js') || '';
-const shipRuntimeText = readFile('bin/ship.js') || '';
-const instructionGeneratorText = readFile('bin/generate-instructions.js') || '';
-
 const runtimeEnforcementResults = [
   {
     check: 'progress runtime exists',
@@ -346,36 +400,107 @@ const runtimeEnforcementResults = [
       : 'tests/install.test.sh missing setup-path hook coverage',
   },
   {
-    check: 'progress runtime reads GitHub PR truth',
-    pass: progressRuntimeText.includes("'gh'") && progressRuntimeText.includes('statusCheckRollup'),
-    reason:
-      progressRuntimeText.includes("'gh'") && progressRuntimeText.includes('statusCheckRollup')
-        ? 'ok'
-        : 'bin/progress.js missing GitHub PR state inference',
+    check: 'progress runtime executes review gate from live runtime evidence',
+    ...(() => {
+      const runtime = buildFakeRuntime({
+        branch: 'feat/132-runtime-enforcement',
+        prData: {
+          state: 'CLOSED',
+          reviewDecision: 'REVIEW_REQUIRED',
+          statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+        },
+      });
+      try {
+        const output = runNode('bin/progress.js', ['--agent', 'engineer', '--wave', '1'], {
+          env: runtime.env,
+        });
+        const pass =
+          output.includes('Workflow Gate') &&
+          output.includes('State:    review_required') &&
+          output.includes('Command:  /orbit:review');
+        return {
+          pass,
+          reason: pass
+            ? 'ok'
+            : 'bin/progress.js did not surface the review gate from runtime truth',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `bin/progress.js failed to execute: ${error.message}`,
+        };
+      } finally {
+        runtime.cleanup();
+      }
+    })(),
   },
   {
-    check: 'ship runtime blocks progression through workflow state',
-    pass:
-      shipRuntimeText.includes('assertPullRequestReady') &&
-      shipRuntimeText.includes('formatWorkflowGate') &&
-      shipRuntimeText.includes('summary.nextCommand'),
-    reason:
-      shipRuntimeText.includes('assertPullRequestReady') &&
-      shipRuntimeText.includes('formatWorkflowGate') &&
-      shipRuntimeText.includes('summary.nextCommand')
-        ? 'ok'
-        : 'bin/ship.js missing enforced PR gate path',
+    check: 'ship runtime blocks progression when review is incomplete',
+    ...(() => {
+      const runtime = buildFakeRuntime({
+        branch: 'feat/132-runtime-enforcement',
+        prData: {
+          state: 'CLOSED',
+          reviewDecision: 'REVIEW_REQUIRED',
+          statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+        },
+      });
+      try {
+        runNode('bin/ship.js', [], {
+          env: runtime.env,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        });
+        return {
+          pass: false,
+          reason: 'bin/ship.js allowed PR progression even though review was still required',
+        };
+      } catch (error) {
+        const stderr = String(error.stdout || '') + String(error.stderr || '');
+        const pass =
+          stderr.includes('Pull request gate blocked') && stderr.includes('/orbit:review');
+        return {
+          pass,
+          reason: pass ? 'ok' : 'bin/ship.js did not block progression with review guidance',
+        };
+      } finally {
+        runtime.cleanup();
+      }
+    })(),
   },
   {
-    check: 'instruction generator uses runtime capability gate for implicit routing',
-    pass:
-      instructionGeneratorText.includes('implicit_prompt_routing') &&
-      instructionGeneratorText.includes('does not provide reliable plain-prompt interception'),
-    reason:
-      instructionGeneratorText.includes('implicit_prompt_routing') &&
-      instructionGeneratorText.includes('does not provide reliable plain-prompt interception')
-        ? 'ok'
-        : 'bin/generate-instructions.js missing runtime capability boundary for plain prompts',
+    check: 'instruction generator enforces supported vs unsupported plain-prompt routing',
+    ...(() => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-eval-routing-'));
+      const codexOut = path.join(tmpDir, 'codex.md');
+      const antigravityOut = path.join(tmpDir, 'antigravity.md');
+      try {
+        runNode('bin/generate-instructions.js', ['--runtime', 'codex', '--output', codexOut]);
+        runNode('bin/generate-instructions.js', [
+          '--runtime',
+          'antigravity',
+          '--output',
+          antigravityOut,
+        ]);
+        const codexText = fs.readFileSync(codexOut, 'utf8');
+        const antigravityText = fs.readFileSync(antigravityOut, 'utf8');
+        const pass =
+          codexText.includes('supports Orbit workflow inference for plain prompts') &&
+          antigravityText.includes('does not provide reliable plain-prompt interception');
+        return {
+          pass,
+          reason: pass
+            ? 'ok'
+            : 'instruction generation did not honor runtime prompt-routing capabilities',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `instruction generation failed: ${error.message}`,
+        };
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    })(),
   },
 ];
 
