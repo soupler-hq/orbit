@@ -124,6 +124,14 @@ Check against REQUIREMENTS.md. Output: PHASE-{N}-VERIFICATION.md
 
 Update STATE.md with phase completion.
 
+**After completion, emit:**
+```
+---
+**What's next**: /orbit:verify {N} — run UAT and automated verification
+**Why**: build complete — verification required before ship
+```
+Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
+
 ---
 
 # Orbit Command: /orbit:verify [N]
@@ -141,6 +149,13 @@ Update STATE.md with phase completion.
    ```
 4. For any failures: spawn debug subagent to find root cause + create fix task
 5. Output: `PHASE-{N}-UAT.md` with results
+
+**After completion, emit:**
+```
+---
+**What's next**: /orbit:ship {N} — ship phase {N} (UAT passed)
+```
+Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
 ---
 
@@ -161,6 +176,14 @@ Load `skills/deployment.md`. Requires PHASE-{N}-UAT.md to exist and pass.
 5. Tag release: `v{milestone}.{phase}`
 6. Update STATE.md: phase marked shipped
 7. Output: deployment summary + next phase hint
+
+**After completion, emit:**
+```
+---
+**What's next**: /orbit:plan — begin next phase  (or /orbit:milestone if all phases shipped)
+**Why**: {one sentence — milestone state + what comes next}
+```
+Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
 ---
 
@@ -208,6 +231,14 @@ Read STATE.md + ROADMAP.md. Determine:
    ```
 3. Execute with relevant skill loaded
 4. Verify, commit, update STATE.md
+
+**After completion, emit:**
+```
+---
+**What's next**: /orbit:quick #NNN — {next unblocked issue title}
+**Why**: {one sentence — current milestone state + why this is next}
+```
+Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
 ---
 
@@ -377,6 +408,19 @@ Then show session token usage if available from STATE.md or context metadata.
 
 # Orbit Command: /orbit:resume
 > Reload project state and continue from where we left off
+
+## CALL MODES
+
+**Session-start mode** (default — called at the beginning of a new session):
+Full resume: read STATE.md + pre-compact-snapshot + git log + output full status summary + next command.
+
+**Mid-session mode** (called while work is already in progress):
+Diff mode: show only what changed in STATE.md since session started — new decisions, new todos, new blockers. Flag externally-added items clearly. Skip git log and snapshot re-read.
+> Use mid-session mode when: another session may have merged a PR and updated STATE.md, or when switching context within the same session.
+
+**Cross-session protocol:**
+> **Switching sessions?** Always run `orbit:resume` first in the new session.
+> STATE.md is the source of truth. Any session that skips resume is working blind.
 
 ## PROCESS
 
