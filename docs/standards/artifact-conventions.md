@@ -210,6 +210,12 @@ Each durable artifact should include:
 
 When a plan supersedes another artifact, add a short note pointing to the replacement instead of silently abandoning the older document.
 
+For pull requests:
+
+- keep the PR body aligned with the current branch scope
+- update `Summary`, `Issues`, `Test plan`, and `Merge notes` whenever commits materially change implementation scope or verification evidence
+- do not leave stale PR descriptions after follow-up commits
+
 ## Current Transition Rules
 
 Orbit already has historical artifacts such as `docs/plans/v2.9.0-wave-0-release-bootstrap.md`.
