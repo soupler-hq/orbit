@@ -291,7 +291,95 @@ const promptRoutingCapabilityResults = [
   },
 ];
 
-// ── Metric 7: Observability ────────────────────────────────────────────────
+// ── Metric 7: Runtime Enforcement ──────────────────────────────────────────
+// Distinguish executable enforcement from documentation/structural coverage.
+
+const installTestText = readFile('tests/install.test.sh') || '';
+const progressRuntimeText = readFile('bin/progress.js') || '';
+const shipRuntimeText = readFile('bin/ship.js') || '';
+const instructionGeneratorText = readFile('bin/generate-instructions.js') || '';
+
+const runtimeEnforcementResults = [
+  {
+    check: 'progress runtime exists',
+    pass: fileExists('bin/progress.js'),
+    reason: fileExists('bin/progress.js') ? 'ok' : 'bin/progress.js missing',
+  },
+  {
+    check: 'ship runtime exists',
+    pass: fileExists('bin/ship.js'),
+    reason: fileExists('bin/ship.js') ? 'ok' : 'bin/ship.js missing',
+  },
+  {
+    check: 'runtime enforcement unit coverage exists',
+    pass: fileExists('tests/runtime-enforcement.test.js'),
+    reason: fileExists('tests/runtime-enforcement.test.js')
+      ? 'ok'
+      : 'tests/runtime-enforcement.test.js missing',
+  },
+  {
+    check: 'runtime enforcement end-to-end coverage exists',
+    pass: fileExists('tests/enforcement-e2e.test.js'),
+    reason: fileExists('tests/enforcement-e2e.test.js')
+      ? 'ok'
+      : 'tests/enforcement-e2e.test.js missing',
+  },
+  {
+    check: 'install tests cover normal-repo hook installation',
+    pass: installTestText.includes('Local install wires git hooks in a normal repo'),
+    reason: installTestText.includes('Local install wires git hooks in a normal repo')
+      ? 'ok'
+      : 'tests/install.test.sh missing normal-repo hook coverage',
+  },
+  {
+    check: 'install tests cover linked-worktree hook installation',
+    pass: installTestText.includes('Local install wires git hooks in a linked worktree'),
+    reason: installTestText.includes('Local install wires git hooks in a linked worktree')
+      ? 'ok'
+      : 'tests/install.test.sh missing linked-worktree hook coverage',
+  },
+  {
+    check: 'install tests cover setup-path hook activation',
+    pass: installTestText.includes('Setup path also ensures git hooks are active'),
+    reason: installTestText.includes('Setup path also ensures git hooks are active')
+      ? 'ok'
+      : 'tests/install.test.sh missing setup-path hook coverage',
+  },
+  {
+    check: 'progress runtime reads GitHub PR truth',
+    pass: progressRuntimeText.includes("'gh'") && progressRuntimeText.includes('statusCheckRollup'),
+    reason:
+      progressRuntimeText.includes("'gh'") && progressRuntimeText.includes('statusCheckRollup')
+        ? 'ok'
+        : 'bin/progress.js missing GitHub PR state inference',
+  },
+  {
+    check: 'ship runtime blocks progression through workflow state',
+    pass:
+      shipRuntimeText.includes('assertPullRequestReady') &&
+      shipRuntimeText.includes('formatWorkflowGate') &&
+      shipRuntimeText.includes('summary.nextCommand'),
+    reason:
+      shipRuntimeText.includes('assertPullRequestReady') &&
+      shipRuntimeText.includes('formatWorkflowGate') &&
+      shipRuntimeText.includes('summary.nextCommand')
+        ? 'ok'
+        : 'bin/ship.js missing enforced PR gate path',
+  },
+  {
+    check: 'instruction generator uses runtime capability gate for implicit routing',
+    pass:
+      instructionGeneratorText.includes('implicit_prompt_routing') &&
+      instructionGeneratorText.includes('does not provide reliable plain-prompt interception'),
+    reason:
+      instructionGeneratorText.includes('implicit_prompt_routing') &&
+      instructionGeneratorText.includes('does not provide reliable plain-prompt interception')
+        ? 'ok'
+        : 'bin/generate-instructions.js missing runtime capability boundary for plain prompts',
+  },
+];
+
+// ── Metric 8: Observability ────────────────────────────────────────────────
 // Commands quick, build, and plan must emit a structured classification block.
 // Wave completion block must be present in build command spec.
 
@@ -367,6 +455,7 @@ const metrics = {
   forge: score(forgeIntegrityResults),
   portability: score(portabilityResults),
   promptRouting: score(promptRoutingCapabilityResults),
+  runtimeEnforcement: score(runtimeEnforcementResults),
   observability: score(observabilityResults),
 };
 
@@ -377,6 +466,7 @@ const allResults = [
   ...forgeIntegrityResults,
   ...portabilityResults,
   ...promptRoutingCapabilityResults,
+  ...runtimeEnforcementResults,
   ...observabilityResults,
 ];
 const overall = score(allResults);
@@ -402,6 +492,10 @@ const report = {
       ...metrics.promptRouting,
       score: (metrics.promptRouting.pct * 100).toFixed(1) + '%',
     },
+    runtimeEnforcement: {
+      ...metrics.runtimeEnforcement,
+      score: (metrics.runtimeEnforcement.pct * 100).toFixed(1) + '%',
+    },
     observability: {
       ...metrics.observability,
       score: (metrics.observability.pct * 100).toFixed(1) + '%',
@@ -415,6 +509,7 @@ const report = {
     forge: forgeIntegrityResults,
     portability: portabilityResults,
     promptRouting: promptRoutingCapabilityResults,
+    runtimeEnforcement: runtimeEnforcementResults,
     observability: observabilityResults,
   },
 };
@@ -447,6 +542,9 @@ if (JSON_OUT) {
   );
   console.log(
     `  Prompt routing      ${bar(metrics.promptRouting).padEnd(30)}  ${pct(metrics.promptRouting)}`
+  );
+  console.log(
+    `  Runtime enforcement ${bar(metrics.runtimeEnforcement).padEnd(30)}  ${pct(metrics.runtimeEnforcement)}`
   );
   console.log(
     `  Observability       ${bar(metrics.observability).padEnd(30)}  ${pct(metrics.observability)}`
