@@ -10,8 +10,8 @@ Orbit is a repo-native agent orchestration framework. It routes work to speciali
 
 - `orbit.registry.json` is the machine-readable source of truth for agents, skills, and workflows.
 - `orbit.config.json` is the runtime configuration source of truth.
-- `docs/runtime-adapters.md` defines native vs compatible runtime support.
-- `docs/evals.md` defines the eval rubric for routing, workflow compliance, and portability.
+- `docs/architecture/runtime-adapters.md` defines native vs compatible runtime support.
+- `docs/quality/evaluation-framework.md` defines the eval rubric for routing, workflow compliance, and portability.
 - `CLAUDE.md` is the Claude-oriented orchestrator view; other runtimes receive their generated instruction file at install time.
 - `INSTRUCTIONS.md`, `SKILLS.md`, and `WORKFLOWS.md` are the modular operator references.
 
@@ -77,7 +77,7 @@ When the active repository is Orbit itself, use Orbit workflows to evolve Orbit.
 - Never work directly on `develop` or `main`; cut a feature branch from a freshly pulled `develop`.
 - Keep one issue scope per branch and carry the issue id through branch naming, PR, and STATE updates.
 - Open PRs using the repository's established PR structure: `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` when relevant.
-- If a branch changes materially after the PR is opened, refresh the PR body before requesting review again. Treat this as part of the work, not optional cleanup.
+- If a branch changes materially after the PR is opened, update the PR body before requesting review again so the description stays truthful. Treat this as part of the work, not optional cleanup.
 - Use git worktrees when parallel waves need isolated write spaces.
 
 ## Docs Rules

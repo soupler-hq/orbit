@@ -1,3 +1,11 @@
+---
+id: code-of-conduct-v1
+doc_type: policy
+status: Final
+version: v1
+last_updated: 2026-03-31
+---
+
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge

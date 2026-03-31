@@ -5,8 +5,8 @@
     "skills": "SKILLS.md",
     "workflows": "WORKFLOWS.md",
     "runtime_config": "orbit.config.json",
-    "runtime_adapters": "docs/runtime-adapters.md",
-    "evals": "docs/evals.md"
+    "runtime_adapters": "docs/architecture/runtime-adapters.md",
+    "evals": "docs/quality/evaluation-framework.md"
   },
   "runtimes": [
     {
@@ -28,7 +28,7 @@
         "orbit.registry.json",
         "orbit.config.json"
       ],
-      "adapter": "docs/runtime-adapters.md#codex",
+      "adapter": "docs/architecture/runtime-adapters.md#codex",
       "install_fn": "install_for_codex"
     },
     {
@@ -39,7 +39,7 @@
         "WORKFLOWS.md",
         "orbit.registry.json"
       ],
-      "adapter": "docs/runtime-adapters.md#antigravity",
+      "adapter": "docs/architecture/runtime-adapters.md#antigravity",
       "install_fn": null,
       "note": "No stable hook/lifecycle API published. Tracked in issue #17."
     }

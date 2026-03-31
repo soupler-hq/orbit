@@ -9,23 +9,30 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 required_files=(
   "templates/orbit.base.md"
   "README.md"
+  "docs/README.md"
+  "docs/architecture/README.md"
+  "docs/operations/README.md"
+  "docs/quality/README.md"
+  "docs/integrations/README.md"
+  "docs/governance/README.md"
   "INSTRUCTIONS.md"
   "SKILLS.md"
   "WORKFLOWS.md"
   "orbit.registry.json"
   "orbit.config.schema.json"
-  "docs/runtime-adapters.md"
-  "docs/evals.md"
-  "docs/eval-dataset.md"
+  "docs/architecture/runtime-adapters.md"
+  "docs/quality/evaluation-framework.md"
+  "docs/quality/eval-dataset.md"
   "commands/commands.md"
   "commands/orbit/eval.md"
   "hooks/HOOKS.md"
   "install.sh"
   "package.json"
   "orbit.config.json"
-  "state/STATE.template.md"
+  "templates/STATE.md"
   "bin/install.js"
   "bin/eval.sh"
+  "bin/generate-plan-index.js"
   "bin/progress.js"
   "bin/ship.js"
   "bin/workflow-state.js"
@@ -38,7 +45,6 @@ required_dirs=(
   "hooks/scripts"
   "docs"
   "examples"
-  "state"
   "bin"
 )
 # forge/ is optional — it is userland (created on demand), not kernel
@@ -72,9 +78,9 @@ const configPath = path.join(root, 'orbit.config.json');
 const registryPath = path.join(root, 'orbit.registry.json');
 const schemaPath = path.join(root, 'orbit.config.schema.json');
 const packagePath = path.join(root, 'package.json');
-const runtimeAdaptersPath = path.join(root, 'docs', 'runtime-adapters.md');
-const evalsPath = path.join(root, 'docs', 'evals.md');
-const evalDatasetPath = path.join(root, 'docs', 'eval-dataset.md');
+const runtimeAdaptersPath = path.join(root, 'docs', 'architecture', 'runtime-adapters.md');
+const evalsPath = path.join(root, 'docs', 'quality', 'evaluation-framework.md');
+const evalDatasetPath = path.join(root, 'docs', 'quality', 'eval-dataset.md');
 const evalCommandPath = path.join(root, 'commands', 'orbit', 'eval.md');
 
 JSON.parse(fs.readFileSync(configPath, 'utf8'));
@@ -186,7 +192,46 @@ if (fs.existsSync(forgeDir)) {
 }
 NODE
 
+node "$ROOT_DIR/bin/generate-plan-index.js" --check
+
 printf 'Orbit validation passed.\n'
+
+# ── Root markdown hygiene check ──────────────────────────────────────────────
+# Warn when new root-level markdown files appear outside the approved root
+# contract. This keeps docs discoverable without breaking historical flows.
+node <<'NODE'
+const fs = require('fs');
+const path = require('path');
+
+const root = process.cwd();
+const allowedRootMarkdown = new Set([
+  'README.md',
+  'CHANGELOG.md',
+  'CLAUDE.md',
+  'INSTRUCTIONS.md',
+  'SECURITY.md',
+  'SKILLS.md',
+  'WORKFLOWS.md',
+  'LICENSE.md'
+]);
+
+const entries = fs.readdirSync(root, { withFileTypes: true });
+const unexpected = entries
+  .filter(entry => entry.isFile())
+  .map(entry => entry.name)
+  .filter(name => name.endsWith('.md'))
+  .filter(name => !allowedRootMarkdown.has(name))
+  .sort();
+
+if (unexpected.length > 0) {
+  console.warn('\n⚠️  Warning: unexpected root-level markdown files found.');
+  console.warn('   Root markdown is reserved for the root contract.');
+  console.warn('   Move durable docs into docs/ unless they are intentional public entrypoints.');
+  for (const name of unexpected) {
+    console.warn(`   - ${name}`);
+  }
+}
+NODE
 
 # ── Model ID hygiene check ────────────────────────────────────────────────────
 # Warn if the orchestrator template contains raw Anthropic model IDs instead of routing aliases.

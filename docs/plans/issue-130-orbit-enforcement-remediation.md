@@ -1,3 +1,18 @@
+---
+id: issue-130-orbit-enforcement-remediation
+doc_type: plan
+status: Active
+version: v1
+last_updated: 2026-03-31
+scope: issue-130
+phase: Foundations
+rank: 010
+priority: P0
+depends_on: []
+blocks:
+  - issue-125
+---
+
 # Orbit Enforcement Remediation
 
 > Implementation plan to make Orbit enforce its workflow contracts at runtime, not only in documentation
