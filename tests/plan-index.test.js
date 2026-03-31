@@ -29,7 +29,7 @@ describe('plan index generator', () => {
     expect(rendered).toContain('| 020 | Recovery | P1 |');
     expect(rendered).toContain('[issue-130-orbit-enforcement-remediation.md](issue-130-orbit-enforcement-remediation.md)');
     expect(rendered).toContain('[artifact-conventions.md](../standards/artifact-conventions.md)');
-    expect(rendered).not.toContain('/Users/');
+    expect(rendered).not.toContain(process.cwd());
   });
 
   it('renders historical wave plans in the completed section', () => {
