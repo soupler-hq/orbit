@@ -243,6 +243,8 @@ Use git worktrees for parallel wave execution: `skills/git-worktree.md`
 
 **To resume:** Run `/orbit:resume` — reads STATE.md + snapshot, checks git log, continues.
 
+**Mid-session reload:** `/orbit:resume` can also be called at any point during an active session to reload STATE.md context — use it when switching sessions or when STATE.md may have been updated externally (another session merged a PR).
+
 ---
 
 ## AGENT FORGE PROTOCOL

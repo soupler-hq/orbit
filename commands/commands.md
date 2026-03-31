@@ -409,6 +409,19 @@ Then show session token usage if available from STATE.md or context metadata.
 # Orbit Command: /orbit:resume
 > Reload project state and continue from where we left off
 
+## CALL MODES
+
+**Session-start mode** (default — called at the beginning of a new session):
+Full resume: read STATE.md + pre-compact-snapshot + git log + output full status summary + next command.
+
+**Mid-session mode** (called while work is already in progress):
+Diff mode: show only what changed in STATE.md since session started — new decisions, new todos, new blockers. Flag externally-added items clearly. Skip git log and snapshot re-read.
+> Use mid-session mode when: another session may have merged a PR and updated STATE.md, or when switching context within the same session.
+
+**Cross-session protocol:**
+> **Switching sessions?** Always run `orbit:resume` first in the new session.
+> STATE.md is the source of truth. Any session that skips resume is working blind.
+
 ## PROCESS
 
 1. Read `.orbit/state/STATE.md`. If it exists, also read `.orbit/state/pre-compact-snapshot.md`.
