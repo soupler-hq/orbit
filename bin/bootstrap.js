@@ -88,7 +88,11 @@ function openDb() {
 function readPackageJson() {
   const p = path.join(ROOT, 'package.json');
   if (!fs.existsSync(p)) return null;
-  try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; }
+  try {
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch {
+    return null;
+  }
 }
 
 function readChangelog() {
@@ -107,7 +111,9 @@ function extractVision(readme) {
   if (!readme) return null;
 
   // Try ## About or ## Overview section
-  const sectionMatch = readme.match(/^## (?:About|Overview)\s*\n+([\s\S]+?)(?=\n##|\n---|\n\n\n|$)/m);
+  const sectionMatch = readme.match(
+    /^## (?:About|Overview)\s*\n+([\s\S]+?)(?=\n##|\n---|\n\n\n|$)/m
+  );
   if (sectionMatch) return sectionMatch[1].trim().split('\n')[0].trim();
 
   // Fall back to first non-heading, non-empty paragraph after any badges/shields
@@ -117,10 +123,10 @@ function extractVision(readme) {
     if (
       trimmed &&
       !trimmed.startsWith('#') &&
-      !trimmed.startsWith('!') &&      // images
-      !trimmed.startsWith('<') &&      // HTML
-      !trimmed.startsWith('[') &&      // badges
-      !trimmed.startsWith('>') &&      // blockquotes
+      !trimmed.startsWith('!') && // images
+      !trimmed.startsWith('<') && // HTML
+      !trimmed.startsWith('[') && // badges
+      !trimmed.startsWith('>') && // blockquotes
       trimmed.length > 20
     ) {
       return trimmed.slice(0, 120) + (trimmed.length > 120 ? '…' : '');
@@ -178,16 +184,26 @@ function main() {
 
   const upsertResults = {};
   const db = openDb();
-  const upsert = db.prepare('INSERT OR REPLACE INTO state (key, value, updated_at) VALUES (?, ?, unixepoch())');
+  const upsert = db.prepare(
+    'INSERT OR REPLACE INTO state (key, value, updated_at) VALUES (?, ?, unixepoch())'
+  );
 
   // 1. package.json
   const pkg = readPackageJson();
   if (pkg) {
-    if (pkg.version) { upsert.run('version', pkg.version); upsertResults.version = { value: pkg.version, source: 'package.json' }; }
-    if (pkg.name)    { upsert.run('name', pkg.name); }
+    if (pkg.version) {
+      upsert.run('version', pkg.version);
+      upsertResults.version = { value: pkg.version, source: 'package.json' };
+    }
+    if (pkg.name) {
+      upsert.run('name', pkg.name);
+    }
     if (pkg.description && !upsertResults.vision) {
       upsert.run('vision', pkg.description);
-      upsertResults.vision = { value: pkg.description.slice(0, 60) + '…', source: 'package.json description' };
+      upsertResults.vision = {
+        value: pkg.description.slice(0, 60) + '…',
+        source: 'package.json description',
+      };
     }
   }
 
@@ -204,14 +220,20 @@ function main() {
   const vision = extractVision(readme);
   if (vision) {
     upsert.run('vision', vision);
-    upsertResults.vision = { value: vision.slice(0, 60) + (vision.length > 60 ? '…' : ''), source: 'README.md' };
+    upsertResults.vision = {
+      value: vision.slice(0, 60) + (vision.length > 60 ? '…' : ''),
+      source: 'README.md',
+    };
   }
 
   // 4. git log — recent work
   const gitLog = runGitLog();
   if (gitLog) {
     upsert.run('git_log_snapshot', gitLog.slice(0, 2000));
-    upsertResults.git = { value: `${gitLog.split('\n').filter(Boolean).length} commits`, source: 'git log' };
+    upsertResults.git = {
+      value: `${gitLog.split('\n').filter(Boolean).length} commits`,
+      source: 'git log',
+    };
   }
 
   // 5. gh issue list — populate tasks
@@ -239,11 +261,18 @@ function main() {
       const insertDecision = db.prepare(
         'INSERT INTO decisions (date, version, decision, rationale) VALUES (?, ?, ?, ?)'
       );
-      const rows = decisionSection[1].split('\n').filter((l) => l.startsWith('|') && !l.includes('---') && !l.includes('Date'));
+      const rows = decisionSection[1]
+        .split('\n')
+        .filter((l) => l.startsWith('|') && !l.includes('---') && !l.includes('Date'));
       for (const row of rows) {
-        const cols = row.split('|').map((c) => c.trim()).filter(Boolean);
+        const cols = row
+          .split('|')
+          .map((c) => c.trim())
+          .filter(Boolean);
         if (cols.length >= 4) {
-          const existing = db.prepare('SELECT id FROM decisions WHERE date = ? AND decision = ?').get(cols[0], cols[2]);
+          const existing = db
+            .prepare('SELECT id FROM decisions WHERE date = ? AND decision = ?')
+            .get(cols[0], cols[2]);
           if (!existing) {
             insertDecision.run(cols[0], cols[1] || null, cols[2], cols[3]);
             migratedDecisions++;
@@ -267,10 +296,30 @@ function main() {
   const symOk = `${G}✓${N}`;
   const symSkip = `${Y}—${N}`;
 
-  log(upsertResults.version  ? symOk : symSkip, 'version',   upsertResults.version?.value  || '(not found)', upsertResults.version?.source);
-  log(upsertResults.vision   ? symOk : symSkip, 'vision',    upsertResults.vision?.value   || '(not found)', upsertResults.vision?.source);
-  log(upsertResults.milestone? symOk : symSkip, 'milestone', upsertResults.milestone?.value|| '(not found)', upsertResults.milestone?.source);
-  log(upsertResults.git      ? symOk : symSkip, 'git',       upsertResults.git?.value      || '(not found)', upsertResults.git?.source);
+  log(
+    upsertResults.version ? symOk : symSkip,
+    'version',
+    upsertResults.version?.value || '(not found)',
+    upsertResults.version?.source
+  );
+  log(
+    upsertResults.vision ? symOk : symSkip,
+    'vision',
+    upsertResults.vision?.value || '(not found)',
+    upsertResults.vision?.source
+  );
+  log(
+    upsertResults.milestone ? symOk : symSkip,
+    'milestone',
+    upsertResults.milestone?.value || '(not found)',
+    upsertResults.milestone?.source
+  );
+  log(
+    upsertResults.git ? symOk : symSkip,
+    'git',
+    upsertResults.git?.value || '(not found)',
+    upsertResults.git?.source
+  );
   if (upsertResults.issues) {
     log(symOk, 'tasks', upsertResults.issues.value, upsertResults.issues.source);
   } else {
