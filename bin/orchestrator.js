@@ -223,6 +223,18 @@ class OrbitOrchestrator {
             details: path.basename(executionPath),
           })
         );
+        if (task.issue) {
+          console.log(
+            this.renderWorkflowGate({
+              issue: task.issue,
+              branch: branchName,
+              implementationStatus: 'in_progress',
+              testsStatus: 'not_run',
+              reviewStatus: 'not_requested',
+              prStatus: 'not_open',
+            })
+          );
+        }
 
         return {
           agent: task.agent,

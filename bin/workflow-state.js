@@ -16,6 +16,7 @@ const WORKFLOW_STATES = [
   'review_clean',
   'pr_ready',
   'pr_open',
+  'merged',
 ];
 
 const NEXT_TRANSITIONS = {
@@ -27,7 +28,8 @@ const NEXT_TRANSITIONS = {
   review_required: 'review_clean',
   review_clean: 'pr_ready',
   pr_ready: 'pr_open',
-  pr_open: null,
+  pr_open: 'merged',
+  merged: null,
 };
 
 const NEXT_COMMANDS = {
@@ -40,6 +42,7 @@ const NEXT_COMMANDS = {
   review_clean: '/orbit:ship',
   pr_ready: '/orbit:ship',
   pr_open: '/orbit:progress',
+  merged: '/orbit:resume',
 };
 
 function normalizeStatus(value, allowed, fallback) {
@@ -54,9 +57,18 @@ function isFeatureBranch(branch) {
   return !['develop', 'main', 'master', 'HEAD'].includes(branch);
 }
 
+function inferIssueFromBranch(branch) {
+  const match = String(branch || '').match(/(?:^|[-/])(\d+)(?:[-/]|$)/);
+  return match ? `#${match[1]}` : null;
+}
+
 function normalizeEvidence(evidence = {}) {
   return {
-    issue: evidence.issue || evidence.issueRef || null,
+    issue:
+      evidence.issue ||
+      evidence.issueRef ||
+      inferIssueFromBranch(evidence.branch || evidence.branchName) ||
+      null,
     branch: evidence.branch || evidence.branchName || null,
     implementationStatus: normalizeStatus(
       evidence.implementationStatus || (evidence.implementationDone ? 'done' : 'not_started'),
@@ -87,7 +99,11 @@ function evaluateWorkflowState(rawEvidence = {}) {
     return buildSummary('issue_ready', evidence, blockers);
   }
 
-  if (evidence.prStatus === 'open' || evidence.prStatus === 'merged') {
+  if (evidence.prStatus === 'merged') {
+    return buildSummary('merged', evidence, blockers);
+  }
+
+  if (evidence.prStatus === 'open') {
     return buildSummary('pr_open', evidence, blockers);
   }
 
@@ -227,6 +243,7 @@ module.exports = {
   assertWorkflowTransition,
   evaluateWorkflowState,
   formatSummary,
+  inferIssueFromBranch,
   isFeatureBranch,
   normalizeEvidence,
 };

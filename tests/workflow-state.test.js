@@ -75,4 +75,18 @@ describe('workflow state engine', () => {
     expect(summary.state).toBe('pr_ready');
     expect(summary.prGate).toBe('ready');
   });
+
+  it('treats merged pull requests as a terminal merged state', () => {
+    const summary = workflowState.evaluateWorkflowState({
+      issue: '#131',
+      branch: 'feat/131-enforce-workflow-state-machine',
+      implementationStatus: 'done',
+      testsStatus: 'passed',
+      reviewStatus: 'approved',
+      prStatus: 'merged',
+    });
+
+    expect(summary.state).toBe('merged');
+    expect(summary.nextCommand).toBe('/orbit:resume');
+  });
 });

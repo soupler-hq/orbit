@@ -2,7 +2,7 @@
  * Tests for bin/orchestrator.js
  * Covers: constructor, state lock, nexus path resolution, result aggregation
  */
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -223,6 +223,21 @@ describe('OrbitOrchestrator — executeWave', () => {
     const tasks = [{ agent: 'reviewer', prompt: 'Review the code' }];
     const results = await orch.executeWave(tasks, 'w004');
     expect(results[0].model).toBe('claude-sonnet-4-5');
+  });
+
+  it('emits workflow gate output when tracked work includes an issue', async () => {
+    const orch = new OrbitOrchestrator(tmpDir);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    await orch.executeWave(
+      [{ agent: 'engineer', issue: '#131', prompt: 'Implement workflow gates' }],
+      'w005'
+    );
+
+    const output = logSpy.mock.calls.map((call) => call.join(' ')).join('\n');
+    expect(output).toContain('Workflow Gate');
+    expect(output).toContain('State:    branch_ready');
+    logSpy.mockRestore();
   });
 
   it('explains the current workflow state and next transition', () => {
