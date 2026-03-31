@@ -10,15 +10,64 @@ const { execFileSync } = require('child_process');
 const { evaluateWorkflowState, inferIssueFromBranch } = require('./workflow-state');
 const { formatNextCommand, formatProgressStatus, formatWorkflowGate } = require('./status');
 
-function readGit(args) {
+function runCommand(bin, args, fallback = null) {
   try {
-    return execFileSync('git', args, {
+    return execFileSync(bin, args, {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
   } catch (_error) {
-    return null;
+    return fallback;
   }
+}
+
+function readGit(args) {
+  return runCommand('git', args, null);
+}
+
+function readGitHubCurrentPullRequest() {
+  const result = runCommand(
+    'gh',
+    ['pr', 'view', '--json', 'state,reviewDecision,statusCheckRollup'],
+    null
+  );
+  return result ? JSON.parse(result) : null;
+}
+
+function inferTestsStatus(prData) {
+  const checks = prData?.statusCheckRollup || [];
+  if (!checks.length) return 'unknown';
+
+  const conclusions = checks.map((check) => String(check.conclusion || '').toUpperCase());
+  if (
+    conclusions.some((value) =>
+      ['FAILURE', 'TIMED_OUT', 'CANCELLED', 'ACTION_REQUIRED'].includes(value)
+    )
+  ) {
+    return 'failed';
+  }
+
+  const allFinished = checks.every(
+    (check) => String(check.status || '').toUpperCase() === 'COMPLETED'
+  );
+  if (allFinished) return 'passed';
+  return 'unknown';
+}
+
+function inferReviewStatus(prData) {
+  const reviewDecision = String(prData?.reviewDecision || '').toUpperCase();
+  if (reviewDecision === 'APPROVED') return 'approved';
+  if (reviewDecision === 'CHANGES_REQUESTED') return 'changes_requested';
+  if (reviewDecision === 'REVIEW_REQUIRED') return 'pending';
+  return prData ? 'pending' : 'unknown';
+}
+
+function inferPrStatus(prData) {
+  const state = String(prData?.state || '').toUpperCase();
+  if (state === 'MERGED') return 'merged';
+  if (state === 'OPEN') return 'open';
+  if (state === 'CLOSED') return 'not_open';
+  return prData ? 'not_open' : 'unknown';
 }
 
 function parseArgs(argv) {
@@ -38,19 +87,25 @@ function parseArgs(argv) {
   return args;
 }
 
-function buildEvidence(args = {}) {
+function buildEvidence(args = {}, deps = {}) {
   if (args.json) return JSON.parse(args.json);
 
-  const branch = args.branch || readGit(['rev-parse', '--abbrev-ref', 'HEAD']) || 'HEAD';
+  const gitReader = deps.gitReader || readGit;
+  const githubReader = deps.githubReader || readGitHubCurrentPullRequest;
+
+  const branch = args.branch || gitReader(['rev-parse', '--abbrev-ref', 'HEAD']) || 'HEAD';
   const issue = args.issue || inferIssueFromBranch(branch);
+  const dirty = args.dirty ?? Boolean(gitReader(['status', '--porcelain']));
+  const prData = args.githubData || githubReader();
 
   return {
     issue,
     branch,
-    implementationStatus: args.implementationStatus || 'in_progress',
-    testsStatus: args.testsStatus || 'not_run',
-    reviewStatus: args.reviewStatus || 'not_requested',
-    prStatus: args.prStatus || 'not_open',
+    implementationStatus:
+      args.implementationStatus || (dirty ? 'in_progress' : issue ? 'in_progress' : 'not_started'),
+    testsStatus: args.testsStatus || inferTestsStatus(prData),
+    reviewStatus: args.reviewStatus || inferReviewStatus(prData),
+    prStatus: args.prStatus || inferPrStatus(prData),
   };
 }
 
@@ -81,5 +136,9 @@ if (require.main === module) {
 
 module.exports = {
   buildEvidence,
+  inferPrStatus,
+  inferReviewStatus,
+  inferTestsStatus,
+  readGitHubCurrentPullRequest,
   renderProgress,
 };

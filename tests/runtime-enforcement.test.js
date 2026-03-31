@@ -11,6 +11,7 @@ describe('runtime enforcement entrypoints', () => {
         implementationStatus: 'done',
         testsStatus: 'passed',
         reviewStatus: 'pending',
+        prStatus: 'not_open',
       }),
       command: '/orbit:progress',
       agent: 'engineer',
@@ -24,6 +25,24 @@ describe('runtime enforcement entrypoints', () => {
     expect(output).toContain('Recommended Next Command');
   });
 
+  it('progress runtime infers active implementation when runtime truth is incomplete', () => {
+    const evidence = progress.buildEvidence(
+      {},
+      {
+        gitReader: (args) => {
+          if (args[0] === 'rev-parse') return 'feat/131-enforce-workflow-state-machine';
+          if (args[0] === 'status') return ' M bin/progress.js';
+          return '';
+        },
+        githubReader: () => null,
+      }
+    );
+
+    expect(evidence.implementationStatus).toBe('in_progress');
+    expect(evidence.reviewStatus).toBe('unknown');
+    expect(evidence.prStatus).toBe('unknown');
+  });
+
   it('ship runtime blocks PR progression when review is incomplete', () => {
     const result = ship.renderShipDecision({
       json: JSON.stringify({
@@ -32,12 +51,26 @@ describe('runtime enforcement entrypoints', () => {
         implementationStatus: 'done',
         testsStatus: 'passed',
         reviewStatus: 'pending',
+        prStatus: 'not_open',
       }),
     });
 
     expect(result.exitCode).toBe(1);
     expect(result.output).toContain('Pull request gate blocked');
     expect(result.output).toContain('/orbit:review');
+  });
+
+  it('ship runtime blocks when GitHub truth is unavailable', () => {
+    const result = ship.renderShipDecision({
+      branch: 'feat/131-enforce-workflow-state-machine',
+      implementationStatus: 'done',
+      testsStatus: 'unknown',
+      reviewStatus: 'unknown',
+      prStatus: 'unknown',
+    });
+
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('PR state unavailable');
   });
 
   it('ship runtime allows PR progression when tests and review are green', () => {
@@ -48,6 +81,7 @@ describe('runtime enforcement entrypoints', () => {
         implementationStatus: 'done',
         testsStatus: 'passed',
         reviewStatus: 'approved',
+        prStatus: 'not_open',
       }),
     });
 

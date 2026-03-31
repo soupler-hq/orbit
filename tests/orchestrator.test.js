@@ -236,7 +236,7 @@ describe('OrbitOrchestrator — executeWave', () => {
 
     const output = logSpy.mock.calls.map((call) => call.join(' ')).join('\n');
     expect(output).toContain('Workflow Gate');
-    expect(output).toContain('State:    branch_ready');
+    expect(output).toContain('State:    implementation_in_progress');
     logSpy.mockRestore();
   });
 

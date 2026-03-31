@@ -10,6 +10,7 @@ const WORKFLOW_STATES = [
   'untracked',
   'issue_ready',
   'branch_ready',
+  'implementation_in_progress',
   'implementation_done',
   'tests_green',
   'review_required',
@@ -22,7 +23,8 @@ const WORKFLOW_STATES = [
 const NEXT_TRANSITIONS = {
   untracked: 'issue_ready',
   issue_ready: 'branch_ready',
-  branch_ready: 'implementation_done',
+  branch_ready: 'implementation_in_progress',
+  implementation_in_progress: 'implementation_done',
   implementation_done: 'tests_green',
   tests_green: 'review_required',
   review_required: 'review_clean',
@@ -36,6 +38,7 @@ const NEXT_COMMANDS = {
   untracked: '/orbit:plan 1',
   issue_ready: '/orbit:quick #NNN',
   branch_ready: '/orbit:quick #NNN',
+  implementation_in_progress: '/orbit:quick #NNN',
   implementation_done: '/orbit:quick #NNN',
   tests_green: '/orbit:review',
   review_required: '/orbit:review',
@@ -75,13 +78,21 @@ function normalizeEvidence(evidence = {}) {
       ['not_started', 'in_progress', 'done'],
       'not_started'
     ),
-    testsStatus: normalizeStatus(evidence.testsStatus, ['not_run', 'failed', 'passed'], 'not_run'),
+    testsStatus: normalizeStatus(
+      evidence.testsStatus,
+      ['unknown', 'not_run', 'failed', 'passed'],
+      'unknown'
+    ),
     reviewStatus: normalizeStatus(
       evidence.reviewStatus,
-      ['not_requested', 'pending', 'changes_requested', 'approved'],
-      'not_requested'
+      ['unknown', 'not_requested', 'pending', 'changes_requested', 'approved'],
+      'unknown'
     ),
-    prStatus: normalizeStatus(evidence.prStatus, ['not_open', 'open', 'merged'], 'not_open'),
+    prStatus: normalizeStatus(
+      evidence.prStatus,
+      ['unknown', 'not_open', 'open', 'merged'],
+      'unknown'
+    ),
   };
 }
 
@@ -107,8 +118,16 @@ function evaluateWorkflowState(rawEvidence = {}) {
     return buildSummary('pr_open', evidence, blockers);
   }
 
+  if (evidence.prStatus === 'unknown') {
+    blockers.push('PR state unavailable; authenticate GitHub or pass explicit PR evidence.');
+  }
+
   if (evidence.reviewStatus === 'approved' && evidence.testsStatus === 'passed') {
     return buildSummary('pr_ready', evidence, blockers);
+  }
+
+  if (evidence.reviewStatus === 'unknown') {
+    blockers.push('Review state unavailable; fetch PR review status before shipping.');
   }
 
   if (evidence.reviewStatus === 'approved') {
@@ -126,6 +145,11 @@ function evaluateWorkflowState(rawEvidence = {}) {
     return buildSummary('review_required', evidence, blockers);
   }
 
+  if (evidence.testsStatus === 'unknown' && evidence.implementationStatus === 'done') {
+    blockers.push('Test state unavailable; run verification or sync CI status before review.');
+    return buildSummary('implementation_done', evidence, blockers);
+  }
+
   if (evidence.testsStatus === 'passed') {
     return buildSummary('tests_green', evidence, blockers);
   }
@@ -139,12 +163,17 @@ function evaluateWorkflowState(rawEvidence = {}) {
     return buildSummary('implementation_done', evidence, blockers);
   }
 
+  if (evidence.implementationStatus === 'in_progress') {
+    blockers.push('Implementation is in progress; finish the branch before verification.');
+    return buildSummary('implementation_in_progress', evidence, blockers);
+  }
+
   return buildSummary('branch_ready', evidence, blockers);
 }
 
 function buildSummary(state, evidence, blockers) {
   const nextTransition = NEXT_TRANSITIONS[state];
-  const canOpenPullRequest = state === 'pr_ready' || state === 'pr_open';
+  const canOpenPullRequest = (state === 'pr_ready' || state === 'pr_open') && blockers.length === 0;
   return {
     state,
     evidence,
