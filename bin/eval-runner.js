@@ -277,12 +277,8 @@ const promptRoutingCapabilityResults = [
   },
   {
     check: 'runtime adapter docs describe Antigravity prompt routing limitation',
-    pass: adapterText.includes(
-      'Plain-prompt Orbit workflow routing is not currently supported'
-    ),
-    reason: adapterText.includes(
-      'Plain-prompt Orbit workflow routing is not currently supported'
-    )
+    pass: adapterText.includes('Plain-prompt Orbit workflow routing is not currently supported'),
+    reason: adapterText.includes('Plain-prompt Orbit workflow routing is not currently supported')
       ? 'ok'
       : 'docs/runtime-adapters.md missing Antigravity prompt-routing limitation',
   },
