@@ -7,7 +7,6 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 required_files=(
-  "CLAUDE.md"
   "templates/orbit.base.md"
   "README.md"
   "INSTRUCTIONS.md"
@@ -187,10 +186,11 @@ NODE
 printf 'Orbit validation passed.\n'
 
 # ── Model ID hygiene check ────────────────────────────────────────────────────
-# Warn if CLAUDE.md contains raw Anthropic model IDs instead of routing aliases.
+# Warn if the orchestrator template contains raw Anthropic model IDs instead of routing aliases.
+# Check templates/orbit.base.md — the canonical source. CLAUDE.md is generated at install time.
 MODEL_PATTERN='claude-(haiku|sonnet|opus)-[0-9]'
-if grep -qE "$MODEL_PATTERN" "$ROOT_DIR/CLAUDE.md"; then
-  printf '\n⚠️  Warning: CLAUDE.md contains hardcoded model IDs.\n' >&2
+if grep -qE "$MODEL_PATTERN" "$ROOT_DIR/templates/orbit.base.md"; then
+  printf '\n⚠️  Warning: templates/orbit.base.md contains hardcoded model IDs.\n' >&2
   printf '   Model versions should live only in orbit.config.json → models.routing.\n' >&2
-  grep -nE "$MODEL_PATTERN" "$ROOT_DIR/CLAUDE.md" >&2 || true
+  grep -nE "$MODEL_PATTERN" "$ROOT_DIR/templates/orbit.base.md" >&2 || true
 fi

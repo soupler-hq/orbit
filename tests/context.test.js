@@ -10,8 +10,10 @@ import os from 'os';
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 let Database;
+let initSchema;
 try {
   Database = require('better-sqlite3');
+  ({ initSchema } = require('../bin/db'));
 } catch {
   console.warn('better-sqlite3 not installed — context.test.js tests will be skipped');
 }
@@ -48,23 +50,8 @@ function makeTmpDb() {
   const dbPath = path.join(tmpDir, 'context.db');
   const db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS state (
-      key TEXT PRIMARY KEY, value TEXT NOT NULL,
-      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
-    );
-    CREATE TABLE IF NOT EXISTS decisions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      date TEXT NOT NULL, version TEXT,
-      decision TEXT NOT NULL, rationale TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS tasks (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      issue_ref TEXT, title TEXT NOT NULL,
-      status TEXT NOT NULL CHECK(status IN ('open','in_progress','complete','blocked')),
-      milestone TEXT, wave INTEGER, blocker TEXT
-    );
-  `);
+  db.pragma('foreign_keys = ON');
+  initSchema(db); // single source of truth: bin/db.js
   return { db, dbPath, tmpDir };
 }
 
