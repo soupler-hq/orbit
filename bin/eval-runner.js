@@ -238,6 +238,51 @@ const portabilityResults = REQUIRED_RUNTIMES.map((req) => {
   };
 });
 
+// ── Metric 6: Observability ────────────────────────────────────────────────
+// Commands quick, build, and plan must emit a structured classification block.
+// Wave completion block must be present in build command spec.
+
+const OBS_CHECKS = [
+  {
+    id: 'OBS001',
+    check: 'orbit:quick emits classification header (━━━ Orbit)',
+    section: '/orbit:quick',
+  },
+  {
+    id: 'OBS002',
+    check: 'orbit:build emits classification header (━━━ Orbit)',
+    section: '/orbit:build',
+  },
+  {
+    id: 'OBS003',
+    check: 'orbit:plan emits classification header (━━━ Orbit)',
+    section: '/orbit:plan',
+  },
+  {
+    id: 'OBS004',
+    check: 'orbit:build emits wave completion block (━━━ Wave)',
+    section: '/orbit:build',
+    keyword: 'Wave {N} Complete',
+  },
+];
+
+const observabilityResults = OBS_CHECKS.map((obs) => {
+  const sectionStart = commandsText.indexOf(`# Orbit Command: ${obs.section}`);
+  const nextSection = commandsText.indexOf('\n# Orbit Command:', sectionStart + 1);
+  const sectionText =
+    sectionStart >= 0
+      ? commandsText.slice(sectionStart, nextSection > 0 ? nextSection : undefined)
+      : '';
+  const keyword = obs.keyword || '━━━ Orbit';
+  const pass = sectionText.includes(keyword);
+  return {
+    id: obs.id,
+    check: obs.check,
+    pass,
+    reason: pass ? 'ok' : `${obs.section} missing: "${keyword}"`,
+  };
+});
+
 // ── Aggregate scores ───────────────────────────────────────────────────────
 
 function score(results) {
@@ -256,6 +301,7 @@ const metrics = {
   registry: score(integrityResults),
   forge: score(forgeIntegrityResults),
   portability: score(portabilityResults),
+  observability: score(observabilityResults),
 };
 
 const allResults = [
@@ -264,6 +310,7 @@ const allResults = [
   ...integrityResults,
   ...forgeIntegrityResults,
   ...portabilityResults,
+  ...observabilityResults,
 ];
 const overall = score(allResults);
 const GATE = 0.8;
@@ -284,6 +331,10 @@ const report = {
       ...metrics.portability,
       score: (metrics.portability.pct * 100).toFixed(1) + '%',
     },
+    observability: {
+      ...metrics.observability,
+      score: (metrics.observability.pct * 100).toFixed(1) + '%',
+    },
   },
   overall: { ...overall, score: (overall.pct * 100).toFixed(1) + '%' },
   details: {
@@ -292,6 +343,7 @@ const report = {
     registry: integrityResults,
     forge: forgeIntegrityResults,
     portability: portabilityResults,
+    observability: observabilityResults,
   },
 };
 
@@ -320,6 +372,9 @@ if (JSON_OUT) {
   console.log(`  Forge integrity     ${bar(metrics.forge).padEnd(30)}  ${pct(metrics.forge)}`);
   console.log(
     `  Portability         ${bar(metrics.portability).padEnd(30)}  ${pct(metrics.portability)}`
+  );
+  console.log(
+    `  Observability       ${bar(metrics.observability).padEnd(30)}  ${pct(metrics.observability)}`
   );
   console.log('─'.repeat(52));
   console.log(`  Overall             ${bar(overall).padEnd(30)}  ${pct(overall)}`);
