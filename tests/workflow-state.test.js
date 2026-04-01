@@ -84,6 +84,7 @@ describe('workflow state engine', () => {
       testsStatus: 'passed',
       testEvidenceStatus: 'present',
       reviewStatus: 'changes_requested',
+      reviewFindings: 'MEDIUM: preserve issue context during retry loop',
       prStatus: 'not_open',
     });
 
@@ -91,6 +92,9 @@ describe('workflow state engine', () => {
     expect(summary.nextTransition).toBe('implementation_done');
     expect(summary.nextCommand).toBe('/orbit:quick #131');
     expect(summary.blockers.some((blocker) => blocker.includes('Review requested changes'))).toBe(true);
+    expect(summary.blockers.some((blocker) => blocker.includes('preserve issue context'))).toBe(
+      true
+    );
   });
 
   it('blocks PR readiness until tests and review are both satisfied', () => {

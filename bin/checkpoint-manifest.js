@@ -138,6 +138,7 @@ function buildCheckpointManifest({ args = {}, profile = {}, evidence = {}, workf
       current_state: workflow.state || 'unknown',
       recommended_next_step:
         workflow.nextCommand || profile.defaultPrimary || args.recommendedNextStep || null,
+      review_findings: args.reviewFindings || evidence.reviewFindings || null,
       required_context: String(args.requiredContext || '')
         .split(',')
         .map((value) => value.trim())

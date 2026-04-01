@@ -106,6 +106,7 @@ function normalizeEvidence(evidence = {}) {
       ['unknown', 'approved', 'conditional', 'blocked'],
       'unknown'
     ),
+    reviewFindings: String(evidence.reviewFindings || '').trim(),
     prStatus: normalizeStatus(
       evidence.prStatus,
       ['unknown', 'not_open', 'open', 'merged'],
@@ -181,7 +182,10 @@ function evaluateWorkflowState(rawEvidence = {}) {
   }
 
   if (evidence.reviewStatus === 'changes_requested') {
-    blockers.push('Review requested changes; fix findings and rerun tests before re-review.');
+    const findingsDetail = evidence.reviewFindings ? ` Findings: ${evidence.reviewFindings}` : '';
+    blockers.push(
+      `Review requested changes; fix findings and rerun tests before re-review.${findingsDetail}`
+    );
     return buildSummary('remediation_required', evidence, blockers);
   }
 

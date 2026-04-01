@@ -95,6 +95,7 @@ describe('runtime command status parity', () => {
       testEvidenceStatus: 'present',
       reviewStatus: 'changes_requested',
       reviewEvidenceStatus: 'present',
+      reviewFindings: 'MEDIUM: persist concrete findings into the remediation loop',
       prStatus: 'not_open',
     });
 
@@ -102,6 +103,7 @@ describe('runtime command status parity', () => {
     expect(output).toContain('Review:       changes_requested');
     expect(output).toContain('PR Action:    blocked');
     expect(output).toContain('Final State:  remediation_required');
+    expect(output).toContain('persist concrete findings into the remediation loop');
     expect(output).toContain('**Primary**: /orbit:quick #181');
   });
 
