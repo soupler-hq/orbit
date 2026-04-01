@@ -77,6 +77,64 @@ describe('runtime command status parity', () => {
 
     expect(output).toContain('**Primary**: /orbit:quick #150 feat(workflow): implement `/orbit:next` as an executable runtime command');
     expect(output).toContain('State:    issue_ready');
+    expect(output).toContain('Issue:      #150');
+  });
+
+  it('next runtime honors active phase metadata even when the section is not marked CURRENT', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-next-state-phase-'));
+    const stateFile = path.join(tmpDir, 'STATE.md');
+    fs.writeFileSync(
+      stateFile,
+      [
+        '# Orbit Project State',
+        '## Project Context',
+        '- **Active Milestone**: v2.9.0 — Idea to Market',
+        '- **Active Phase**: Enforcement Hardening',
+        '',
+        '## Todos + Seeds',
+        '### v2.9.0 — Idea to Market',
+        '#### Enforcement Hardening',
+        '- [ ] #151 — feat(governance): enforce documentation updates for behavior changes',
+      ].join('\n')
+    );
+
+    const output = renderNext({
+      branch: 'develop',
+      implementationStatus: 'not_started',
+      stateFile,
+    });
+
+    expect(output).toContain('**Primary**: /orbit:quick #151 feat(governance): enforce documentation updates for behavior changes');
+    expect(output).toContain('Issue:      #151');
+  });
+
+  it('next runtime uses a planning-aligned workflow gate when the active phase backlog is empty', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-next-plan-'));
+    const stateFile = path.join(tmpDir, 'STATE.md');
+    fs.writeFileSync(
+      stateFile,
+      [
+        '# Orbit Project State',
+        '## Project Context',
+        '- **Active Milestone**: v2.9.0 — Idea to Market',
+        '- **Active Phase**: Enforcement Hardening',
+        '',
+        '## Todos + Seeds',
+        '### v2.9.0 — Idea to Market',
+        '#### Enforcement Hardening (CURRENT)',
+        '- [x] #150 — feat(workflow): implement `/orbit:next` as an executable runtime command',
+      ].join('\n')
+    );
+
+    const output = renderNext({
+      branch: 'develop',
+      implementationStatus: 'not_started',
+      stateFile,
+    });
+
+    expect(output).toContain('State:    planning_required');
+    expect(output).toContain('Next:     planned');
+    expect(output).toContain('**Primary**: /orbit:plan');
   });
 
   it('early-stage runtime output uses the concrete issue and avoids premature PR blockers', () => {

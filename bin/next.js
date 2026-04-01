@@ -17,6 +17,13 @@ function sanitizeTitleForCommand(title) {
     .trim();
 }
 
+function normalizeSectionLabel(label) {
+  return String(label || '')
+    .replace(/\s+\((?:CURRENT|COMPLETE|PAUSED.*?)\)\s*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function parseStateBacklog(text) {
   const lines = String(text || '').split(/\r?\n/);
   const result = {
@@ -55,7 +62,14 @@ function parseStateBacklog(text) {
 
     match = line.match(/^####\s+(.+?)(?:\s+\(CURRENT\))?\s*$/);
     if (match) {
-      result.currentSection = line.includes('(CURRENT)') ? match[1].trim() : null;
+      const rawSection = match[1].trim();
+      const normalizedSection = normalizeSectionLabel(rawSection);
+      const normalizedActivePhase = normalizeSectionLabel(result.activePhase);
+      result.currentSection =
+        line.includes('(CURRENT)') ||
+        (normalizedActivePhase && normalizedSection === normalizedActivePhase)
+          ? rawSection
+          : null;
       continue;
     }
 
@@ -117,6 +131,7 @@ function resolveNextAction(args = {}, deps = {}) {
   if (nextIssue) {
     const title = sanitizeTitleForCommand(nextIssue.title);
     return {
+      issue: nextIssue.issue,
       workflow: {
         state: 'issue_ready',
         prGate: 'blocked',
@@ -133,10 +148,11 @@ function resolveNextAction(args = {}, deps = {}) {
   }
 
   return {
+    issue: null,
     workflow: {
-      state: 'review_clean',
+      state: 'planning_required',
       prGate: 'blocked',
-      nextTransition: 'pr_ready',
+      nextTransition: 'planned',
       nextCommand: '/orbit:plan',
       blockers: [
         `No open issues remain in ${stateSummary.activePhase || 'the active phase'}; plan the next milestone slice.`,
@@ -159,6 +175,7 @@ function renderNext(args = {}, deps = {}) {
     defaultPrimary: resolution.primary,
     defaultWhy: resolution.why,
     details: resolution.details,
+    classificationIssue: resolution.issue || args.issue || null,
     workflowOverride: resolution.workflow,
   });
 }

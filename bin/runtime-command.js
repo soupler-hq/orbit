@@ -45,7 +45,7 @@ function buildRuntimeCommandOutput(args, profile) {
       complexity: profile.complexity,
       agent: profile.agent,
       mode: profile.mode || 'AUTONOMOUS',
-      issue: evidence.issue || args.issue || null,
+      issue: profile.classificationIssue || evidence.issue || args.issue || null,
     }),
     formatProgressStatus({
       command: profile.command,
