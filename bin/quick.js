@@ -14,6 +14,7 @@ function renderQuick(args = {}) {
     defaultWhy: 'Tracked implementation work should flow to review once the branch is ready.',
     details: 'tracked implementation',
     enforceIssueBoundary: true,
+    autoChain: true,
   });
 }
 

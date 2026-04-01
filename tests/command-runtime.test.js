@@ -36,6 +36,8 @@ describe('runtime command status parity', () => {
     const output = renderQuick(trackedArgs);
     expectParity(output, '/orbit:quick');
     expect(output).toContain('**Primary**: /orbit:ship');
+    expect(output).toContain('Orbit Auto-Chain');
+    expect(output).toContain('Final State:  pr_ready');
   });
 
   it('quick runtime writes a checkpoint manifest and emits the checkpoint block', () => {
@@ -65,6 +67,23 @@ describe('runtime command status parity', () => {
     });
     expect(latest.orchestration.current_state).toBe('pr_ready');
     expect(latest.orchestration.recommended_next_step).toBe('/orbit:ship');
+  });
+
+  it('quick runtime auto-dispatches review after tests go green and updates the chained final state', () => {
+    const output = renderQuick({
+      issue: '#181',
+      branch: 'feat/181-quick-review-pr-autochain',
+      implementationStatus: 'done',
+      testsStatus: 'passed',
+      testEvidenceStatus: 'present',
+      reviewStatus: 'not_requested',
+      prStatus: 'not_open',
+    });
+
+    expect(output).toContain('Orbit Auto-Chain');
+    expect(output).toContain('Review:       auto_dispatch_review');
+    expect(output).toContain('Final State:  review_required');
+    expect(output).toContain('**Primary**: /orbit:review');
   });
 
   it('quick runtime blocks when the requested issue does not match the active feature branch', () => {

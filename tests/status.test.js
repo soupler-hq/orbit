@@ -59,4 +59,18 @@ describe('status formatter', () => {
     expect(output).toContain('PR Gate:  blocked');
     expect(output).toContain('Command:  /orbit:review');
   });
+
+  it('renders an auto-chain block', () => {
+    const output = status.formatAutoChainStatus({
+      verification: 'passed',
+      review: 'auto_dispatch_review',
+      prAction: 'blocked',
+      finalState: 'review_required',
+    });
+
+    expect(output).toContain('Orbit Auto-Chain');
+    expect(output).toContain('Verification: passed');
+    expect(output).toContain('Review:       auto_dispatch_review');
+    expect(output).toContain('Final State:  review_required');
+  });
 });

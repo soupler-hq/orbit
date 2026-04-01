@@ -1248,7 +1248,9 @@ const OBS_CHECKS = [
         const latestPath = path.join(tmpDir, 'latest.json');
         const manifest = JSON.parse(fs.readFileSync(latestPath, 'utf8'));
         const pass =
+          output.includes('Orbit Auto-Chain') &&
           output.includes('Orbit Checkpoint') &&
+          output.includes('Final State:  pr_ready') &&
           manifest.metadata.issue === '#181' &&
           manifest.checkpoint === 'pr_ready' &&
           manifest.verification_summary.status === 'success';
