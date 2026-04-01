@@ -228,6 +228,7 @@ describe('OrbitOrchestrator — executeWave', () => {
   it('emits workflow gate output when tracked work includes an issue', async () => {
     const orch = new OrbitOrchestrator(tmpDir);
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const worktreeSpy = vi.spyOn(orch, 'setupWorktree');
 
     await orch.executeWave(
       [{ agent: 'engineer', issue: '#131', prompt: 'Implement workflow gates' }],
@@ -237,6 +238,8 @@ describe('OrbitOrchestrator — executeWave', () => {
     const output = logSpy.mock.calls.map((call) => call.join(' ')).join('\n');
     expect(output).toContain('Workflow Gate');
     expect(output).toContain('State:    implementation_in_progress');
+    expect(worktreeSpy).toHaveBeenCalledWith('task_w005_0', 'feat/orbit-task-w005-0');
+    worktreeSpy.mockRestore();
     logSpy.mockRestore();
   });
 

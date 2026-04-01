@@ -11,6 +11,7 @@ describe('validate-pr-governance', () => {
     expect(validateBranchName('feat/143-pr-governance-enforcement', 'develop')).toEqual([]);
     expect(validateBranchName('fix/145-context-minimal-dedup', 'develop')).toEqual([]);
     expect(validateBranchName('docs/145-durable-state-context', 'develop')).toEqual([]);
+    expect(validateBranchName('feat/orbit-task-w005-0', 'develop')).toEqual([]);
   });
 
   it('allows the develop -> main release bridge', () => {
