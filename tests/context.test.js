@@ -31,6 +31,7 @@ Test project vision paragraph.
 - **Active Phase**: Wave 0 — Release Bootstrap
 - **Current Version**: v2.8.1
 - **Current Branch**: test/132-enforcement-e2e
+- **Active PR**: #141 — test(enforcement): add end-to-end coverage for runtime gates
 
 ## Decisions Log
 | Date | Version | Decision | Rationale |
@@ -44,6 +45,11 @@ Test project vision paragraph.
 - [ ] #94 — observability status blocks
 - [ ] #99 — unified installer
 - [x] #97 — next-command inference (closed)
+
+#### Enforcement Hardening (CURRENT)
+- [ ] #132 — test(enforcement): add end-to-end coverage for setup, routing, and review gates
+  - Active branch: \`test/132-enforcement-e2e\`
+  - Active PR: #141 against \`develop\`
 
 ## Last 5 Completed Tasks
 1. docs(plan): v2.9.0 Wave 0 plan
@@ -93,9 +99,90 @@ describeIfSqlite('context.js — schema and load levels', () => {
     const output = loadMinimal(db);
 
     expect(output).toContain('- Milestone: v2.9.0 — Wave 0');
-    expect(output).toContain('- Branch: feat/context-fix');
     expect(output).toContain('[OPEN] #94 observability blocks');
     expect(output).toContain('[BLOCKED] #99 setup installer — waiting for PR');
+  });
+
+  it('--load minimal: prioritizes active issue and shows active PR', () => {
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('milestone', 'v2.9.0 — Idea to Market');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('phase', 'Enforcement Hardening');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('version', 'v2.8.1');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('branch', 'fix/145-state-freshness');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('active_issue', '#145');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run(
+      'active_title',
+      'enforce automatic state freshness across command paths'
+    );
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run(
+      'active_pr',
+      '#153 — fix(state): persist active branch in minimal context'
+    );
+    db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run(
+      '#87',
+      'name hook stages in orbit.config.json',
+      'open'
+    );
+    db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run(
+      '#145',
+      'enforce automatic state freshness across command paths',
+      'open'
+    );
+
+    const output = loadMinimal(db);
+
+    expect(output).toContain('## Active Work');
+    expect(output).toContain('- Issue: #145 — enforce automatic state freshness across command paths');
+    expect(output).toContain('- PR: #153 — fix(state): persist active branch in minimal context');
+    expect(output.indexOf('#145 enforce automatic state freshness across command paths')).toBeLessThan(
+      output.indexOf('#87 name hook stages in orbit.config.json')
+    );
+  });
+
+  it('--load minimal: infers the active issue from the branch when state facts are stale', () => {
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('milestone', 'v2.9.0 — Idea to Market');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('phase', 'Enforcement Hardening');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('version', 'v2.8.1');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('branch', 'fix/145-state-freshness');
+    db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run(
+      '#145',
+      'enforce automatic state freshness across command paths',
+      'open'
+    );
+
+    const output = loadMinimal(db);
+
+    expect(output).toContain('## Active Work');
+    expect(output).toContain('- Issue: #145');
+  });
+
+  it('--load minimal: ignores stale active issue and PR when the live branch has changed', () => {
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('milestone', 'v2.9.0 — Idea to Market');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('phase', 'Enforcement Hardening');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('version', 'v2.8.1');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('branch', 'test/129-enforcement-e2e');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('active_issue', '#129');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run(
+      'active_title',
+      'test(enforcement): add end-to-end coverage for setup, routing, and review gates'
+    );
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run(
+      'active_pr',
+      '#165 — test(enforcement): execute install and setup hook paths'
+    );
+
+    const originalExecFileSync = require('child_process').execFileSync;
+    require('child_process').execFileSync = () => 'fix/145-state-freshness\n';
+
+    try {
+      const output = loadMinimal(db);
+
+      expect(output).toContain('- Branch: fix/145-state-freshness');
+      expect(output).toContain('- Issue: #145');
+      expect(output).not.toContain('#129');
+      expect(output).not.toContain('#165');
+    } finally {
+      require('child_process').execFileSync = originalExecFileSync;
+    }
   });
 
   it('--load decisions: returns decisions ordered newest first', () => {
@@ -152,6 +239,13 @@ describeIfSqlite('context.js — migrate from STATE.md', () => {
     const branchMatch = text.match(/\*\*Current Branch\*\*:\s*(.+)/);
     expect(branchMatch).not.toBeNull();
     expect(branchMatch[1].trim()).toBe('test/132-enforcement-e2e');
+  });
+
+  it('extracts active PR from STATE.md', () => {
+    const text = fs.readFileSync(statePath, 'utf8');
+    const prMatch = text.match(/\*\*Active PR\*\*:\s*(.+)/);
+    expect(prMatch).not.toBeNull();
+    expect(prMatch[1].trim()).toBe('#141 — test(enforcement): add end-to-end coverage for runtime gates');
   });
 
   it('decisions table rows are idempotent on duplicate insert', () => {
