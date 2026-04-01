@@ -4,7 +4,6 @@
 const path = require('path');
 const { buildRuntimeCommandOutput, parseArgs } = require('./runtime-command');
 const {
-  DEFAULT_STATE_FILE,
   pendingClarificationRequests,
   resolveClarificationRequest,
 } = require('./clarification-gate');

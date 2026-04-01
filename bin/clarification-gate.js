@@ -8,6 +8,17 @@ const ROOT = path.resolve(__dirname, '..');
 const DEFAULT_STATE_FILE = path.join(ROOT, '.orbit', 'state', 'STATE.md');
 const SECTION_HEADING = '## Clarification Requests';
 
+function readTextOrDefault(filePath, fallback) {
+  try {
+    return fs.readFileSync(filePath, 'utf8');
+  } catch (error) {
+    if (error && error.code === 'ENOENT') {
+      return fallback;
+    }
+    throw error;
+  }
+}
+
 function parseArgs(argv) {
   const args = {};
   for (let index = 0; index < argv.length; index += 1) {
@@ -113,8 +124,7 @@ function parseClarificationRequests(text) {
 }
 
 function loadClarificationRequests(stateFile = DEFAULT_STATE_FILE) {
-  if (!fs.existsSync(stateFile)) return [];
-  return parseClarificationRequests(fs.readFileSync(stateFile, 'utf8'));
+  return parseClarificationRequests(readTextOrDefault(stateFile, ''));
 }
 
 function pendingClarificationRequests(stateFile = DEFAULT_STATE_FILE) {
@@ -140,9 +150,7 @@ function nextClarificationId(existing) {
 }
 
 function appendClarificationRequest(stateFile, fields) {
-  const existingText = fs.existsSync(stateFile)
-    ? fs.readFileSync(stateFile, 'utf8')
-    : '# Orbit State\n';
+  const existingText = readTextOrDefault(stateFile, '# Orbit State\n');
   const seeded = ensureClarificationSection(existingText);
   const nextId = fields.id || nextClarificationId(parseClarificationRequests(seeded));
   const requestedAt = fields.requested_at || new Date().toISOString();
@@ -165,7 +173,7 @@ function appendClarificationRequest(stateFile, fields) {
 }
 
 function resolveClarificationRequest(stateFile, id, resolution, resolvedBy = 'operator') {
-  const text = fs.existsSync(stateFile) ? fs.readFileSync(stateFile, 'utf8') : '';
+  const text = readTextOrDefault(stateFile, '');
   const lines = text.split(/\r?\n/);
   const resolvedAt = new Date().toISOString();
   let replaced = false;
@@ -258,5 +266,6 @@ module.exports = {
   loadClarificationRequests,
   parseClarificationRequests,
   pendingClarificationRequests,
+  readTextOrDefault,
   resolveClarificationRequest,
 };
