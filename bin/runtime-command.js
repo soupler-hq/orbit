@@ -101,7 +101,7 @@ function buildOperationalRuleWorkflow(args, profile) {
   };
 }
 
-function buildQuickAutoChain(evidence, workflow) {
+function buildQuickAutoChain(evidence, workflow, args = {}) {
   if (!evidence.issue || !evidence.branch || !isFeatureBranch(evidence.branch)) {
     return null;
   }
@@ -117,7 +117,14 @@ function buildQuickAutoChain(evidence, workflow) {
   let finalWorkflow = workflow;
 
   if (evidence.testsStatus === 'passed') {
-    if (evidence.reviewStatus === 'approved') {
+    if (args.prActionResult === 'created' || args.prActionResult === 'updated') {
+      review = 'clean';
+      prAction = args.prActionResult;
+      finalWorkflow = evaluateWorkflowState({
+        ...evidence,
+        prStatus: 'open',
+      });
+    } else if (evidence.reviewStatus === 'approved') {
       review = 'clean';
       prAction = evidence.prStatus === 'open' ? 'update_existing_pr' : 'create_or_update_ready';
       finalWorkflow = evaluateWorkflowState(evidence);
@@ -151,7 +158,8 @@ function buildRuntimeCommandOutput(args, profile) {
     boundaryWorkflow ||
     profile.workflowOverride ||
     evaluateWorkflowState(evidence);
-  const autoChain = profile.autoChain === true ? buildQuickAutoChain(evidence, workflow) : null;
+  const autoChain =
+    profile.autoChain === true ? buildQuickAutoChain(evidence, workflow, args) : null;
   const effectiveWorkflow = autoChain?.finalWorkflow || workflow;
   const primary =
     effectiveWorkflow.nextCommand && effectiveWorkflow.nextCommand !== profile.command

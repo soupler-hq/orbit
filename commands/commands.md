@@ -499,6 +499,7 @@ If the user gives a plain prompt that implies a tracked implementation task, Orb
 The auto-chain block is the executable controller summary:
 - if verification is green, `/orbit:quick` must advance into review handling instead of stopping at implementation prose
 - if review is clean, the chained final state must reach `pr_ready` or `pr_open`
+- if review is clean and PR metadata is available, `/orbit:quick` should create or refresh the PR automatically
 - if review or evidence is not clean, PR action stays blocked
 
 And then:

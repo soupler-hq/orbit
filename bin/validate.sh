@@ -46,6 +46,7 @@ required_files=(
   "bin/runtime-adapter.js"
   "bin/operational-rules.js"
   "bin/checkpoint-manifest.js"
+  "bin/pull-request-controller.js"
   "bin/review-evidence.js"
   "bin/review.js"
   "bin/runtime-command.js"
