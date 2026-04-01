@@ -555,6 +555,22 @@
   ],
   "workflows": [
     {
+      "name": "discover",
+      "command": "/orbit:discover",
+      "mode": "collaborative",
+      "agents": [
+        "researcher",
+        "designer"
+      ],
+      "inputs": [
+        "problem statement",
+        "target user hypothesis"
+      ],
+      "outputs": [
+        "DISCOVERY.md"
+      ]
+    },
+    {
       "name": "new-project",
       "command": "/orbit:new-project",
       "mode": "collaborative",
