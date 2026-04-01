@@ -63,4 +63,29 @@ describe('checkpoint manifest', () => {
     expect(latest.metadata.issue).toBe('#181');
     expect(latest.checkpoint).toBe('pr_ready');
   });
+
+  it('treats command markdown as docs impact', () => {
+    const manifest = buildCheckpointManifest({
+      args: {
+        issue: '#181',
+        branch: 'feat/181-quick-review-pr-autochain',
+        headSha: 'abc1234',
+        changedFiles: 'commands/commands.md',
+      },
+      profile: {
+        command: '/orbit:quick',
+      },
+      evidence: {
+        issue: '#181',
+        branch: 'feat/181-quick-review-pr-autochain',
+      },
+      workflow: {
+        state: 'implementation_done',
+        nextCommand: '/orbit:review',
+        blockers: [],
+      },
+    });
+
+    expect(manifest.impact.scope.docs).toBe(true);
+  });
 });

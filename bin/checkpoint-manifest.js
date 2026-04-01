@@ -45,6 +45,7 @@ function categorizeImpact(changedFiles) {
       (file) =>
         /^docs\//.test(file) ||
         /^templates\//.test(file) ||
+        /^commands\/.*\.md$/.test(file) ||
         ['README.md', 'INSTRUCTIONS.md', 'SKILLS.md', 'WORKFLOWS.md', 'CLAUDE.md'].includes(file)
     ),
     config: files.some((file) =>

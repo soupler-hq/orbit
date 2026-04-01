@@ -21,6 +21,7 @@ const DOC_UPDATE_PATTERNS = [
   /^README\.md$/,
   /^CHANGELOG\.md$/,
   /^docs\//,
+  /^commands\/.*\.md$/,
   /^INSTRUCTIONS\.md$/,
   /^WORKFLOWS\.md$/,
   /^SKILLS\.md$/,
