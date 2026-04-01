@@ -63,6 +63,12 @@ function issueRefFromBranch(branch) {
   return match ? `#${match[1]}` : '';
 }
 
+function milestonePrefix(value) {
+  const normalized = String(value || '').trim();
+  const match = normalized.match(/^(v[0-9]+(?:\.[0-9]+){1,2})\b/i);
+  return match ? match[1] : normalized;
+}
+
 function parseActiveIssueFromState(text, branch) {
   const lines = String(text || '').split(/\r?\n/);
   for (let index = 0; index < lines.length; index += 1) {
@@ -103,9 +109,11 @@ function loadMinimal(db) {
     : issueRefFromBranch(branch);
   const activeTitle = branchMatchesState ? factMap.active_title || '' : '';
   const activePr = branchMatchesState ? factMap.active_pr || '' : '';
-  const tasks = db
+  const activeMilestone = milestonePrefix(factMap.milestone || '');
+  const candidateTasks = db
     .prepare(
       `SELECT issue_ref, title, status, blocker
+       , milestone
        FROM tasks
        WHERE status IN ('open','blocked','in_progress')
        ORDER BY
@@ -116,9 +124,23 @@ function loadMinimal(db) {
            ELSE 2
          END,
          id DESC
-       LIMIT 10`
+       LIMIT 25`
     )
     .all(activeIssue);
+  let tasks = candidateTasks;
+
+  if (activeMilestone) {
+    const milestoneTasks = candidateTasks.filter((task) => {
+      const taskMilestone = milestonePrefix(task.milestone || '');
+      return taskMilestone && taskMilestone === activeMilestone;
+    });
+
+    if (milestoneTasks.length > 0) {
+      tasks = milestoneTasks;
+    }
+  }
+
+  tasks = tasks.slice(0, 10);
 
   const lines = [
     '## Project Context (minimal)',

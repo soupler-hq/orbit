@@ -128,14 +128,21 @@ describeIfSqlite('context.js — schema and load levels', () => {
       'open'
     );
 
-    const output = loadMinimal(db);
+    const originalExecFileSync = require('child_process').execFileSync;
+    require('child_process').execFileSync = () => 'fix/145-state-freshness\n';
 
-    expect(output).toContain('## Active Work');
-    expect(output).toContain('- Issue: #145 — enforce automatic state freshness across command paths');
-    expect(output).toContain('- PR: #153 — fix(state): persist active branch in minimal context');
-    expect(output.indexOf('#145 enforce automatic state freshness across command paths')).toBeLessThan(
-      output.indexOf('#87 name hook stages in orbit.config.json')
-    );
+    try {
+      const output = loadMinimal(db);
+
+      expect(output).toContain('## Active Work');
+      expect(output).toContain('- Issue: #145 — enforce automatic state freshness across command paths');
+      expect(output).toContain('- PR: #153 — fix(state): persist active branch in minimal context');
+      expect(
+        output.indexOf('#145 enforce automatic state freshness across command paths')
+      ).toBeLessThan(output.indexOf('#87 name hook stages in orbit.config.json'));
+    } finally {
+      require('child_process').execFileSync = originalExecFileSync;
+    }
   });
 
   it('--load minimal: infers the active issue from the branch when state facts are stale', () => {
@@ -183,6 +190,59 @@ describeIfSqlite('context.js — schema and load levels', () => {
     } finally {
       require('child_process').execFileSync = originalExecFileSync;
     }
+  });
+
+  it('--load minimal: prefers current-milestone tasks over unrelated legacy backlog noise', () => {
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run(
+      'milestone',
+      'v2.9.0 — Idea to Market (self-orchestrated by Orbit)'
+    );
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run(
+      'phase',
+      'Enforcement Hardening — documented-vs-enforced closure and resumable-state reliability'
+    );
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('version', 'v2.8.1');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run(
+      'branch',
+      'fix/145-minimal-context-priority'
+    );
+    db.prepare('INSERT INTO tasks (issue_ref, title, status, milestone) VALUES (?, ?, ?, ?)').run(
+      '#142',
+      'epic(enforcement): close documented-vs-enforced workflow gaps',
+      'open',
+      'v2.9.0'
+    );
+    db.prepare('INSERT INTO tasks (issue_ref, title, status, milestone) VALUES (?, ?, ?, ?)').run(
+      '#132',
+      'test(enforcement): add end-to-end coverage for setup, routing, and review gates',
+      'open',
+      'v2.9.0'
+    );
+    db.prepare('INSERT INTO tasks (issue_ref, title, status, milestone) VALUES (?, ?, ?, ?)').run(
+      '#125',
+      'feat(context): provenance-driven context synthesis and recovery',
+      'open',
+      'v2.9.0'
+    );
+    db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run(
+      '#64',
+      'feat(agents): add product-manager agent',
+      'open'
+    );
+    db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run(
+      '#65',
+      'feat(agents): add business-analyst agent',
+      'open'
+    );
+
+    const output = loadMinimal(db);
+
+    expect(output).toContain('- Issue: #145');
+    expect(output).toContain('#142 epic(enforcement): close documented-vs-enforced workflow gaps');
+    expect(output).toContain('#132 test(enforcement): add end-to-end coverage for setup, routing, and review gates');
+    expect(output).toContain('#125 feat(context): provenance-driven context synthesis and recovery');
+    expect(output).not.toContain('#64 feat(agents): add product-manager agent');
+    expect(output).not.toContain('#65 feat(agents): add business-analyst agent');
   });
 
   it('--load decisions: returns decisions ordered newest first', () => {
