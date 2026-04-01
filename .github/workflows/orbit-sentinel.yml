@@ -60,19 +60,15 @@ jobs:
             exit 0
           fi
 
-          output='['
-          first=1
+          : > /tmp/orbit-tracked-issues.jsonl
           for ref in $refs; do
             number="${ref#\#}"
-            issue_json=$(gh issue view "$number" --json number,state,title,url)
-            if [ $first -eq 0 ]; then
-              output="$output,"
-            fi
-            output="$output$(printf '%s' "$issue_json" | node -e 'const issue = JSON.parse(require(\"fs\").readFileSync(0, \"utf8\")); process.stdout.write(JSON.stringify({ issue_ref: `#${issue.number}`, number: issue.number, state: issue.state, title: issue.title, url: issue.url }));')"
-            first=0
+            gh issue view "$number" \
+              --json number,state,title,url \
+              --jq '{issue_ref: ("#" + (.number | tostring)), number, state, title, url}' \
+              >> /tmp/orbit-tracked-issues.jsonl
           done
-          output="$output]"
-          printf '%s' "$output" > /tmp/orbit-tracked-issues.json
+          node bin/collect-tracked-issues.js --input /tmp/orbit-tracked-issues.jsonl > /tmp/orbit-tracked-issues.json
       - name: 🧭 PR governance gate
         run: node bin/validate-pr-governance.js --event-file "$GITHUB_EVENT_PATH" --body-file /tmp/orbit-pr-body.md --tracked-issues-file /tmp/orbit-tracked-issues.json
       - name: 📚 Docs-update governance gate
