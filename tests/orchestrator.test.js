@@ -128,6 +128,43 @@ describe('OrbitOrchestrator — state lock', () => {
     expect(() => orch2.acquireStateLock()).toThrow('Could not acquire Orbit state lock');
     orch.releaseStateLock();
   });
+
+  it('warns once in CI that the state mutex is local-only', () => {
+    process.env.CI = 'true';
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const orch = new OrbitOrchestrator(tmpDir);
+
+    orch.acquireStateLock();
+    orch.releaseStateLock();
+    orch.acquireStateLock();
+    orch.releaseStateLock();
+
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('local .orbit.lock directory')
+    );
+
+    warnSpy.mockRestore();
+    delete process.env.CI;
+  });
+
+  it('warns when distributed_mutex_warning is enabled outside CI', () => {
+    const configPath = path.join(tmpDir, 'orbit.config.json');
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    config.distributed_mutex_warning = true;
+    fs.writeFileSync(configPath, JSON.stringify(config));
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const orch = new OrbitOrchestrator(tmpDir);
+
+    orch.acquireStateLock();
+    orch.releaseStateLock();
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('not safe across distributed CI runners')
+    );
+
+    warnSpy.mockRestore();
+  });
 });
 
 describe('OrbitOrchestrator — resolveNexusPath', () => {

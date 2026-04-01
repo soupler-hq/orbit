@@ -56,6 +56,8 @@ bash install.sh --local --tool claude
 
 Core development follows Orbit-on-Orbit rules: create or identify the issue, cut a feature branch from freshly pulled `develop`, use an Orbit workflow command as the task entrypoint, run review on the feature branch, and open a PR using the repo's standard body structure. Branches should follow `<type>/<slug>` naming such as `feat/143-pr-governance-enforcement` or `fix/145-context-minimal-dedup`. If the branch scope changes after the PR is opened, update the PR body in the same pass so `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` remain truthful, and refresh the `Head SHA` marker before re-review. Treat that refresh as part of the work, not optional cleanup. PR progression also requires evidence: `## Test plan` must list the commands actually run, and `Orbit Self-Review` must record the review command, dispatched agents, ship decision, and findings handled. Behavior-sensitive changes must also declare a `## Docs update` disposition: either name the updated contract docs (`UPDATED`) or record an explicit exemption (`EXEMPT`). If a review still leaves residual risks, treat them as `track-or-waive` work before considering the review complete, and label each one explicitly as `Tracked by #...`, `Waived: ...`, or `Operational: ...`; do not leave residuals implied.
 
+In CI or other distributed runner setups, Orbit's `.orbit.lock` mutex remains local-only. It prevents concurrent `STATE.md` writes inside one filesystem, but it does not provide cross-runner mutual exclusion. When `CI=true` or `distributed_mutex_warning` is enabled in `orbit.config.json`, the orchestrator emits a warning so operators do not mistake the local lock for a distributed safety guarantee.
+
 ---
 
 ## Slash commands

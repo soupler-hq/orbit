@@ -37,6 +37,20 @@ class OrbitOrchestrator {
     this.nexusPath = path.join(projectRoot, 'orbit.nexus.json');
     this.isNexus = fs.existsSync(this.nexusPath);
     this.nexus = this.isNexus ? JSON.parse(fs.readFileSync(this.nexusPath, 'utf8')) : null;
+    this.hasWarnedDistributedMutex = false;
+  }
+
+  shouldWarnDistributedMutex() {
+    return process.env.CI === 'true' || this.config.distributed_mutex_warning === true;
+  }
+
+  emitDistributedMutexWarning() {
+    if (!this.shouldWarnDistributedMutex() || this.hasWarnedDistributedMutex) return;
+
+    console.warn(
+      '[WARN-ORBIT-DISTRIBUTED-MUTEX] Orbit state locking uses a local .orbit.lock directory and is not safe across distributed CI runners or remote subagent hosts. STATE.md writes remain local-only in this mode; do not assume cross-runner mutual exclusion.'
+    );
+    this.hasWarnedDistributedMutex = true;
   }
 
   /**
@@ -84,6 +98,7 @@ class OrbitOrchestrator {
    * Acquire an atomic lock on the state directory.
    */
   acquireStateLock() {
+    this.emitDistributedMutexWarning();
     const lockPath = path.join(this.stateDir, '.orbit.lock');
     let attempts = 0;
     while (attempts < 10) {

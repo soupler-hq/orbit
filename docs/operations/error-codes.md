@@ -39,6 +39,10 @@ Example:
 [ERR-ORBIT-003] Could not acquire Orbit state lock after 10 retries. Another process may be writing STATE.md. Delete .orbit/state/.orbit.lock manually if the lock is stale.
 ```
 
+Distributed CI note:
+- Orbit also emits `[WARN-ORBIT-DISTRIBUTED-MUTEX]` when `CI=true` or `distributed_mutex_warning` is enabled.
+- That warning means the `.orbit.lock` mutex is only local to the current filesystem and does not protect `STATE.md` across separate runners or remote hosts.
+
 ## Runbooks
 
 ### ERR-ORBIT-003 — Stale lock

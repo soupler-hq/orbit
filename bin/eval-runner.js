@@ -606,6 +606,14 @@ integrityResults.push({
       : 'orbit.config.json missing clarification_gate boolean',
 });
 integrityResults.push({
+  check: 'config contract: distributed_mutex_warning boolean exists',
+  pass: typeof config.distributed_mutex_warning === 'boolean',
+  reason:
+    typeof config.distributed_mutex_warning === 'boolean'
+      ? 'ok'
+      : 'orbit.config.json missing distributed_mutex_warning boolean',
+});
+integrityResults.push({
   check: 'hook contract: pre-tool-use references clarification gate helper',
   pass:
     preToolUseHookText.includes('bin/clarification-gate.js') &&
