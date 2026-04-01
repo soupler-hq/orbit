@@ -27,6 +27,27 @@ const ROOT = path.resolve(__dirname, '..');
 const STATE_PATH = path.join(ROOT, '.orbit', 'state', 'STATE.md');
 const ARGS = process.argv.slice(2);
 
+function currentGitBranch() {
+  try {
+    return require('child_process')
+      .execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+        cwd: ROOT,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      })
+      .trim();
+  } catch {
+    return null;
+  }
+}
+
+function findExistingTask(db, issueRef, title) {
+  if (issueRef) {
+    return db.prepare('SELECT id FROM tasks WHERE issue_ref = ?').get(issueRef);
+  }
+  return db.prepare('SELECT id FROM tasks WHERE issue_ref IS NULL AND title = ?').get(title);
+}
+
 // ── Load levels ───────────────────────────────────────────────────────────────
 
 function loadMinimal(db) {
@@ -38,13 +59,14 @@ function loadMinimal(db) {
     .all();
 
   const factMap = Object.fromEntries(facts.map((r) => [r.key, r.value]));
+  const branch = factMap.branch || currentGitBranch() || '(not set)';
 
   const lines = [
     '## Project Context (minimal)',
     `- Milestone: ${factMap.milestone || '(not set)'}`,
     `- Phase: ${factMap.phase || '(not set)'}`,
     `- Version: ${factMap.version || '(not set)'}`,
-    `- Branch: ${factMap.branch || '(not set)'}`,
+    `- Branch: ${branch}`,
     '',
     '## Open / In-Progress / Blocked Tasks',
   ];
@@ -155,6 +177,7 @@ function migrate(db) {
   const milestoneMatch = text.match(/\*\*Active Milestone\*\*:\s*(.+)/);
   const phaseMatch = text.match(/\*\*Active Phase\*\*:\s*(.+)/);
   const versionMatch = text.match(/\*\*Current Version\*\*:\s*(.+)/);
+  const branchMatch = text.match(/\*\*Current Branch\*\*:\s*(.+)/);
 
   const upsertState = db.prepare(
     'INSERT OR REPLACE INTO state (key, value, updated_at) VALUES (?, ?, unixepoch())'
@@ -170,6 +193,11 @@ function migrate(db) {
   }
   if (versionMatch) {
     upsertState.run('version', versionMatch[1].trim());
+    count.state++;
+  }
+  const branch = branchMatch?.[1]?.trim() || currentGitBranch();
+  if (branch) {
+    upsertState.run('branch', branch);
     count.state++;
   }
 
@@ -204,7 +232,10 @@ function migrate(db) {
   const todoSection = text.match(/### v[\d.]+.*?\n([\s\S]*?)(?=\n###|\n## |$)/g);
   if (todoSection) {
     const insertTask = db.prepare(
-      'INSERT OR IGNORE INTO tasks (issue_ref, title, status, milestone, wave) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO tasks (issue_ref, title, status, milestone, wave) VALUES (?, ?, ?, ?, ?)'
+    );
+    const updateTask = db.prepare(
+      'UPDATE tasks SET issue_ref = ?, title = ?, status = ?, milestone = ?, wave = ? WHERE id = ?'
     );
     for (const section of todoSection) {
       const lines = section.split('\n');
@@ -216,10 +247,12 @@ function migrate(db) {
           const issueRef = todoMatch[2] || null;
           const title = todoMatch[3].trim();
           const status = done ? 'complete' : 'open';
-          const existing = db.prepare('SELECT id FROM tasks WHERE title = ?').get(title);
+          const existing = findExistingTask(db, issueRef, title);
           if (!existing) {
             insertTask.run(issueRef, title, status, milestoneHeader || null, null);
             count.tasks++;
+          } else {
+            updateTask.run(issueRef, title, status, milestoneHeader || null, null, existing.id);
           }
         }
       }
@@ -320,4 +353,17 @@ function main() {
   db.close();
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  loadMinimal,
+  loadStandard,
+  loadFull,
+  loadDecisions,
+  loadBlocked,
+  migrate,
+  save,
+  currentGitBranch,
+};

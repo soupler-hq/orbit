@@ -11,9 +11,11 @@ import os from 'os';
 
 let Database;
 let initSchema;
+let loadMinimal;
 try {
   Database = require('better-sqlite3');
   ({ initSchema } = require('../bin/db'));
+  ({ loadMinimal } = require('../bin/context'));
 } catch {
   console.warn('better-sqlite3 not installed — context.test.js tests will be skipped');
 }
@@ -27,6 +29,7 @@ Test project vision paragraph.
 - **Active Milestone**: v2.9.0 — Idea to Market
 - **Active Phase**: Wave 0 — Release Bootstrap
 - **Current Version**: v2.8.1
+- **Current Branch**: test/132-enforcement-e2e
 
 ## Decisions Log
 | Date | Version | Decision | Rationale |
@@ -82,15 +85,16 @@ describeIfSqlite('context.js — schema and load levels', () => {
   it('--load minimal: returns milestone and open tasks', () => {
     db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('milestone', 'v2.9.0 — Wave 0');
     db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('version', 'v2.8.1');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('branch', 'feat/context-fix');
     db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run('#94', 'observability blocks', 'open');
     db.prepare('INSERT INTO tasks (issue_ref, title, status, blocker) VALUES (?, ?, ?, ?)').run('#99', 'setup installer', 'blocked', 'waiting for PR');
 
-    const state = db.prepare('SELECT key, value FROM state').all();
-    const tasks = db.prepare("SELECT * FROM tasks WHERE status IN ('open','blocked','in_progress')").all();
+    const output = loadMinimal(db);
 
-    expect(state.find((s) => s.key === 'milestone').value).toBe('v2.9.0 — Wave 0');
-    expect(tasks.length).toBe(2);
-    expect(tasks.find((t) => t.status === 'blocked').blocker).toBe('waiting for PR');
+    expect(output).toContain('- Milestone: v2.9.0 — Wave 0');
+    expect(output).toContain('- Branch: feat/context-fix');
+    expect(output).toContain('[OPEN] #94 observability blocks');
+    expect(output).toContain('[BLOCKED] #99 setup installer — waiting for PR');
   });
 
   it('--load decisions: returns decisions ordered newest first', () => {
@@ -142,6 +146,13 @@ describeIfSqlite('context.js — migrate from STATE.md', () => {
     expect(versionMatch[1].trim()).toBe('v2.8.1');
   });
 
+  it('extracts current branch from STATE.md', () => {
+    const text = fs.readFileSync(statePath, 'utf8');
+    const branchMatch = text.match(/\*\*Current Branch\*\*:\s*(.+)/);
+    expect(branchMatch).not.toBeNull();
+    expect(branchMatch[1].trim()).toBe('test/132-enforcement-e2e');
+  });
+
   it('decisions table rows are idempotent on duplicate insert', () => {
     // Insert same decision twice — should not duplicate
     const insert = db.prepare('INSERT INTO decisions (date, version, decision, rationale) VALUES (?, ?, ?, ?)');
@@ -163,5 +174,24 @@ describeIfSqlite('context.js — migrate from STATE.md', () => {
     expect(() => {
       db.prepare("INSERT INTO tasks (title, status) VALUES ('bad', 'invalid_status')").run();
     }).toThrow();
+  });
+
+  it('prevents duplicate task rows by issue_ref', () => {
+    db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run(
+      '#145',
+      'enforce automatic state freshness across command paths',
+      'open'
+    );
+
+    expect(() => {
+      db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run(
+        '#145',
+        'enforce automatic state freshness across command paths',
+        'open'
+      );
+    }).toThrow();
+
+    const rows = db.prepare('SELECT id FROM tasks WHERE issue_ref = ?').all('#145');
+    expect(rows).toHaveLength(1);
   });
 });

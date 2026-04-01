@@ -206,11 +206,16 @@ function main() {
   let issueCount = 0;
   const issues = runGhIssueList();
   if (issues) {
-    const insertTask = db.prepare(
-      'INSERT OR IGNORE INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)'
-    );
+    const insertTask = db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)');
+    const updateTask = db.prepare('UPDATE tasks SET title = ?, status = ? WHERE issue_ref = ?');
+    const existingTask = db.prepare('SELECT id FROM tasks WHERE issue_ref = ?');
     for (const issue of issues) {
-      insertTask.run(`#${issue.number}`, issue.title, 'open');
+      const issueRef = `#${issue.number}`;
+      if (existingTask.get(issueRef)) {
+        updateTask.run(issue.title, 'open', issueRef);
+      } else {
+        insertTask.run(issueRef, issue.title, 'open');
+      }
       issueCount++;
     }
     upsertResults.issues = { value: `${issueCount} open issues`, source: 'gh issue list' };
