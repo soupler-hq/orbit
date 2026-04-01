@@ -15,8 +15,6 @@ const { execFileSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { buildRuntimeAdapterContract } = require('./runtime-adapter');
-
 const ROOT = path.resolve(__dirname, '..');
 const ARGS = process.argv.slice(2);
 const JSON_OUT = ARGS.includes('--json');
