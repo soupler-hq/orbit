@@ -29,13 +29,14 @@ const ARGS = process.argv.slice(2);
 
 function currentGitBranch() {
   try {
-    return require('child_process')
+    const branch = require('child_process')
       .execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
         cwd: ROOT,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'ignore'],
       })
       .trim();
+    return branch === 'HEAD' ? null : branch;
   } catch {
     return null;
   }
