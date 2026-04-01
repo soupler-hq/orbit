@@ -63,7 +63,13 @@ function initSchema(db) {
       date       TEXT NOT NULL,
       version    TEXT,
       decision   TEXT NOT NULL,
-      rationale  TEXT NOT NULL
+      rationale  TEXT NOT NULL,
+      phase      TEXT,
+      made_by    TEXT,
+      context    TEXT,
+      supersedes TEXT,
+      still_valid INTEGER NOT NULL DEFAULT 1,
+      invalidated_at TEXT
     );
 
     CREATE TABLE IF NOT EXISTS tasks (
@@ -76,6 +82,23 @@ function initSchema(db) {
       blocker    TEXT
     );
   `);
+
+  const decisionColumns = db
+    .prepare(`PRAGMA table_info(decisions)`)
+    .all()
+    .map((column) => column.name);
+  const ensureDecisionColumn = (name, sqlType) => {
+    if (!decisionColumns.includes(name)) {
+      db.exec(`ALTER TABLE decisions ADD COLUMN ${name} ${sqlType}`);
+    }
+  };
+
+  ensureDecisionColumn('phase', 'TEXT');
+  ensureDecisionColumn('made_by', 'TEXT');
+  ensureDecisionColumn('context', 'TEXT');
+  ensureDecisionColumn('supersedes', 'TEXT');
+  ensureDecisionColumn('still_valid', 'INTEGER NOT NULL DEFAULT 1');
+  ensureDecisionColumn('invalidated_at', 'TEXT');
 
   normalizeTaskRows(db);
 

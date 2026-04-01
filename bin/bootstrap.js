@@ -9,7 +9,7 @@
  *   3. README.md        → project vision (first paragraph or ## About / ## Overview)
  *   4. git log -30      → recent commit count
  *   5. gh issue list    → populate tasks table (skip if gh unavailable)
- *   6. STATE.md         → decisions log + active phase migration
+ *   6. STATE.md / DECISIONS-LOG.md → decision history + active phase migration
  *   7. Defaults         → vision="new project", milestone="v1.0.0", phase=1
  *
  * Usage:
@@ -25,6 +25,11 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { openDb, DB_PATH } = require('./db');
+const {
+  DECISIONS_LOG_PATH,
+  parseDecisionLogFile,
+  parseStateDecisionTable,
+} = require('./decision-log');
 
 const ROOT = path.resolve(__dirname, '..');
 const STATE_PATH = path.join(ROOT, '.orbit', 'state', 'STATE.md');
@@ -226,34 +231,36 @@ function main() {
     upsertResults.issues = { value: `${issueCount} open issues`, source: 'gh issue list' };
   }
 
-  // 6. STATE.md — migrate decisions + active phase if exists
+  // 6. STATE.md / DECISIONS-LOG.md — migrate decisions + active phase if exists
   let migratedDecisions = 0;
-  if (fs.existsSync(STATE_PATH)) {
-    const text = fs.readFileSync(STATE_PATH, 'utf8');
+  if (fs.existsSync(STATE_PATH) || fs.existsSync(DECISIONS_LOG_PATH)) {
+    const text = fs.existsSync(STATE_PATH) ? fs.readFileSync(STATE_PATH, 'utf8') : '';
 
-    // Decisions table
-    const decisionSection = text.match(/## Decisions Log\n([\s\S]*?)(?=\n##|$)/);
-    if (decisionSection) {
-      const insertDecision = db.prepare(
-        'INSERT INTO decisions (date, version, decision, rationale) VALUES (?, ?, ?, ?)'
-      );
-      const rows = decisionSection[1]
-        .split('\n')
-        .filter((l) => l.startsWith('|') && !l.includes('---') && !l.includes('Date'));
-      for (const row of rows) {
-        const cols = row
-          .split('|')
-          .map((c) => c.trim())
-          .filter(Boolean);
-        if (cols.length >= 4) {
-          const existing = db
-            .prepare('SELECT id FROM decisions WHERE date = ? AND decision = ?')
-            .get(cols[0], cols[2]);
-          if (!existing) {
-            insertDecision.run(cols[0], cols[1] || null, cols[2], cols[3]);
-            migratedDecisions++;
-          }
-        }
+    const decisionEntries = parseDecisionLogFile(DECISIONS_LOG_PATH);
+    const fallbackEntries = decisionEntries.length === 0 ? parseStateDecisionTable(text) : [];
+    const insertDecision = db.prepare(
+      `INSERT INTO decisions
+        (date, version, decision, rationale, phase, made_by, context, supersedes, still_valid, invalidated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const entry of [...decisionEntries, ...fallbackEntries]) {
+      const existing = db
+        .prepare('SELECT id FROM decisions WHERE date = ? AND decision = ?')
+        .get(entry.made_at, entry.decision);
+      if (!existing) {
+        insertDecision.run(
+          entry.made_at,
+          entry.version || null,
+          entry.decision,
+          entry.rationale,
+          entry.phase || null,
+          entry.made_by || null,
+          entry.context || null,
+          JSON.stringify(entry.supersedes || []),
+          entry.still_valid === false ? 0 : 1,
+          entry.invalidated_at || null
+        );
+        migratedDecisions++;
       }
     }
 
@@ -263,7 +270,10 @@ function main() {
       upsert.run('phase', phaseMatch[1].trim());
     }
 
-    upsertResults.decisions = { value: `${migratedDecisions} entries`, source: 'STATE.md' };
+    upsertResults.decisions = {
+      value: `${migratedDecisions} entries`,
+      source: fs.existsSync(DECISIONS_LOG_PATH) ? 'DECISIONS-LOG.md' : 'STATE.md',
+    };
   }
 
   db.close();

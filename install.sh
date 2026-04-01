@@ -180,6 +180,7 @@ allowed-tools: all
 Read \$CLAUDE_DIR/CLAUDE.md to load Orbit context.
 Read \$CLAUDE_DIR/commands/orbit/commands.md for this command's exact process specification.
 If STATE.md exists at .orbit/state/STATE.md, read it for project context.
+If DECISIONS-LOG.md exists at .orbit/state/DECISIONS-LOG.md, append durable decision history there.
 Execute: /orbit:${cmd} \$ARGUMENTS — follow the exact process defined, no shortcuts.
 CMDEOF
     qecho "  ✓ /orbit:${cmd}"
@@ -188,7 +189,9 @@ CMDEOF
 
   # ── State Template ────────────────────────────────────────────────────────
   cp "$FRAMEWORK_DIR/templates/STATE.md" "$CLAUDE_DIR/state/STATE.template.md"
+  cp "$FRAMEWORK_DIR/templates/DECISIONS-LOG.md" "$CLAUDE_DIR/state/DECISIONS-LOG.template.md"
   qecho "  ✓ state/STATE.template.md"
+  qecho "  ✓ state/DECISIONS-LOG.template.md"
 
   # ── Hook Scripts ──────────────────────────────────────────────────────────
   qecho ""
@@ -231,7 +234,8 @@ install_for_codex() {
   cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$codex_dir/orbit.config.schema.json"
   write_runtime_adapter_contract "codex" "$codex_dir"
   cp "$FRAMEWORK_DIR/templates/STATE.md"  "$codex_dir/state/STATE.template.md"
-  qecho "  ✓ operator surface + registry + config + state template"
+  cp "$FRAMEWORK_DIR/templates/DECISIONS-LOG.md" "$codex_dir/state/DECISIONS-LOG.template.md"
+  qecho "  ✓ operator surface + registry + config + state templates"
 
   for f in "$FRAMEWORK_DIR"/agents/*.md; do
     cp "$f" "$codex_dir/agents/$(basename "$f")"
@@ -252,6 +256,7 @@ You are running the Orbit orchestration framework.
 Read INSTRUCTIONS.md at session start. Your agent registry is orbit.registry.json.
 Classify the request, select the best agent, dispatch work per WORKFLOWS.md.
 Read state/STATE.md on start, write it on session end.
+Record durable decisions in state/DECISIONS-LOG.md.
 If the user sends a plain prompt that implies tracked work, infer the nearest Orbit workflow before acting. Explicit `/orbit:*` commands still take precedence.
 
 /orbit: command equivalents — follow the matching section in WORKFLOWS.md:
@@ -287,7 +292,8 @@ install_for_antigravity() {
   cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$ag_dir/orbit.config.schema.json"
   write_runtime_adapter_contract "antigravity" "$ag_dir"
   cp "$FRAMEWORK_DIR/templates/STATE.md"  "$ag_dir/state/STATE.template.md"
-  qecho "  ✓ control plane docs + registry + config + state template"
+  cp "$FRAMEWORK_DIR/templates/DECISIONS-LOG.md" "$ag_dir/state/DECISIONS-LOG.template.md"
+  qecho "  ✓ control plane docs + registry + config + state templates"
 
   for f in "$FRAMEWORK_DIR"/agents/*.md; do
     cp "$f" "$ag_dir/agents/$(basename "$f")"
@@ -365,12 +371,19 @@ init_project_state() {
 
   mkdir -p "$state_dir" "$hooks_dir" "$PROJECT_DIR/.orbit/errors"
 
-  # Copy STATE template if no STATE.md yet
+  # Copy state templates if missing
   if [[ ! -f "$state_dir/STATE.md" ]]; then
     cp "$FRAMEWORK_DIR/templates/STATE.md" "$state_dir/STATE.md"
     qecho "  ✓ .orbit/state/STATE.md (from template)"
   else
     qecho "  ✓ .orbit/state/STATE.md (already exists — preserved)"
+  fi
+
+  if [[ ! -f "$state_dir/DECISIONS-LOG.md" ]]; then
+    cp "$FRAMEWORK_DIR/templates/DECISIONS-LOG.md" "$state_dir/DECISIONS-LOG.md"
+    qecho "  ✓ .orbit/state/DECISIONS-LOG.md (from template)"
+  else
+    qecho "  ✓ .orbit/state/DECISIONS-LOG.md (already exists — preserved)"
   fi
 
   # Copy hook scripts to project-local .orbit/hooks/

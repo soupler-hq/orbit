@@ -49,12 +49,13 @@ Soupler HQ is the internal operations platform for Soupler — a B2B SaaS compan
 
 ---
 
-## Decisions Log
-**2026-03-15** — Chose Stripe Connect for employer-to-worker payouts (not Stripe Checkout). Reason: Soupler takes a platform fee and needs to split payments. Connect supports this; Checkout alone does not.
+## Decision Ledger
+See `examples/DECISIONS-LOG-example.md` for the additive decision history.
+Current active decisions summarized here:
 
-**2026-03-10** — Deferred multi-currency support to M3. Scope cut agreed with product team. Only USD in M2. EUR/GBP tracking issue: #234.
-
-**2026-03-05** — Railway over Vercel for hosting. Reason: NestJS API runs as a separate service — Vercel serverless isn't suitable for long-running WebSocket connections.
+- Payments use Stripe Connect for employer-to-worker payouts.
+- Multi-currency support is deferred to M3.
+- Railway remains the hosting choice for the separate NestJS API service.
 
 ---
 
