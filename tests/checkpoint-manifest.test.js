@@ -27,6 +27,7 @@ describe('checkpoint manifest', () => {
       evidence: {
         issue: '#181',
         branch: 'feat/181-quick-review-pr-autochain',
+        reviewFindings: 'MEDIUM: persist findings into remediation state',
       },
       workflow: {
         state: 'pr_ready',
@@ -45,6 +46,9 @@ describe('checkpoint manifest', () => {
     });
     expect(manifest.orchestration.current_state).toBe('pr_ready');
     expect(manifest.orchestration.recommended_next_step).toBe('/orbit:ship');
+    expect(manifest.orchestration.review_findings).toBe(
+      'MEDIUM: persist findings into remediation state'
+    );
     expect(manifest.verification_summary.status).toBe('success');
     expect(manifest.verification_summary.checks).toEqual([
       { name: 'vitest', passed: true },

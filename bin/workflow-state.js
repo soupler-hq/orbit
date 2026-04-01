@@ -14,6 +14,7 @@ const WORKFLOW_STATES = [
   'implementation_done',
   'tests_green',
   'review_required',
+  'remediation_required',
   'review_clean',
   'pr_ready',
   'pr_open',
@@ -28,6 +29,7 @@ const NEXT_TRANSITIONS = {
   implementation_done: 'tests_green',
   tests_green: 'review_required',
   review_required: 'review_clean',
+  remediation_required: 'implementation_done',
   review_clean: 'pr_ready',
   pr_ready: 'pr_open',
   pr_open: 'merged',
@@ -42,6 +44,7 @@ const NEXT_COMMANDS = {
   implementation_done: (evidence) => `/orbit:quick ${evidence.issue || '#NNN'}`,
   tests_green: () => '/orbit:review',
   review_required: () => '/orbit:review',
+  remediation_required: (evidence) => `/orbit:quick ${evidence.issue || '#NNN'}`,
   review_clean: () => '/orbit:ship',
   pr_ready: () => '/orbit:ship',
   pr_open: () => '/orbit:progress',
@@ -103,6 +106,7 @@ function normalizeEvidence(evidence = {}) {
       ['unknown', 'approved', 'conditional', 'blocked'],
       'unknown'
     ),
+    reviewFindings: String(evidence.reviewFindings || '').trim(),
     prStatus: normalizeStatus(
       evidence.prStatus,
       ['unknown', 'not_open', 'open', 'merged'],
@@ -143,13 +147,6 @@ function evaluateWorkflowState(rawEvidence = {}) {
     return buildSummary('review_required', evidence, blockers);
   }
 
-  if (evidence.shipDecisionStatus === 'blocked') {
-    blockers.push(
-      'Orbit self-review is blocked; resolve the recorded findings before PR or ship progression.'
-    );
-    return buildSummary('review_required', evidence, blockers);
-  }
-
   if (
     evidence.prStatus === 'open' &&
     evidence.reviewStatus === 'approved' &&
@@ -159,6 +156,21 @@ function evaluateWorkflowState(rawEvidence = {}) {
     evidence.shipDecisionStatus !== 'blocked'
   ) {
     return buildSummary('pr_open', evidence, blockers);
+  }
+
+  if (evidence.reviewStatus === 'changes_requested') {
+    const findingsDetail = evidence.reviewFindings ? ` Findings: ${evidence.reviewFindings}` : '';
+    blockers.push(
+      `Review requested changes; fix findings and rerun tests before re-review.${findingsDetail}`
+    );
+    return buildSummary('remediation_required', evidence, blockers);
+  }
+
+  if (evidence.shipDecisionStatus === 'blocked') {
+    blockers.push(
+      'Orbit self-review is blocked; resolve the recorded findings before PR or ship progression.'
+    );
+    return buildSummary('review_required', evidence, blockers);
   }
 
   if (evidence.reviewStatus === 'approved' && evidence.testsStatus === 'passed') {
@@ -175,11 +187,6 @@ function evaluateWorkflowState(rawEvidence = {}) {
   if (evidence.reviewStatus === 'approved') {
     blockers.push('Tests must be green before opening a PR, even after review approval.');
     return buildSummary('review_clean', evidence, blockers);
-  }
-
-  if (evidence.reviewStatus === 'changes_requested') {
-    blockers.push('Review requested changes; fix findings and rerun tests before re-review.');
-    return buildSummary('implementation_done', evidence, blockers);
   }
 
   if (evidence.reviewStatus === 'pending') {

@@ -8,7 +8,7 @@
 
 const { execFileSync } = require('child_process');
 const { evaluateWorkflowState, inferIssueFromBranch } = require('./workflow-state');
-const { inferEvidenceStatus } = require('./review-evidence');
+const { inferEvidenceStatus, parseReviewEvidence } = require('./review-evidence');
 const { formatNextCommand, formatProgressStatus, formatWorkflowGate } = require('./status');
 
 function runCommand(bin, args, fallback = null) {
@@ -98,6 +98,7 @@ function buildEvidence(args = {}, deps = {}) {
   const issue = args.issue || inferIssueFromBranch(branch);
   const dirty = args.dirty ?? Boolean(gitReader(['status', '--porcelain']));
   const prData = args.githubData || githubReader();
+  const reviewEvidence = prData?.body ? parseReviewEvidence(prData.body) : null;
   const evidenceStatus = prData?.body
     ? inferEvidenceStatus(prData.body)
     : {
@@ -117,6 +118,8 @@ function buildEvidence(args = {}, deps = {}) {
     reviewEvidenceStatus: args.reviewEvidenceStatus || evidenceStatus.reviewEvidenceStatus,
     testEvidenceStatus: args.testEvidenceStatus || evidenceStatus.testEvidenceStatus,
     shipDecisionStatus: args.shipDecisionStatus || evidenceStatus.shipDecisionStatus,
+    reviewFindings:
+      args.reviewFindings || args['review-findings'] || reviewEvidence?.findings || null,
   };
 }
 

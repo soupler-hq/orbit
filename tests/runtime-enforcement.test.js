@@ -23,6 +23,22 @@ const BLOCKED_REVIEW_EVIDENCE_BODY = REVIEW_EVIDENCE_BODY.replace(
   '**Ship decision**: APPROVED',
   '**Ship decision**: BLOCKED'
 );
+const CHANGES_REQUESTED_REVIEW_EVIDENCE_BODY = [
+  '## Summary',
+  '## Issues',
+  '## Ship Decision',
+  '- Head SHA: `abc1234`',
+  '## Test plan',
+  '- `npm test`',
+  '## Orbit Self-Review',
+  '**Command run**: `/orbit:review`',
+  '**Agent(s) dispatched**: reviewer',
+  '**Ship decision**: BLOCKED',
+  '**Findings addressed** (paste critical/high findings and how you resolved them, or "none"):',
+  '```',
+  'MEDIUM: persist concrete review findings into the remediation loop',
+  '```',
+].join('\n');
 
 describe('runtime enforcement entrypoints', () => {
   it('progress runtime emits execution, workflow gate, and next command', () => {
@@ -197,6 +213,28 @@ describe('runtime enforcement entrypoints', () => {
     expect(evidence.reviewEvidenceStatus).toBe('present');
     expect(evidence.testEvidenceStatus).toBe('present');
     expect(evidence.shipDecisionStatus).toBe('approved');
+  });
+
+  it('progress runtime carries review findings from a live PR body into evidence', () => {
+    const evidence = progress.buildEvidence(
+      {},
+      {
+        gitReader: (args) => {
+          if (args[0] === 'rev-parse') return 'feat/181-quick-review-pr-autochain';
+          if (args[0] === 'status') return '';
+          return '';
+        },
+        githubReader: () => ({
+          state: 'OPEN',
+          reviewDecision: 'CHANGES_REQUESTED',
+          statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+          body: CHANGES_REQUESTED_REVIEW_EVIDENCE_BODY,
+        }),
+      }
+    );
+
+    expect(evidence.reviewStatus).toBe('changes_requested');
+    expect(evidence.reviewFindings).toContain('persist concrete review findings');
   });
 
   it('ship runtime blocks when self-review decision is blocked', () => {

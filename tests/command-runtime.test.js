@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { renderQuick } from '../bin/quick.js';
+import { renderQuick, runQuick } from '../bin/quick.js';
 import { renderPlan } from '../bin/plan.js';
 import { renderReview } from '../bin/review.js';
 import { renderVerify } from '../bin/verify.js';
@@ -86,6 +86,141 @@ describe('runtime command status parity', () => {
     expect(output).toContain('**Primary**: /orbit:review');
   });
 
+  it('quick runtime routes review findings into a remediation loop', () => {
+    const output = renderQuick({
+      issue: '#181',
+      branch: 'feat/181-quick-review-pr-autochain',
+      implementationStatus: 'done',
+      testsStatus: 'passed',
+      testEvidenceStatus: 'present',
+      reviewStatus: 'changes_requested',
+      reviewEvidenceStatus: 'present',
+      reviewFindings: 'MEDIUM: persist concrete findings into the remediation loop',
+      prStatus: 'not_open',
+    });
+
+    expect(output).toContain('Orbit Auto-Chain');
+    expect(output).toContain('Review:       changes_requested');
+    expect(output).toContain('PR Action:    blocked');
+    expect(output).toContain('Final State:  remediation_required');
+    expect(output).toContain('persist concrete findings into the remediation loop');
+    expect(output).toContain('**Primary**: /orbit:quick #181');
+  });
+
+  it('quick runtime can execute review and land in remediation_required when findings are returned', () => {
+    const result = runQuick(
+      {
+        issue: '#181',
+        branch: 'feat/181-quick-review-pr-autochain',
+        implementationStatus: 'done',
+        testsStatus: 'passed',
+        testEvidenceStatus: 'present',
+        reviewStatus: 'not_requested',
+        executeReviewAction: true,
+        prStatus: 'not_open',
+      },
+      {
+        reviewRunner: () => ({
+          output: 'review executed',
+          reviewStatus: 'changes_requested',
+          reviewEvidenceStatus: 'present',
+          shipDecisionStatus: 'blocked',
+          reviewFindings: 'HIGH: preserve concrete findings in remediation',
+        }),
+      }
+    );
+
+    expect(result.reviewResult).toMatchObject({
+      reviewStatus: 'changes_requested',
+      reviewFindings: 'HIGH: preserve concrete findings in remediation',
+    });
+    expect(result.prResult).toBe(null);
+    expect(result.output).toContain('Review:       changes_requested');
+    expect(result.output).toContain('Final State:  remediation_required');
+    expect(result.output).toContain('preserve concrete findings in remediation');
+    expect(result.output).toContain('**Primary**: /orbit:quick #181');
+  });
+
+  it('quick runtime can execute review and then sync the PR when the result is clean', () => {
+    const result = runQuick(
+      {
+        issue: '#181',
+        branch: 'feat/181-quick-review-pr-autochain',
+        implementationStatus: 'done',
+        testsStatus: 'passed',
+        testEvidenceStatus: 'present',
+        reviewStatus: 'not_requested',
+        executeReviewAction: true,
+        executePrAction: true,
+        verificationCommands: 'bash bin/validate.sh||npm run format:check',
+        changedFiles: 'commands/commands.md',
+        prStatus: 'not_open',
+      },
+      {
+        reviewRunner: () => ({
+          output: 'review executed',
+          reviewStatus: 'approved',
+          reviewEvidenceStatus: 'present',
+          shipDecisionStatus: 'approved',
+          reviewFindings: 'none',
+        }),
+        syncPullRequest: () => ({
+          action: 'created',
+          number: 187,
+          url: 'https://github.com/soupler-hq/orbit/pull/187',
+        }),
+      }
+    );
+
+    expect(result.reviewResult).toMatchObject({
+      reviewStatus: 'approved',
+      shipDecisionStatus: 'approved',
+    });
+    expect(result.prResult).toEqual({
+      action: 'created',
+      number: 187,
+      url: 'https://github.com/soupler-hq/orbit/pull/187',
+    });
+    expect(result.output).toContain('PR Action:    created');
+    expect(result.output).toContain('Final State:  pr_open');
+    expect(result.output).toContain('PR:         #187');
+  });
+
+  it('quick runtime creates or updates the PR once the chained state is clean', () => {
+    const result = runQuick(
+      {
+        issue: '#181',
+        branch: 'feat/181-quick-review-pr-autochain',
+        implementationStatus: 'done',
+        testsStatus: 'passed',
+        testEvidenceStatus: 'present',
+        reviewStatus: 'approved',
+        reviewEvidenceStatus: 'present',
+        shipDecisionStatus: 'approved',
+        prStatus: 'not_open',
+        executePrAction: true,
+        verificationCommands: 'bash bin/validate.sh||npm run format:check',
+        changedFiles: 'commands/commands.md',
+      },
+      {
+        syncPullRequest: () => ({
+          action: 'created',
+          number: 186,
+          url: 'https://github.com/soupler-hq/orbit/pull/186',
+        }),
+      }
+    );
+
+    expect(result.prResult).toEqual({
+      action: 'created',
+      number: 186,
+      url: 'https://github.com/soupler-hq/orbit/pull/186',
+    });
+    expect(result.output).toContain('PR Action:    created');
+    expect(result.output).toContain('Final State:  pr_open');
+    expect(result.output).toContain('PR:         #186');
+    expect(result.output).toContain('**Primary**: /orbit:progress');
+  });
   it('quick runtime blocks when the requested issue does not match the active feature branch', () => {
     const output = renderQuick({
       issue: '#148',

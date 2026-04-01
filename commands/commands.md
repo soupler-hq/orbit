@@ -484,12 +484,12 @@ If the user gives a plain prompt that implies a tracked implementation task, Orb
 ━━━ Orbit Auto-Chain ━━━━━━━━━━━━━━━━━
   Verification: {passed|failed|required|in_progress|waiting_on_implementation}
   Review:       {auto_dispatch_review|dispatched_pending|clean|changes_requested|waiting_on_verification}
-  PR Action:    {blocked|create_or_update_ready|update_existing_pr}
-  Final State:  {implementation_done|review_required|pr_ready|pr_open}
+  PR Action:    {blocked|create_or_update_ready|update_existing_pr|created|updated}
+  Final State:  {implementation_done|review_required|remediation_required|pr_ready|pr_open}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ━━━ Orbit Checkpoint ━━━━━━━━━━━━━━━━━━
-  Checkpoint: {implementation_complete|review_required|review_clean|pr_ready|pr_open}
+  Checkpoint: {implementation_complete|review_required|remediation_required|review_clean|pr_ready|pr_open}
   Artifact:   .orbit/state/checkpoints/latest.json
   Verification: {success|failed}
   Next:       {/orbit:review|/orbit:ship|/orbit:progress}
@@ -499,6 +499,8 @@ If the user gives a plain prompt that implies a tracked implementation task, Orb
 The auto-chain block is the executable controller summary:
 - if verification is green, `/orbit:quick` must advance into review handling instead of stopping at implementation prose
 - if review is clean, the chained final state must reach `pr_ready` or `pr_open`
+- if review is clean and PR metadata is available, `/orbit:quick` should create or refresh the PR automatically
+- if review requests changes, `/orbit:quick` must route back into `remediation_required` with the issue fix loop as the next command
 - if review or evidence is not clean, PR action stays blocked
 
 And then:
