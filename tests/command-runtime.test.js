@@ -334,6 +334,47 @@ describe('runtime command status parity', () => {
     expect(output).toContain('**Primary**: /orbit:plan');
   });
 
+  it('next runtime drops an active PR lane once the current branch is already handoff-complete', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-next-handoff-complete-'));
+    const stateFile = path.join(tmpDir, 'STATE.md');
+    fs.writeFileSync(
+      stateFile,
+      [
+        '# Orbit Project State',
+        '## Project Context',
+        '- **Active Milestone**: v2.9.0 — Idea to Market',
+        '- **Active Phase**: Enforcement Hardening',
+        '',
+        '## Todos + Seeds',
+        '### v2.9.0 — Idea to Market',
+        '#### Enforcement Hardening (CURRENT)',
+        '- [ ] #62 — feat(state): initialize v2.9.0 release STATE.md — prime Orbit with full release plan',
+      ].join('\n')
+    );
+
+    const output = renderNext({
+      issue: '#181',
+      branch: 'feat/181-quick-review-pr-autochain',
+      implementationStatus: 'done',
+      testsStatus: 'passed',
+      testEvidenceStatus: 'present',
+      reviewStatus: 'approved',
+      reviewEvidenceStatus: 'present',
+      shipDecisionStatus: 'approved',
+      prStatus: 'open',
+      prNumber: '#184',
+      stateFile,
+    });
+
+    expect(output).toContain(
+      '**Primary**: /orbit:quick #62 feat(state): initialize v2.9.0 release STATE.md — prime Orbit with full release plan'
+    );
+    expect(output).toContain('State:    issue_ready');
+    expect(output).toContain('Working target: Issue #62');
+    expect(output).toContain('already in pr_open');
+    expect(output).not.toContain('**Primary**: /orbit:progress');
+  });
+
   it('early-stage runtime output uses the concrete issue and avoids premature PR blockers', () => {
     const output = renderPlan({
       issue: '#146',
