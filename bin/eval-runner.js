@@ -114,7 +114,6 @@ function installRuntimeArtifact(tool) {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 }
-
 function checkRuntimeCommandOutput(relPath, args, expectations) {
   try {
     const output = runNode(relPath, args);
