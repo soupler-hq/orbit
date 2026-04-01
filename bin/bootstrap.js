@@ -207,12 +207,17 @@ function main() {
   const issues = runGhIssueList();
   if (issues) {
     const insertTask = db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)');
-    const updateTask = db.prepare('UPDATE tasks SET title = ?, status = ? WHERE issue_ref = ?');
-    const existingTask = db.prepare('SELECT id FROM tasks WHERE issue_ref = ?');
+    const updateTask = db.prepare(
+      'UPDATE tasks SET issue_ref = ?, title = ?, status = ? WHERE id = ?'
+    );
+    const existingTaskByIssue = db.prepare('SELECT id FROM tasks WHERE issue_ref = ?');
+    const existingTaskByTitle = db.prepare('SELECT id FROM tasks WHERE title = ?');
     for (const issue of issues) {
       const issueRef = `#${issue.number}`;
-      if (existingTask.get(issueRef)) {
-        updateTask.run(issue.title, 'open', issueRef);
+      const existingTask =
+        existingTaskByIssue.get(issueRef) || existingTaskByTitle.get(issue.title);
+      if (existingTask) {
+        updateTask.run(issueRef, issue.title, 'open', existingTask.id);
       } else {
         insertTask.run(issueRef, issue.title, 'open');
       }

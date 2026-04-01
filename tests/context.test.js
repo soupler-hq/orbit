@@ -12,10 +12,11 @@ import os from 'os';
 let Database;
 let initSchema;
 let loadMinimal;
+let findExistingTask;
 try {
   Database = require('better-sqlite3');
   ({ initSchema } = require('../bin/db'));
-  ({ loadMinimal } = require('../bin/context'));
+  ({ loadMinimal, findExistingTask } = require('../bin/context'));
 } catch {
   console.warn('better-sqlite3 not installed — context.test.js tests will be skipped');
 }
@@ -193,5 +194,34 @@ describeIfSqlite('context.js — migrate from STATE.md', () => {
 
     const rows = db.prepare('SELECT id FROM tasks WHERE issue_ref = ?').all('#145');
     expect(rows).toHaveLength(1);
+  });
+
+  it('upgrades a title-only task when the same task later gets an issue_ref', () => {
+    db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run(
+      null,
+      'enforce automatic state freshness across command paths',
+      'open'
+    );
+
+    const existing = findExistingTask(
+      db,
+      '#145',
+      'enforce automatic state freshness across command paths'
+    );
+
+    expect(existing).not.toBeNull();
+
+    db.prepare('UPDATE tasks SET issue_ref = ?, title = ?, status = ? WHERE id = ?').run(
+      '#145',
+      'enforce automatic state freshness across command paths',
+      'open',
+      existing.id
+    );
+
+    const rows = db
+      .prepare('SELECT issue_ref, title FROM tasks WHERE title = ?')
+      .all('enforce automatic state freshness across command paths');
+    expect(rows).toHaveLength(1);
+    expect(rows[0].issue_ref).toBe('#145');
   });
 });

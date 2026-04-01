@@ -43,7 +43,10 @@ function currentGitBranch() {
 
 function findExistingTask(db, issueRef, title) {
   if (issueRef) {
-    return db.prepare('SELECT id FROM tasks WHERE issue_ref = ?').get(issueRef);
+    return (
+      db.prepare('SELECT id FROM tasks WHERE issue_ref = ?').get(issueRef) ||
+      db.prepare('SELECT id FROM tasks WHERE title = ?').get(title)
+    );
   }
   return db.prepare('SELECT id FROM tasks WHERE issue_ref IS NULL AND title = ?').get(title);
 }
@@ -366,4 +369,5 @@ module.exports = {
   migrate,
   save,
   currentGitBranch,
+  findExistingTask,
 };
