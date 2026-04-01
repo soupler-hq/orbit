@@ -50,19 +50,21 @@ function parseChangedFiles(text) {
 }
 
 function extractDocsUpdateSection(body) {
-  const match = String(body || '').match(/## Docs update\s*([\s\S]*?)(?=\n## |$)/i);
+  const match = String(body || '').match(
+    /(?:^|\n)## Docs update[ \t]*\n([\s\S]*?)(?=\n## |\n---\n|\s*$)/i
+  );
   return match ? match[1].trim() : '';
 }
 
 function extractDocsStatus(body) {
   const section = extractDocsUpdateSection(body);
-  const match = section.match(/- Status:\s*`?([A-Z]+)`?/i);
+  const match = section.match(/(?:^|\n)- Status:\s*`?([A-Z]+)`?[ \t]*$/im);
   return match ? match[1].toUpperCase() : '';
 }
 
 function extractDocsNotes(body) {
   const section = extractDocsUpdateSection(body);
-  const match = section.match(/- Notes:\s*(.+)/i);
+  const match = section.match(/(?:^|\n)- Notes:\s*(.+)$/im);
   return match ? match[1].trim() : '';
 }
 

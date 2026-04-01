@@ -17,6 +17,31 @@ describe('validate-doc-updates', () => {
     expect(errors).toEqual([]);
   });
 
+  it('parses the real docs-update section instead of summary text that mentions it', () => {
+    const errors = validateDocUpdates({
+      body: [
+        '## Summary',
+        '- require PR bodies to record `## Docs update` as either `UPDATED` or `EXEMPT`',
+        '',
+        '## Issues',
+        '- Relates to #151',
+        '',
+        '## Test plan',
+        '- `bash bin/validate.sh`',
+        '',
+        '## Docs update',
+        '- Status: `UPDATED`',
+        '- Notes: Updated README.md and docs/governance/contributing.md',
+        '',
+        '## Merge notes',
+        '- governance follow-through',
+      ].join('\n'),
+      changedFiles: ['bin/validate-doc-updates.js', 'README.md', 'docs/governance/contributing.md'],
+    });
+
+    expect(errors).toEqual([]);
+  });
+
   it('requires explicit exemption when behavior-sensitive changes lack doc updates', () => {
     const errors = validateDocUpdates({
       body: ['## Summary', '## Docs update', '- Status: `UPDATED`', '- Notes: Updated README.md'].join(
