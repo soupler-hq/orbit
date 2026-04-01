@@ -48,6 +48,14 @@ Use `.orbit/reports/` for generated operator-facing runtime artifacts that shoul
     eval-report.json
 ```
 
+Use `templates/` for reusable control-plane templates that downstream repos or operators may materialize.
+
+```text
+templates/
+  STATE.md
+  DECISIONS-LOG.md
+```
+
 ## Root Contract
 
 Keep the repository root intentionally thin.
