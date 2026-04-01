@@ -8,6 +8,7 @@ const { validateReviewEvidence, validateTestEvidence } = require('./review-evide
 const ALLOWED_BRANCH_RE =
   /^(feat|fix|docs|chore|refactor|test|release|hotfix)\/(?:\d+-)?[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const REQUIRED_HEADINGS = ['## Summary', '## Issues', '## Ship Decision', '## Test plan'];
+const RESIDUAL_RISK_LABEL_RE = /^(Tracked by #\d+(?::\s+.+)?|Waived:\s+.+|Operational:\s+.+)$/;
 
 function parseArgs(argv) {
   const args = {};
@@ -67,6 +68,24 @@ function loadPayload(args) {
   };
 }
 
+function loadTrackedIssueMetadata(args) {
+  if (!args['tracked-issues-file']) {
+    return [];
+  }
+
+  const filePath = path.resolve(args['tracked-issues-file']);
+  if (!fs.existsSync(filePath)) {
+    return [];
+  }
+
+  const text = fs.readFileSync(filePath, 'utf8').trim();
+  if (!text) {
+    return [];
+  }
+
+  return JSON.parse(text);
+}
+
 function isReleaseBridge(headRef, baseRef) {
   return headRef === 'develop' && baseRef === 'main';
 }
@@ -100,6 +119,88 @@ function validateBody(body, headSha) {
 
   errors.push(...validateTestEvidence(normalizedBody));
   errors.push(...validateReviewEvidence(normalizedBody));
+  errors.push(...validateResidualRisks(normalizedBody));
+
+  return errors;
+}
+
+function extractResidualRiskBlock(body) {
+  const match = String(body || '').match(/\*\*Residual risks\*\*[\s\S]*?```([\s\S]*?)```/i);
+  return match ? match[1].trim() : '';
+}
+
+function parseTrackedIssueRefs(body) {
+  const residualBlock = extractResidualRiskBlock(body);
+  if (!residualBlock || residualBlock.toLowerCase() === 'none') {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      residualBlock
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .map((line) => line.match(/^Tracked by (#[0-9]+)(?::\s+.+)?$/)?.[1] || '')
+        .filter(Boolean)
+    )
+  );
+}
+
+function validateResidualRisks(body) {
+  const residualBlock = extractResidualRiskBlock(body);
+
+  if (!residualBlock) {
+    return [
+      'Orbit Self-Review must include a residual-risk disposition block using `Tracked by #...`, `Waived: ...`, `Operational: ...`, or `none`.',
+    ];
+  }
+
+  if (residualBlock.toLowerCase() === 'none') {
+    return [];
+  }
+
+  const lines = residualBlock
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const invalidLines = lines.filter((line) => !RESIDUAL_RISK_LABEL_RE.test(line));
+
+  if (invalidLines.length > 0) {
+    return [
+      `Residual risks must be labeled as \`Tracked by #...\`, \`Waived: ...\`, \`Operational: ...\`, or \`none\`. Invalid entries: ${invalidLines.join('; ')}`,
+    ];
+  }
+
+  return [];
+}
+
+function validateTrackedIssueMetadata(body, trackedIssues) {
+  const trackedRefs = parseTrackedIssueRefs(body);
+  if (trackedRefs.length === 0) {
+    return [];
+  }
+
+  const metadataByRef = new Map(
+    trackedIssues.map((issue) => [issue.issue_ref || `#${issue.number}`, issue])
+  );
+  const errors = [];
+
+  for (const ref of trackedRefs) {
+    const metadata = metadataByRef.get(ref);
+    if (!metadata) {
+      errors.push(
+        `Residual risk ${ref} is not backed by loaded issue metadata. Refresh the tracked issue fetch.`
+      );
+      continue;
+    }
+
+    if (metadata.state !== 'OPEN') {
+      errors.push(
+        `Residual risk ${ref} must point to an open follow-up issue, but ${ref} is ${String(metadata.state || 'unknown').toLowerCase()}.`
+      );
+    }
+  }
 
   return errors;
 }
@@ -134,6 +235,7 @@ function validateGovernance(payload) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const payload = loadPayload(args);
+  const trackedIssues = loadTrackedIssueMetadata(args);
   const result = validateGovernance(payload);
 
   if (result.skipped) {
@@ -141,8 +243,14 @@ async function main() {
     return;
   }
 
-  if (!result.ok) {
-    for (const error of result.errors) {
+  const metadataErrors = validateTrackedIssueMetadata(
+    payload.pull_request?.body || '',
+    trackedIssues
+  );
+  const allErrors = [...result.errors, ...metadataErrors];
+
+  if (!result.ok || allErrors.length > 0) {
+    for (const error of allErrors) {
       console.error(`ERROR: ${error}`);
     }
     process.exit(1);
@@ -163,9 +271,15 @@ if (require.main === module) {
 module.exports = {
   ALLOWED_BRANCH_RE,
   REQUIRED_HEADINGS,
+  RESIDUAL_RISK_LABEL_RE,
+  extractResidualRiskBlock,
   isReleaseBridge,
   loadPayload,
+  loadTrackedIssueMetadata,
+  parseTrackedIssueRefs,
   validateBranchName,
   validateBody,
+  validateResidualRisks,
+  validateTrackedIssueMetadata,
   validateGovernance,
 };
