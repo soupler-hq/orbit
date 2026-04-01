@@ -89,12 +89,15 @@ assert_file "INSTRUCTIONS.md installed"       "$PROJECT1/.claude/INSTRUCTIONS.md
 assert_file "SKILLS.md installed"             "$PROJECT1/.claude/SKILLS.md"
 assert_file "WORKFLOWS.md installed"          "$PROJECT1/.claude/WORKFLOWS.md"
 assert_file "orbit.registry.json installed"   "$PROJECT1/.claude/orbit.registry.json"
+assert_file "adapter.contract.json installed" "$PROJECT1/.claude/adapter.contract.json"
 assert_file "orbit.config.json installed"     "$PROJECT1/orbit.config.json"
 assert_file "STATE.template.md installed"     "$PROJECT1/.claude/state/STATE.template.md"
 assert_dir  "agents/ installed"               "$PROJECT1/.claude/agents"
 assert_dir  "skills/ installed"               "$PROJECT1/.claude/skills"
 assert_dir  "hooks/ installed"                "$PROJECT1/.claude/orbit/hooks"
 assert_file ".orbit/state/STATE.md created"   "$PROJECT1/.orbit/state/STATE.md"
+assert_contains "Claude contract marks implicit prompt routing supported" "$PROJECT1/.claude/adapter.contract.json" '"implicit_prompt_routing": true'
+assert_contains "Claude contract reflects post_tool_use disabled" "$PROJECT1/.claude/adapter.contract.json" '"post_tool_use": false'
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Flag matrix: --tool codex"

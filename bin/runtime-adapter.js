@@ -7,13 +7,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const CONFIG = JSON.parse(fs.readFileSync(path.join(ROOT, 'orbit.config.json'), 'utf8'));
 
-const HOOK_SUPPORT = {
-  claude: {
-    pre_tool_use: true,
-    post_tool_use: true,
-    pre_compact: true,
-    stop: true,
-  },
+const STATIC_HOOK_SUPPORT = {
   codex: {
     pre_tool_use: false,
     post_tool_use: false,
@@ -63,6 +57,16 @@ function buildRuntimeAdapterContract(runtime) {
   const operatorSurfaces = [instructionFile];
   if (policyFile) operatorSurfaces.push(policyFile);
 
+  const hookSupport =
+    runtime === 'claude'
+      ? {
+          pre_tool_use: CONFIG.hooks?.pre_tool_use === true,
+          post_tool_use: CONFIG.hooks?.post_tool_use === true,
+          pre_compact: CONFIG.hooks?.pre_compact === true,
+          stop: CONFIG.hooks?.stop === true,
+        }
+      : STATIC_HOOK_SUPPORT[runtime] || STATIC_HOOK_SUPPORT.codex;
+
   return {
     runtime,
     name: runtimeConfig.name,
@@ -76,7 +80,7 @@ function buildRuntimeAdapterContract(runtime) {
     operator_surfaces: operatorSurfaces,
     required_files: operatorSurfaces,
     policy_file: policyFile,
-    hook_support: HOOK_SUPPORT[runtime] || HOOK_SUPPORT.codex,
+    hook_support: hookSupport,
   };
 }
 
