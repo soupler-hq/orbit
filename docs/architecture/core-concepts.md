@@ -25,6 +25,7 @@ Specialized roles with deep domain expertise. Each agent has clear trigger condi
 | `strategist` | PRODUCT | Roadmaps, milestones, OKRs, strategic sequencing |
 | `product-manager` | PRODUCT | Requirements, PRDs, user stories, feature specs, backlog prioritization |
 | `business-analyst` | PRODUCT, SYNTHESIS | Functional specs, use cases, edge cases, process maps |
+| `qa-engineer` | REVIEW, ENGINEERING | Test strategy, QA automation, regression suites, release gates |
 | `reviewer` | REVIEW | Code review, QA, performance — TS/Python/Go language axes |
 | `devops` | OPERATIONS | CI/CD, Docker, K8s, cloud infra, monitoring, deployment |
 | `researcher` | RESEARCH | Domain research, feasibility, competitive analysis, tech eval |
@@ -42,6 +43,7 @@ Security concern             → security-engineer (always parallel)
 PR touches .github/workflows → devops (always parallel)
 PRDs / requirements / user stories / feature specs → product-manager
 Functional specs / use cases / edge cases / process maps → business-analyst
+Test strategy / test plan / regression suite / release gate → qa-engineer
 Spans 2-3 domains            → parallel wave, merge results
 All domains                  → strategist first, then parallelize
 No agent ≥60% match          → trigger Agent Forge

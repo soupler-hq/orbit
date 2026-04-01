@@ -34,6 +34,8 @@ Each entry should be evaluated for:
 | E09 | Write the product requirements, PRD, user stories, and acceptance criteria for this feature | PRODUCT | product-manager | `/orbit:plan` | Product requirement lifecycle should route to product-manager instead of strategist |
 | E10 | Turn this PRD into a functional spec with use cases, edge cases, and a process map for Wave 2 checkout work | PRODUCT | business-analyst | `/orbit:plan` | Graduation test for engineer-ready specification work |
 | E11 | Create milestone OKRs and a roadmap for the next release phase | PRODUCT | strategist | `/orbit:plan` | Strategic planning should still route to strategist after the split |
+| E12 | Create a QA test strategy and regression suite for the release gate on issues #72 and #73 | REVIEW | qa-engineer | `/orbit:plan` | Test-strategy work should route to qa-engineer rather than reviewer |
+| E13 | Review this PR for bugs, security issues, and architectural regressions | REVIEW | reviewer | `/orbit:review` | Code-review work should stay with reviewer after the QA split |
 
 ## Expected Signals
 
