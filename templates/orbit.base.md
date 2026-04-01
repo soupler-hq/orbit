@@ -66,6 +66,7 @@ The registry below mirrors `orbit.registry.json`. Keep both in sync.
 | `engineer`   | Coding, TDD, debugging, refactoring, API integration            |
 | `strategist` | Roadmaps, milestones, OKRs, strategic sequencing               |
 | `product-manager` | Requirements, PRDs, user stories, feature specs, backlog prioritization |
+| `business-analyst` | Functional specs, use cases, edge cases, process maps      |
 | `reviewer`   | Code review, QA, performance (generic)                          |
 | `devops`     | CI/CD, Docker, K8s, cloud infra, monitoring, deployment         |
 | `researcher` | Domain research, feasibility, competitive analysis, tech eval   |
@@ -88,6 +89,7 @@ TypeScript/Python/Go code review → dispatch `reviewer` with language context (
 Security concern → always dispatch security-engineer (parallel with other agents)
 PR touches .github/workflows/ → always dispatch devops agent for pipeline architecture review
 PRDs / requirements / user stories / feature specs / backlog shaping → dispatch `product-manager`
+Functional specs / use cases / edge cases / process maps → dispatch `business-analyst`
 Spans 2-3 domains → parallel wave, merge results
 All domains → strategist FIRST, then parallelize
 No agent >60% fit → trigger Agent Forge

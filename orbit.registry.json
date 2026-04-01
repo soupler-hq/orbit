@@ -148,6 +148,35 @@
       ]
     },
     {
+      "name": "business-analyst",
+      "file": "agents/business-analyst.md",
+      "domains": [
+        "PRODUCT",
+        "SYNTHESIS"
+      ],
+      "triggers": [
+        "functional spec",
+        "user story breakdown",
+        "edge cases",
+        "process map",
+        "requirements analysis",
+        "use case",
+        "acceptance criteria definition"
+      ],
+      "skills": [
+        "skills/planning.md",
+        "skills/brainstorming.md",
+        "skills/riper.md"
+      ],
+      "outputs": [
+        "FUNCTIONAL-SPEC.md",
+        "USE-CASES.md",
+        "EDGE-CASES.md",
+        "PROCESS-MAP.md",
+        "DATA-DICTIONARY.md"
+      ]
+    },
+    {
       "name": "reviewer",
       "file": "agents/reviewer.md",
       "domains": [
