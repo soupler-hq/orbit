@@ -121,7 +121,6 @@ describe('runtime command status parity', () => {
     expect(result.output).toContain('PR:         #186');
     expect(result.output).toContain('**Primary**: /orbit:progress');
   });
-
   it('quick runtime blocks when the requested issue does not match the active feature branch', () => {
     const output = renderQuick({
       issue: '#148',
