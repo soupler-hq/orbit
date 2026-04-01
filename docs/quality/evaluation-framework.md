@@ -22,7 +22,8 @@ Given a user request, does the framework select the right agent or wave?
 
 - Clear engineering task routes to `engineer`
 - System design routes to `architect`
-- Planning routes to `strategist`
+- Milestone and roadmap planning route to `strategist`
+- Product requirement definition routes to `product-manager`
 - Engineer-ready functional specification work routes to `business-analyst`
 - Security-sensitive work routes to `security-engineer`
 - Unknown domains route to `researcher` or `forge`
