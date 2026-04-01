@@ -147,13 +147,6 @@ function evaluateWorkflowState(rawEvidence = {}) {
     return buildSummary('review_required', evidence, blockers);
   }
 
-  if (evidence.shipDecisionStatus === 'blocked') {
-    blockers.push(
-      'Orbit self-review is blocked; resolve the recorded findings before PR or ship progression.'
-    );
-    return buildSummary('review_required', evidence, blockers);
-  }
-
   if (
     evidence.prStatus === 'open' &&
     evidence.reviewStatus === 'approved' &&
@@ -163,6 +156,21 @@ function evaluateWorkflowState(rawEvidence = {}) {
     evidence.shipDecisionStatus !== 'blocked'
   ) {
     return buildSummary('pr_open', evidence, blockers);
+  }
+
+  if (evidence.reviewStatus === 'changes_requested') {
+    const findingsDetail = evidence.reviewFindings ? ` Findings: ${evidence.reviewFindings}` : '';
+    blockers.push(
+      `Review requested changes; fix findings and rerun tests before re-review.${findingsDetail}`
+    );
+    return buildSummary('remediation_required', evidence, blockers);
+  }
+
+  if (evidence.shipDecisionStatus === 'blocked') {
+    blockers.push(
+      'Orbit self-review is blocked; resolve the recorded findings before PR or ship progression.'
+    );
+    return buildSummary('review_required', evidence, blockers);
   }
 
   if (evidence.reviewStatus === 'approved' && evidence.testsStatus === 'passed') {
@@ -179,14 +187,6 @@ function evaluateWorkflowState(rawEvidence = {}) {
   if (evidence.reviewStatus === 'approved') {
     blockers.push('Tests must be green before opening a PR, even after review approval.');
     return buildSummary('review_clean', evidence, blockers);
-  }
-
-  if (evidence.reviewStatus === 'changes_requested') {
-    const findingsDetail = evidence.reviewFindings ? ` Findings: ${evidence.reviewFindings}` : '';
-    blockers.push(
-      `Review requested changes; fix findings and rerun tests before re-review.${findingsDetail}`
-    );
-    return buildSummary('remediation_required', evidence, blockers);
   }
 
   if (evidence.reviewStatus === 'pending') {

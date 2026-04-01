@@ -3,6 +3,7 @@
 
 const { buildEvidence } = require('./progress');
 const { syncPullRequest } = require('./pull-request-controller');
+const { renderReview } = require('./review');
 const { buildQuickAutoChain, buildRuntimeCommandOutput, parseArgs } = require('./runtime-command');
 const { evaluateWorkflowState } = require('./workflow-state');
 
@@ -21,16 +22,58 @@ function renderQuick(args = {}) {
   });
 }
 
+function truthyFlag(value) {
+  return String(value || '').toLowerCase() === 'true';
+}
+
+function normalizeReviewResult(result) {
+  if (!result) return {};
+  if (typeof result === 'string') {
+    return { output: result };
+  }
+  return { ...result };
+}
+
+function executeReviewPhase(args = {}, deps = {}) {
+  const reviewArgs = { ...args };
+  const result = deps.reviewRunner
+    ? deps.reviewRunner(reviewArgs)
+    : {
+        output: (deps.renderReview || renderReview)(reviewArgs),
+        reviewStatus: reviewArgs.reviewStatus || 'pending',
+      };
+  return normalizeReviewResult(result);
+}
+
 function runQuick(args = {}, deps = {}) {
   const runtimeArgs = { ...args };
-  const evidence = buildEvidence(runtimeArgs, deps.runtimeDeps);
-  const workflow = evaluateWorkflowState(evidence);
-  const autoChain = buildQuickAutoChain(evidence, workflow, runtimeArgs);
+  let evidence = buildEvidence(runtimeArgs, deps.runtimeDeps);
+  let workflow = evaluateWorkflowState(evidence);
+  let autoChain = buildQuickAutoChain(evidence, workflow, runtimeArgs);
+  const approvedRoute = runtimeArgs.route === 'approved';
+  const reviewExecutionEnabled =
+    truthyFlag(runtimeArgs.executeReviewAction || runtimeArgs['execute-review-action']) ||
+    approvedRoute;
   const prSyncEnabled =
-    String(runtimeArgs.executePrAction || runtimeArgs['execute-pr-action'] || '').toLowerCase() ===
-      'true' || runtimeArgs.route === 'approved';
+    truthyFlag(runtimeArgs.executePrAction || runtimeArgs['execute-pr-action']) || approvedRoute;
 
+  let reviewResult = null;
   let prResult = null;
+  if (autoChain && autoChain.review === 'auto_dispatch_review' && reviewExecutionEnabled) {
+    reviewResult = executeReviewPhase(runtimeArgs, deps);
+    if (reviewResult.reviewStatus) runtimeArgs.reviewStatus = reviewResult.reviewStatus;
+    if (reviewResult.reviewEvidenceStatus) {
+      runtimeArgs.reviewEvidenceStatus = reviewResult.reviewEvidenceStatus;
+    }
+    if (reviewResult.shipDecisionStatus) {
+      runtimeArgs.shipDecisionStatus = reviewResult.shipDecisionStatus;
+    }
+    if (reviewResult.reviewFindings) runtimeArgs.reviewFindings = reviewResult.reviewFindings;
+    evidence = buildEvidence(runtimeArgs, deps.runtimeDeps);
+    workflow = evaluateWorkflowState(evidence);
+    autoChain = buildQuickAutoChain(evidence, workflow, runtimeArgs);
+  }
+
   if (
     autoChain &&
     ['create_or_update_ready', 'update_existing_pr'].includes(autoChain.prAction) &&
@@ -66,6 +109,7 @@ function runQuick(args = {}, deps = {}) {
 
   return {
     output: renderQuick(runtimeArgs),
+    reviewResult,
     prResult,
   };
 }
