@@ -23,6 +23,8 @@ Orbit should expose live progress, not just end-state summaries.
 
 The telemetry layer is documentation-backed in `commands/commands.md` and enforced by eval coverage.
 
+For vague or plain prompt routing checks, use the verification checklist in [docs/architecture/runtime-adapters.md](../architecture/runtime-adapters.md#verification-checklist) before treating the behavior as a runtime bug.
+
 ## Playbook 1: Full-Stack SaaS Product
 
 **Typical phases**: Auth → Core Domain → Payments → Admin → Launch

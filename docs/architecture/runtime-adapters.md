@@ -132,3 +132,81 @@ Every runtime adapter must answer:
 ## Practical Rule
 
 If a runtime can follow the control plane without special-casing the repository structure, it is a first-class compatible runtime. Custom glue should be small, isolated, and documented here.
+
+## Verification Checklist
+
+Use this checklist when a user asks whether vague/plain prompts should be intercepted by Orbit first.
+
+### 1. Confirm the installed adapter contract
+
+Inspect the runtime's installed `adapter.contract.json`.
+
+- Claude:
+  - `.claude/adapter.contract.json`
+  - expect `"implicit_prompt_routing": true`
+- Codex:
+  - `.codex/adapter.contract.json`
+  - expect `"implicit_prompt_routing": true`
+  - expect `"policy_file": "policy.md"`
+- Antigravity:
+  - `.antigravity/adapter.contract.json`
+  - expect `"implicit_prompt_routing": false`
+  - expect `"explicit_command_preferred": true`
+
+If the installed contract does not match the runtime expectation, treat that as an Orbit install/runtime bug.
+
+### 2. Confirm the required operator files exist
+
+- Claude:
+  - `CLAUDE.md`
+- Codex:
+  - `INSTRUCTIONS.md`
+  - `policy.md`
+- Antigravity:
+  - `CLAUDE.md`
+
+If a required file is missing, vague-prompt routing should not be treated as trustworthy even if the config claims support.
+
+### 3. Confirm the runtime category
+
+- `native` or `stable` plus `"implicit_prompt_routing": true`:
+  - Orbit should classify the vague prompt first
+- `experimental` or `"implicit_prompt_routing": false`:
+  - prefer explicit `/orbit:*` commands
+
+### 4. Confirm expected prompt behavior
+
+Examples of vague prompts that should be classified first on supported runtimes:
+
+- `pick next task`
+- `go ahead`
+- `what next`
+- `continue`
+- `review this`
+
+Expected workflow mapping examples:
+
+- `pick next task` → `/orbit:next` or `/orbit:resume`
+- `go ahead` after active issue context → `/orbit:quick <active issue>`
+- `review this` on an active branch → `/orbit:review`
+
+### 5. Confirm unsupported-runtime fallback
+
+If the runtime contract says plain-prompt routing is unsupported:
+
+- do not claim Orbit intercepted the prompt natively
+- prefer explicit `/orbit:*` commands
+- explain that the runtime is explicit-command-first
+
+### 6. Use this to separate failure modes
+
+If vague-prompt routing appears wrong, classify the problem as one of:
+
+- install problem:
+  - required adapter files missing
+- contract problem:
+  - `adapter.contract.json` is wrong or stale
+- runtime-support limitation:
+  - runtime explicitly does not support implicit routing
+- inference problem:
+  - supported runtime is installed correctly, but Orbit mapped the prompt to the wrong workflow
