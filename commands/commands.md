@@ -402,6 +402,14 @@ Use `/orbit:review` on the active feature branch before opening or finalizing th
 
 Before requesting review again after follow-up commits, refresh the PR body so `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` still match the branch truth, and update the `Head SHA` marker so CI can detect stale PR descriptions.
 
+If the review ends with residual risks, Orbit must record their disposition before treating the review as complete:
+
+- link an existing hardening issue if the risk is already covered
+- create a new hardening issue if the risk is still untracked
+- or explicitly explain why no tracking issue is required
+
+Treat this as a strict `track-or-waive` rule for residual risks. For Orbit self-hosting work, prefer placing the follow-up in the hardening stack such as `#163`.
+
 Load `agents/reviewer.md`. Spawn reviewer subagent with:
 
 - All changed files since last ship
@@ -410,6 +418,30 @@ Load `agents/reviewer.md`. Spawn reviewer subagent with:
 
 Output: structured review with CRITICAL/HIGH/MEDIUM/LOW findings.
 CRITICAL findings must be fixed before next ship.
+
+---
+
+# Orbit Command: /orbit:riper <task>
+
+> Structured RIPER analysis with an executable inner recovery loop when Execute fails
+
+## PROCESS
+
+1. Load `skills/riper.md` for the outer loop: Research → Innovate → Plan → Execute → Review.
+2. If Execute succeeds, continue the normal task flow and emit the standard Orbit status blocks.
+3. If Execute fails inside the repo-local RIPER runtime, Orbit invokes the recovery controller automatically.
+   Hook and manual bridge path:
+   - `node bin/recovery-loop.js --command /orbit:riper --phase execute --task "<task>" --error-message "<failure>"`
+4. The recovery controller must:
+   - write `.orbit/state/last_error.json`
+   - append a deterministic recovery trace to `SUMMARY.md` when a summary path is supplied
+   - decide `retry` for bounded repeated failures and `halt` after the same failure repeats 3 times
+5. On `halt`, Orbit must stop autonomous retrying and request human help through `/orbit:review` or operator intervention.
+
+Output:
+- RIPER runtime status
+- recovery-loop decision when Execute fails
+- deterministic next command (`/orbit:riper` retry or `/orbit:review` halt path)
 
 ---
 

@@ -4,6 +4,7 @@ import { renderPlan } from '../bin/plan.js';
 import { renderReview } from '../bin/review.js';
 import { renderVerify } from '../bin/verify.js';
 import { renderNext } from '../bin/next.js';
+import { renderRiper } from '../bin/riper.js';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -63,6 +64,10 @@ describe('runtime command status parity', () => {
 
   it('next runtime emits the standard status blocks', () => {
     expectParity(renderNext(trackedArgs), '/orbit:next');
+  });
+
+  it('riper runtime emits the standard status blocks', () => {
+    expectParity(renderRiper(trackedArgs), '/orbit:riper');
   });
 
   it('next runtime resolves the next issue from STATE.md when no tracked branch is active', () => {

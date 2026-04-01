@@ -38,6 +38,8 @@
 (findings here)
 ```
 
+**Residual risks disposition**: <!-- link the hardening issue, link the existing umbrella issue, say "none", or explain the waiver -->
+
 ---
 
 ## Checklist
@@ -46,6 +48,7 @@
 - [ ] This PR is from a feature branch, NOT a direct push to `develop` or `main`
 - [ ] Branch name follows convention: `<type>/<slug>` such as `feat/143-pr-governance-enforcement` or `fix/145-context-minimal-dedup`
 - [ ] If this PR changed after opening, the `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` sections were refreshed before re-review
+- [ ] If review left residual risks, their disposition is recorded: linked issue, new hardening issue, or explicit waiver
 
 ### Code
 - [ ] Tests added or updated for changed behaviour
