@@ -195,6 +195,28 @@ describe('runtime command status parity', () => {
     expect(output).toContain('State:    clarification_required');
   });
 
+  it('clarify runtime refuses to resolve a request without an answer', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-clarify-missing-answer-'));
+    const stateFile = path.join(tmpDir, 'STATE.md');
+    fs.writeFileSync(
+      stateFile,
+      [
+        '# Orbit State',
+        '## Clarification Requests',
+        '[OPEN] id: clarify-001 | requested_by: engineer | issue: #73 | command: /orbit:quick | question: Which staging dataset should be used? | reason: Missing required input | requested_at: 2026-04-01T00:00:00Z',
+      ].join('\n')
+    );
+
+    expect(() =>
+      renderClarify({
+        issue: '#73',
+        branch: 'feat/73-clarification-gate',
+        stateFile,
+        resolve: 'clarify-001',
+      })
+    ).toThrow('--answer is required with --resolve');
+  });
+
   it('next runtime resolves the next issue from STATE.md when no tracked branch is active', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-next-state-'));
     const stateFile = path.join(tmpDir, 'STATE.md');

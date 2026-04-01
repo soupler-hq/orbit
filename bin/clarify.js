@@ -35,10 +35,13 @@ function renderClarify(args = {}) {
   const stateFile = stateFileFromArgs(args);
 
   if (args.resolve) {
+    if (!args.answer) {
+      throw new Error('--answer is required with --resolve');
+    }
     resolveClarificationRequest(
       stateFile,
       args.resolve,
-      args.answer || '',
+      args.answer,
       args['resolved-by'] || args.resolvedBy || 'operator'
     );
   }
