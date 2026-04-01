@@ -104,6 +104,7 @@ run_install "$PROJECT2" --tool codex
 assert_file "INSTRUCTIONS.md installed"     "$PROJECT2/.codex/INSTRUCTIONS.md"
 assert_file "orbit.registry.json installed" "$PROJECT2/.codex/orbit.registry.json"
 assert_file "orbit.config.json installed"   "$PROJECT2/.codex/orbit.config.json"
+assert_file "adapter.contract.json installed" "$PROJECT2/.codex/adapter.contract.json"
 assert_file "policy.md installed"           "$PROJECT2/.codex/policy.md"
 assert_file "STATE.template.md installed"   "$PROJECT2/.codex/state/STATE.template.md"
 assert_dir  "agents/ installed"             "$PROJECT2/.codex/agents"
@@ -111,6 +112,8 @@ assert_dir  "skills/ installed"             "$PROJECT2/.codex/skills"
 assert_contains "policy.md mentions INSTRUCTIONS" "$PROJECT2/.codex/policy.md" "INSTRUCTIONS.md"
 assert_contains "policy.md mentions plain prompts" "$PROJECT2/.codex/policy.md" "plain prompt"
 assert_contains "INSTRUCTIONS.md mentions supported plain-prompt routing" "$PROJECT2/.codex/INSTRUCTIONS.md" "supports Orbit workflow inference for plain prompts"
+assert_contains "Codex contract marks implicit prompt routing supported" "$PROJECT2/.codex/adapter.contract.json" '"implicit_prompt_routing": true'
+assert_contains "Codex contract requires policy.md" "$PROJECT2/.codex/adapter.contract.json" '"policy_file": "policy.md"'
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Flag matrix: --all (claude + codex)"
@@ -122,6 +125,17 @@ assert_file "Codex: INSTRUCTIONS.md"    "$PROJECT3/.codex/INSTRUCTIONS.md"
 assert_file "Codex: policy.md"          "$PROJECT3/.codex/policy.md"
 assert_contains "Claude CLAUDE.md mentions supported plain-prompt routing" "$PROJECT3/.claude/CLAUDE.md" "supports Orbit workflow inference for plain prompts"
 assert_contains "Codex policy mentions plain prompts in --all" "$PROJECT3/.codex/policy.md" "plain prompt"
+
+# ─────────────────────────────────────────────────────────────────────────────
+section "Flag matrix: --tool antigravity"
+PROJECT3C="$TMPDIR_ROOT/proj-antigravity"
+run_install "$PROJECT3C" --tool antigravity
+
+assert_file "Antigravity CLAUDE.md installed" "$PROJECT3C/.antigravity/CLAUDE.md"
+assert_file "Antigravity adapter contract installed" "$PROJECT3C/.antigravity/adapter.contract.json"
+assert_contains "Antigravity instructions mention unsupported plain-prompt interception" "$PROJECT3C/.antigravity/CLAUDE.md" "does not provide reliable plain-prompt interception"
+assert_contains "Antigravity contract marks implicit prompt routing unsupported" "$PROJECT3C/.antigravity/adapter.contract.json" '"implicit_prompt_routing": false'
+assert_contains "Antigravity contract prefers explicit commands" "$PROJECT3C/.antigravity/adapter.contract.json" '"explicit_command_preferred": true'
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Node wrapper smoke test: bin/install.js delegates to install.sh"

@@ -15,6 +15,7 @@ const { execFileSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { buildRuntimeAdapterContract } = require('./runtime-adapter');
 
 const ROOT = path.resolve(__dirname, '..');
 const ARGS = process.argv.slice(2);
@@ -319,28 +320,34 @@ const portabilityResults = REQUIRED_RUNTIMES.map((req) => {
 
 const promptRoutingCapabilityResults = [
   {
-    check: 'claude runtime declares implicit prompt routing support',
-    pass: config.runtimes?.claude?.capabilities?.implicit_prompt_routing === true,
+    check: 'claude adapter contract declares implicit prompt routing support',
+    pass: buildRuntimeAdapterContract('claude').capabilities.implicit_prompt_routing === true,
     reason:
-      config.runtimes?.claude?.capabilities?.implicit_prompt_routing === true
+      buildRuntimeAdapterContract('claude').capabilities.implicit_prompt_routing === true
         ? 'ok'
-        : 'orbit.config.json missing claude implicit_prompt_routing=true',
+        : 'claude adapter contract missing implicit prompt routing support',
   },
   {
-    check: 'codex runtime declares implicit prompt routing support',
-    pass: config.runtimes?.codex?.capabilities?.implicit_prompt_routing === true,
+    check: 'codex adapter contract declares implicit prompt routing support',
+    pass:
+      buildRuntimeAdapterContract('codex').capabilities.implicit_prompt_routing === true &&
+      buildRuntimeAdapterContract('codex').policy_file === 'policy.md',
     reason:
-      config.runtimes?.codex?.capabilities?.implicit_prompt_routing === true
+      buildRuntimeAdapterContract('codex').capabilities.implicit_prompt_routing === true &&
+      buildRuntimeAdapterContract('codex').policy_file === 'policy.md'
         ? 'ok'
-        : 'orbit.config.json missing codex implicit_prompt_routing=true',
+        : 'codex adapter contract must require policy.md for implicit prompt routing',
   },
   {
-    check: 'antigravity runtime declares no implicit prompt routing support',
-    pass: config.runtimes?.antigravity?.capabilities?.implicit_prompt_routing === false,
+    check: 'antigravity adapter contract declares explicit command routing only',
+    pass:
+      buildRuntimeAdapterContract('antigravity').capabilities.implicit_prompt_routing === false &&
+      buildRuntimeAdapterContract('antigravity').capabilities.explicit_command_preferred === true,
     reason:
-      config.runtimes?.antigravity?.capabilities?.implicit_prompt_routing === false
+      buildRuntimeAdapterContract('antigravity').capabilities.implicit_prompt_routing === false &&
+      buildRuntimeAdapterContract('antigravity').capabilities.explicit_command_preferred === true
         ? 'ok'
-        : 'orbit.config.json missing antigravity implicit_prompt_routing=false',
+        : 'antigravity adapter contract must prefer explicit commands',
   },
   {
     check: 'runtime adapter docs describe Codex prompt routing support',

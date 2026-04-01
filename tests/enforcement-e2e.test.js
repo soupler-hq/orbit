@@ -263,6 +263,44 @@ describe('runtime capability generation', () => {
     }
   });
 
+  it('writes different adapter contracts for supported and unsupported runtimes', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-contract-e2e-'));
+    const codexOut = path.join(tmpDir, 'codex.contract.json');
+    const antigravityOut = path.join(tmpDir, 'antigravity.contract.json');
+
+    try {
+      execFileSync(
+        'node',
+        [path.join(ROOT, 'bin', 'runtime-adapter.js'), '--runtime', 'codex', '--output', codexOut],
+        { cwd: ROOT, encoding: 'utf8' }
+      );
+      execFileSync(
+        'node',
+        [
+          path.join(ROOT, 'bin', 'runtime-adapter.js'),
+          '--runtime',
+          'antigravity',
+          '--output',
+          antigravityOut,
+        ],
+        { cwd: ROOT, encoding: 'utf8' }
+      );
+
+      const codexContract = JSON.parse(fs.readFileSync(codexOut, 'utf8'));
+      const antigravityContract = JSON.parse(fs.readFileSync(antigravityOut, 'utf8'));
+
+      expect(codexContract.capabilities.implicit_prompt_routing).toBe(true);
+      expect(codexContract.policy_file).toBe('policy.md');
+      expect(codexContract.required_files).toContain('policy.md');
+
+      expect(antigravityContract.capabilities.implicit_prompt_routing).toBe(false);
+      expect(antigravityContract.capabilities.explicit_command_preferred).toBe(true);
+      expect(antigravityContract.policy_file).toBe(null);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   it('blocks PR-open progression when review evidence is missing from the body', () => {
     const runtime = buildFakeRuntime({
       branch: 'feat/144-review-ship-evidence',

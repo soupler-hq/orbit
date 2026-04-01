@@ -48,6 +48,12 @@ create_adapter_dir() {
     *)      hook_support="❌" ;;
   esac
 
+  local prompt_routing
+  case "$tool" in
+    claude|codex) prompt_routing="supported" ;;
+    *)            prompt_routing="explicit commands required" ;;
+  esac
+
   # Use single-quoted EOF to prevent shell expansion in the heredoc
   cat > "$adapter_path/README.md" << 'HEREDOC_END'
 # Orbit Adapter
@@ -72,7 +78,14 @@ HEREDOC_END
     echo "| PostToolUse | ${hook_support} |"
     echo "| PreCompact  | ${hook_support} |"
     echo "| Stop        | ${hook_support} |"
+    echo ""
+    echo "## Plain-prompt routing"
+    echo ""
+    echo "- ${prompt_routing}"
   } >> "$adapter_path/README.md"
+
+  node "$FRAMEWORK_DIR/bin/runtime-adapter.js" \
+    --runtime "$tool" --output "$adapter_path/adapter.contract.json" >/dev/null
 
   echo "$adapter_path"
 }

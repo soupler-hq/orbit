@@ -3,7 +3,7 @@ id: runtime-adapters-v1
 doc_type: reference
 status: Final
 version: v1
-last_updated: 2026-03-30
+last_updated: 2026-04-01
 ---
 
 # Runtime Adapters
@@ -75,6 +75,7 @@ Codex does not read `CLAUDE.md`. Instead, Orbit maps the control plane to Codex'
 This installs to `.codex/` (local) or `~/.codex/` (global) with:
 - `INSTRUCTIONS.md` — operator surface (equivalent to `CLAUDE.md`)
 - `policy.md` — injected system context pointing to the Orbit control plane
+- `adapter.contract.json` — executable capability contract for routing and hook support
 - `orbit.registry.json`, `orbit.config.json` — registry and config
 - `agents/`, `skills/` — full agent and skill library
 - `templates/STATE.md` — source state template copied into runtime state directories during install
@@ -94,19 +95,25 @@ This installs to `.codex/` (local) or `~/.codex/` (global) with:
 
 Support level: `experimental`
 
-Antigravity can follow the Orbit control plane if it can read markdown instructions and execute repo-local workflows, but no stable hook or lifecycle API has been published. The install pathway is not yet implemented.
+Antigravity can follow the Orbit control plane if it can read markdown instructions and execute repo-local workflows, but no stable hook or lifecycle API has been published. Orbit now installs a best-effort adapter package, but plain-prompt routing still remains unsupported.
 
 **Current constraints:**
-- No `install_for_antigravity()` in `install.sh` — manual setup required
+- Best-effort `install_for_antigravity()` exists in `install.sh`, but the runtime contract still prefers explicit Orbit commands
 - Hook injection mechanism is unspecified in Antigravity's public docs
 - State persistence pathway is untested
 - Plain-prompt Orbit workflow routing is not currently supported as a reliable runtime capability
 
 **Manual setup (best-effort):**
-1. Point Antigravity at `INSTRUCTIONS.md` as its operator context.
+1. Point Antigravity at `CLAUDE.md` as its operator context.
 2. Provide `orbit.registry.json` and `WORKFLOWS.md` as reference documents.
 3. Write session state manually to `.orbit/state/STATE.md`.
 4. Skip hook-based safety checks until Antigravity publishes a lifecycle API.
+
+Every installed adapter must also ship `adapter.contract.json`, which is the machine-readable source of truth for:
+- instruction/operator surfaces
+- plain-prompt routing support
+- explicit-command fallback requirements
+- hook support
 
 **Tracking:** Full implementation tracked in [issue #17](https://github.com/soupler-hq/orbit/issues/17). When Antigravity publishes a stable hook/lifecycle API, `install_for_antigravity()` will be added and the support level will be upgraded to `stable`.
 
