@@ -190,9 +190,9 @@ Repeat PHASE per phase until milestone complete
 
 ## STATE MANAGEMENT
 
-`context.db` is the primary structured session cache when present. `STATE.md` remains the human-readable project ledger, and `DECISIONS-LOG.md` is the additive temporal decision history.
+`context.db` is the primary structured session cache when present. `STATE.md` remains the human-readable project ledger, `DECISIONS-LOG.md` is the additive temporal decision history, and `OPERATIONAL-RULES.json` is the machine-readable layer for learned execution policy.
 
-Every session reads `context.db` first when available. Every session writes `STATE.md` on completion, appends durable decision changes to `DECISIONS-LOG.md` when they happen, and the git/session hooks keep `context.db` synced from both state files.
+Every session reads `context.db` first when available. Every session writes `STATE.md` on completion, appends durable decision changes to `DECISIONS-LOG.md` when they happen, records learned operational rules in `OPERATIONAL-RULES.json`, and the git/session hooks keep `context.db` synced from the human-readable state surface.
 
 `STATE.md` contains:
 
@@ -217,7 +217,14 @@ Every session reads `context.db` first when available. Every session writes `STA
 - `still_valid`
 - `invalidated_at`
 
-Rule: if `STATE.md` or `DECISIONS-LOG.md` are missing, create them before doing anything else. If `context.db` exists, keep it synchronized from both files after meaningful progress.
+`OPERATIONAL-RULES.json` contains active learned rules with:
+
+- stable rule id
+- active/inactive status
+- scoped match criteria such as environment, tool, operation, route, or runtime command
+- guidance including preferred route and source issue
+
+Rule: if `STATE.md`, `DECISIONS-LOG.md`, or `OPERATIONAL-RULES.json` are missing, create them before doing anything else. If `context.db` exists, keep it synchronized from the human-readable state files after meaningful progress.
 
 ---
 

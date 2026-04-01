@@ -64,6 +64,29 @@ function formatWorkflowGate({ state, prGate, nextTransition, nextCommand, blocke
   return lines.join('\n');
 }
 
+function formatOperationalRule(rule) {
+  const guidance = rule.guidance || {};
+  const lines = [
+    '━━━ Operational Rule ━━━━━━━━━━━━━━━━━━',
+    `  Rule:     ${rule.id}`,
+    `  Tool:     ${scopeDisplay(rule.scope?.tool)}`,
+    `  Scope:    ${scopeDisplay(rule.scope?.operation)}`,
+  ];
+  if (guidance.preferred_route) {
+    lines.push(`  Route:    ${guidance.preferred_route}`);
+  }
+  if (guidance.why) {
+    lines.push(`  Why:      ${guidance.why}`);
+  }
+  lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  return lines.join('\n');
+}
+
+function scopeDisplay(value) {
+  if (Array.isArray(value)) return value.join(', ');
+  return value || '-';
+}
+
 function formatNextCommand({ primary, why, alternatives = [] }) {
   const altLines = alternatives.map((alt) => `- ${alt}`);
   return [
@@ -81,6 +104,7 @@ function formatNextCommand({ primary, why, alternatives = [] }) {
 module.exports = {
   formatClassification,
   formatNextCommand,
+  formatOperationalRule,
   formatProgressStatus,
   formatWorkflowGate,
   formatWaveComplete,

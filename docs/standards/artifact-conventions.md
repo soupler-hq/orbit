@@ -54,12 +54,14 @@ Use `templates/` for reusable control-plane templates that downstream repos or o
 templates/
   STATE.md
   DECISIONS-LOG.md
+  OPERATIONAL-RULES.json
 ```
 
 For project memory:
 
 - `STATE.md` is the current human-readable ledger for active project state.
 - `DECISIONS-LOG.md` is the additive temporal decision history.
+- `OPERATIONAL-RULES.json` is the machine-readable execution-policy layer for learned operational rules.
 - Do not keep the full durable decisions history inline inside `STATE.md`; summarize the current surface there and append durable entries to `DECISIONS-LOG.md`.
 
 ## Root Contract
@@ -85,6 +87,7 @@ Everything else should live in the appropriate internal directory such as `docs/
 - GitHub Issues remain the canonical tracker for issue status, discussion, and assignment.
 - `STATE.md` remains the canonical human-readable project ledger for current framework state.
 - `DECISIONS-LOG.md` remains the canonical additive record of durable project decisions.
+- `OPERATIONAL-RULES.json` remains the canonical machine-readable record of learned operational execution rules.
 - `context.db` remains the fast structured cache.
 - `docs/releases/release-notes.md` remains the canonical release-notes artifact consumed by the release pipeline.
 - Docs artifacts extend those systems; they do not replace them.

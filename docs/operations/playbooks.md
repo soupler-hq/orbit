@@ -25,6 +25,21 @@ The telemetry layer is documentation-backed in `commands/commands.md` and enforc
 
 For vague or plain prompt routing checks, use the verification checklist in [docs/architecture/runtime-adapters.md](../architecture/runtime-adapters.md#verification-checklist) before treating the behavior as a runtime bug.
 
+## Operational Rule Memory
+
+When a repeated operational failure pattern is observed, promote it into `.orbit/state/OPERATIONAL-RULES.json` instead of relying on conversational memory alone.
+
+Use operational rules for patterns such as:
+- environment-specific tool routing, for example GitHub CLI network actions that must use an approved route first
+- repeated execution constraints that should block the wrong path before the tool is invoked
+- known runtime friction that should be surfaced as explicit operator guidance
+
+Operational rules should stay:
+- machine-readable
+- scoped by environment, tool, command, or operation
+- inspectable by operators
+- connected to a source issue when possible
+
 ## Playbook 1: Full-Stack SaaS Product
 
 **Typical phases**: Auth → Core Domain → Payments → Admin → Launch
