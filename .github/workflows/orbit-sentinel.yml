@@ -26,7 +26,24 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: gh pr view "$PR_NUMBER" --json body --jq .body > /tmp/orbit-pr-body.md
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          short_sha="${EXPECTED_HEAD_SHA:0:7}"
+          for attempt in 1 2 3 4 5; do
+            gh pr view "$PR_NUMBER" --json body --jq .body > /tmp/orbit-pr-body.md
+            if grep -Fq "Head SHA: \`$short_sha\`" /tmp/orbit-pr-body.md; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 5 ]; then
+              echo "PR body still references an older head SHA; retrying fetch ($attempt/5)..."
+              sleep 3
+            fi
+          done
+
+          echo "PR body did not refresh to head SHA $short_sha after retries."
+          cat /tmp/orbit-pr-body.md
+          exit 1
       - name: 🧭 PR governance gate
         run: node bin/validate-pr-governance.js --event-file "$GITHUB_EVENT_PATH" --body-file /tmp/orbit-pr-body.md
       - name: 🔒 Verify package-lock.json is up to date
