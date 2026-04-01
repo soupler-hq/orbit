@@ -35,6 +35,7 @@ required_files=(
   "bin/generate-plan-index.js"
   "bin/progress.js"
   "bin/ship.js"
+  "bin/validate-pr-governance.js"
   "bin/workflow-state.js"
 )
 

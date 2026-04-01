@@ -1,8 +1,20 @@
-## What
-<!-- One sentence: what does this PR do? -->
+## Summary
+- <!-- concise summary bullet -->
 
-## Why
-<!-- Why is this change needed? Link issue or audit finding if applicable. -->
+## Issues
+- Closes #<!-- issue -->
+- Relates to #<!-- optional -->
+
+## Ship Decision
+- Review: `/orbit:review`
+- Head SHA: `<!-- replace with current branch head sha; update on every follow-up commit -->`
+- Merge when checks are green
+
+## Test plan
+- `<!-- command -->`
+
+## Merge notes
+- <!-- optional notes / relevant exceptions -->
 
 ---
 
@@ -31,7 +43,7 @@
 
 ### Branch
 - [ ] This PR is from a feature branch, NOT a direct push to `develop` or `main`
-- [ ] Branch name follows convention: `fix/issue-N-description` or `feat/description`
+- [ ] Branch name follows convention: `<type>/<slug>` such as `feat/143-pr-governance-enforcement` or `fix/145-context-minimal-dedup`
 - [ ] If this PR changed after opening, the `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` sections were refreshed before re-review
 
 ### Code
