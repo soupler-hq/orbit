@@ -33,6 +33,7 @@ required_files=(
   "templates/STATE.md"
   "bin/recovery-loop.js"
   "bin/install.js"
+  "bin/eval-contract.js"
   "bin/eval.sh"
   "bin/generate-plan-index.js"
   "bin/next.js"
