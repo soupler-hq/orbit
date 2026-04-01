@@ -88,6 +88,22 @@ function runNode(relPath, args = [], options = {}) {
   });
 }
 
+function checkRuntimeCommandOutput(relPath, args, expectations) {
+  try {
+    const output = runNode(relPath, args);
+    const pass = expectations.every((snippet) => output.includes(snippet));
+    return {
+      pass,
+      reason: pass ? 'ok' : `${relPath} missing expected runtime block output`,
+    };
+  } catch (error) {
+    return {
+      pass: false,
+      reason: `${relPath} failed to execute: ${error.message}`,
+    };
+  }
+}
+
 /** Parse the eval-dataset.md Markdown table into case objects. */
 function parseEvalDataset(content) {
   const cases = [];
@@ -544,33 +560,48 @@ const OBS_CHECKS = [
   },
   {
     id: 'OBS007',
-    check: 'orbit:quick runtime exists',
-    pass: fileExists('bin/quick.js'),
-    reason: fileExists('bin/quick.js') ? 'ok' : 'bin/quick.js missing',
+    check: 'orbit:quick runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/quick.js',
+      ['--issue', '#146', '--branch', 'feat/146-runtime-status-parity'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
   },
   {
     id: 'OBS008',
-    check: 'orbit:plan runtime exists',
-    pass: fileExists('bin/plan.js'),
-    reason: fileExists('bin/plan.js') ? 'ok' : 'bin/plan.js missing',
+    check: 'orbit:plan runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/plan.js',
+      ['--issue', '#146', '--branch', 'feat/146-runtime-status-parity'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
   },
   {
     id: 'OBS009',
-    check: 'orbit:review runtime exists',
-    pass: fileExists('bin/review.js'),
-    reason: fileExists('bin/review.js') ? 'ok' : 'bin/review.js missing',
+    check: 'orbit:review runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/review.js',
+      ['--issue', '#146', '--branch', 'feat/146-runtime-status-parity'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
   },
   {
     id: 'OBS010',
-    check: 'orbit:verify runtime exists',
-    pass: fileExists('bin/verify.js'),
-    reason: fileExists('bin/verify.js') ? 'ok' : 'bin/verify.js missing',
+    check: 'orbit:verify runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/verify.js',
+      ['--issue', '#146', '--branch', 'feat/146-runtime-status-parity'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
   },
   {
     id: 'OBS011',
-    check: 'orbit:next runtime exists',
-    pass: fileExists('bin/next.js'),
-    reason: fileExists('bin/next.js') ? 'ok' : 'bin/next.js missing',
+    check: 'orbit:next runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/next.js',
+      ['--issue', '#146', '--branch', 'feat/146-runtime-status-parity'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
   },
 ];
 

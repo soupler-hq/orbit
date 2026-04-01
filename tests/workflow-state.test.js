@@ -39,6 +39,26 @@ describe('workflow state engine', () => {
 
     expect(summary.state).toBe('implementation_in_progress');
     expect(summary.nextTransition).toBe('implementation_done');
+    expect(summary.nextCommand).toBe('/orbit:quick #131');
+    expect(summary.blockers.some((blocker) => blocker.includes('PR state unavailable'))).toBe(false);
+  });
+
+  it('keeps a clean tracked branch focused on implementation, not PR blockers', () => {
+    const summary = workflowState.evaluateWorkflowState({
+      issue: '#146',
+      branch: 'feat/146-runtime-status-parity',
+      implementationStatus: 'not_started',
+      testsStatus: 'unknown',
+      reviewStatus: 'unknown',
+      prStatus: 'unknown',
+    });
+
+    expect(summary.state).toBe('branch_ready');
+    expect(summary.nextCommand).toBe('/orbit:quick #146');
+    expect(summary.blockers.some((blocker) => blocker.includes('PR state unavailable'))).toBe(false);
+    expect(summary.blockers.some((blocker) => blocker.includes('Review state unavailable'))).toBe(
+      false
+    );
   });
 
   it('moves review-pending work into review_required', () => {

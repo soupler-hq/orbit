@@ -27,7 +27,9 @@ describe('runtime command status parity', () => {
   };
 
   it('quick runtime emits the standard status blocks', () => {
-    expectParity(renderQuick(trackedArgs), '/orbit:quick');
+    const output = renderQuick(trackedArgs);
+    expectParity(output, '/orbit:quick');
+    expect(output).toContain('**Primary**: /orbit:ship');
   });
 
   it('plan runtime emits the standard status blocks', () => {
@@ -44,5 +46,21 @@ describe('runtime command status parity', () => {
 
   it('next runtime emits the standard status blocks', () => {
     expectParity(renderNext(trackedArgs), '/orbit:next');
+  });
+
+  it('early-stage runtime output uses the concrete issue and avoids premature PR blockers', () => {
+    const output = renderPlan({
+      issue: '#146',
+      branch: 'feat/146-runtime-status-parity',
+      implementationStatus: 'not_started',
+      testsStatus: 'unknown',
+      reviewStatus: 'unknown',
+      prStatus: 'unknown',
+    });
+
+    expect(output).toContain('Command:  /orbit:quick #146');
+    expect(output).not.toContain('/orbit:quick #NNN');
+    expect(output).not.toContain('PR state unavailable');
+    expect(output).not.toContain('Review state unavailable');
   });
 });
