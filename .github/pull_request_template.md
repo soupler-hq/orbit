@@ -23,6 +23,7 @@
 > This framework reviews other projects' code. It must review its own.
 > Run the relevant agent before raising this PR. Record the verdict below.
 > If you push follow-up commits after opening the PR, refresh this body before requesting review again.
+> CI requires this section and the `## Test plan` to contain real evidence, not placeholders.
 
 ### Agent Review Verdict
 

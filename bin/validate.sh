@@ -34,6 +34,7 @@ required_files=(
   "bin/eval.sh"
   "bin/generate-plan-index.js"
   "bin/progress.js"
+  "bin/review-evidence.js"
   "bin/ship.js"
   "bin/validate-pr-governance.js"
   "bin/workflow-state.js"

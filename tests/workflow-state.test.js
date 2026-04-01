@@ -17,6 +17,7 @@ describe('workflow state engine', () => {
       branch: 'feat/131-enforce-workflow-state-machine',
       implementationStatus: 'done',
       testsStatus: 'passed',
+      testEvidenceStatus: 'present',
       reviewStatus: 'not_requested',
       prStatus: 'not_open',
     });
@@ -46,6 +47,7 @@ describe('workflow state engine', () => {
       branch: 'feat/131-enforce-workflow-state-machine',
       implementationStatus: 'done',
       testsStatus: 'passed',
+      testEvidenceStatus: 'present',
       reviewStatus: 'pending',
       prStatus: 'not_open',
     });
@@ -60,6 +62,7 @@ describe('workflow state engine', () => {
       branch: 'feat/131-enforce-workflow-state-machine',
       implementationStatus: 'done',
       testsStatus: 'passed',
+      testEvidenceStatus: 'present',
       reviewStatus: 'changes_requested',
       prStatus: 'not_open',
     });
@@ -75,6 +78,7 @@ describe('workflow state engine', () => {
         branch: 'feat/131-enforce-workflow-state-machine',
         implementationStatus: 'done',
         testsStatus: 'passed',
+        testEvidenceStatus: 'present',
         reviewStatus: 'pending',
         prStatus: 'not_open',
       })
@@ -87,7 +91,9 @@ describe('workflow state engine', () => {
       branch: 'feat/131-enforce-workflow-state-machine',
       implementationStatus: 'done',
       testsStatus: 'passed',
+      testEvidenceStatus: 'present',
       reviewStatus: 'approved',
+      reviewEvidenceStatus: 'present',
       prStatus: 'not_open',
     });
 
@@ -101,7 +107,9 @@ describe('workflow state engine', () => {
       branch: 'feat/131-enforce-workflow-state-machine',
       implementationStatus: 'done',
       testsStatus: 'passed',
+      testEvidenceStatus: 'present',
       reviewStatus: 'approved',
+      reviewEvidenceStatus: 'present',
       prStatus: 'merged',
     });
 
@@ -115,12 +123,45 @@ describe('workflow state engine', () => {
       branch: 'feat/131-enforce-workflow-state-machine',
       implementationStatus: 'done',
       testsStatus: 'passed',
+      testEvidenceStatus: 'present',
       reviewStatus: 'approved',
+      reviewEvidenceStatus: 'present',
       prStatus: 'unknown',
     });
 
     expect(summary.state).toBe('pr_ready');
     expect(summary.prGate).toBe('blocked');
     expect(summary.blockers[0]).toContain('PR state unavailable');
+  });
+
+  it('blocks progression when test evidence is missing', () => {
+    const summary = workflowState.evaluateWorkflowState({
+      issue: '#144',
+      branch: 'feat/144-review-ship-evidence',
+      implementationStatus: 'done',
+      testsStatus: 'passed',
+      testEvidenceStatus: 'missing',
+      reviewStatus: 'not_requested',
+      prStatus: 'not_open',
+    });
+
+    expect(summary.state).toBe('tests_green');
+    expect(summary.blockers[0]).toContain('Test evidence missing');
+  });
+
+  it('blocks progression when review evidence is missing after approval', () => {
+    const summary = workflowState.evaluateWorkflowState({
+      issue: '#144',
+      branch: 'feat/144-review-ship-evidence',
+      implementationStatus: 'done',
+      testsStatus: 'passed',
+      testEvidenceStatus: 'present',
+      reviewStatus: 'approved',
+      reviewEvidenceStatus: 'missing',
+      prStatus: 'open',
+    });
+
+    expect(summary.state).toBe('review_required');
+    expect(summary.blockers[0]).toContain('Review evidence missing');
   });
 });

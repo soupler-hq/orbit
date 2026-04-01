@@ -88,6 +88,16 @@ function normalizeEvidence(evidence = {}) {
       ['unknown', 'not_requested', 'pending', 'changes_requested', 'approved'],
       'unknown'
     ),
+    reviewEvidenceStatus: normalizeStatus(
+      evidence.reviewEvidenceStatus,
+      ['unknown', 'missing', 'present'],
+      'unknown'
+    ),
+    testEvidenceStatus: normalizeStatus(
+      evidence.testEvidenceStatus,
+      ['unknown', 'missing', 'present'],
+      'unknown'
+    ),
     prStatus: normalizeStatus(
       evidence.prStatus,
       ['unknown', 'not_open', 'open', 'merged'],
@@ -114,12 +124,32 @@ function evaluateWorkflowState(rawEvidence = {}) {
     return buildSummary('merged', evidence, blockers);
   }
 
-  if (evidence.prStatus === 'open') {
-    return buildSummary('pr_open', evidence, blockers);
-  }
-
   if (evidence.prStatus === 'unknown') {
     blockers.push('PR state unavailable; authenticate GitHub or pass explicit PR evidence.');
+  }
+
+  if (evidence.testsStatus === 'passed' && evidence.testEvidenceStatus === 'missing') {
+    blockers.push(
+      'Test evidence missing; update the PR body with the commands actually run before progression.'
+    );
+    return buildSummary('tests_green', evidence, blockers);
+  }
+
+  if (evidence.reviewStatus === 'approved' && evidence.reviewEvidenceStatus === 'missing') {
+    blockers.push(
+      'Review evidence missing; refresh the PR body with Orbit self-review details before shipping.'
+    );
+    return buildSummary('review_required', evidence, blockers);
+  }
+
+  if (
+    evidence.prStatus === 'open' &&
+    evidence.reviewStatus === 'approved' &&
+    evidence.testsStatus === 'passed' &&
+    evidence.reviewEvidenceStatus === 'present' &&
+    evidence.testEvidenceStatus === 'present'
+  ) {
+    return buildSummary('pr_open', evidence, blockers);
   }
 
   if (evidence.reviewStatus === 'approved' && evidence.testsStatus === 'passed') {

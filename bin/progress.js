@@ -8,6 +8,7 @@
 
 const { execFileSync } = require('child_process');
 const { evaluateWorkflowState, inferIssueFromBranch } = require('./workflow-state');
+const { inferEvidenceStatus } = require('./review-evidence');
 const { formatNextCommand, formatProgressStatus, formatWorkflowGate } = require('./status');
 
 function runCommand(bin, args, fallback = null) {
@@ -28,7 +29,7 @@ function readGit(args) {
 function readGitHubCurrentPullRequest() {
   const result = runCommand(
     'gh',
-    ['pr', 'view', '--json', 'state,reviewDecision,statusCheckRollup'],
+    ['pr', 'view', '--json', 'state,reviewDecision,statusCheckRollup,body'],
     null
   );
   return result ? JSON.parse(result) : null;
@@ -97,6 +98,12 @@ function buildEvidence(args = {}, deps = {}) {
   const issue = args.issue || inferIssueFromBranch(branch);
   const dirty = args.dirty ?? Boolean(gitReader(['status', '--porcelain']));
   const prData = args.githubData || githubReader();
+  const evidenceStatus = prData?.body
+    ? inferEvidenceStatus(prData.body)
+    : {
+        reviewEvidenceStatus: args.reviewEvidenceStatus || 'unknown',
+        testEvidenceStatus: args.testEvidenceStatus || 'unknown',
+      };
 
   return {
     issue,
@@ -105,6 +112,8 @@ function buildEvidence(args = {}, deps = {}) {
     testsStatus: args.testsStatus || inferTestsStatus(prData),
     reviewStatus: args.reviewStatus || inferReviewStatus(prData),
     prStatus: args.prStatus || inferPrStatus(prData),
+    reviewEvidenceStatus: args.reviewEvidenceStatus || evidenceStatus.reviewEvidenceStatus,
+    testEvidenceStatus: args.testEvidenceStatus || evidenceStatus.testEvidenceStatus,
   };
 }
 

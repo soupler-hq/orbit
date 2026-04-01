@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { validateReviewEvidence, validateTestEvidence } = require('./review-evidence');
 
 const ALLOWED_BRANCH_RE =
   /^(feat|fix|docs|chore|refactor|test|release|hotfix)\/(?:\d+-)?[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -96,6 +97,9 @@ function validateBody(body, headSha) {
       `PR body Head SHA (${shaMatch[1]}) does not match current PR head (${headSha}). Refresh the body before re-review.`
     );
   }
+
+  errors.push(...validateTestEvidence(normalizedBody));
+  errors.push(...validateReviewEvidence(normalizedBody));
 
   return errors;
 }
