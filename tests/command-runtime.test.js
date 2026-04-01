@@ -35,6 +35,20 @@ describe('runtime command status parity', () => {
     expect(output).toContain('**Primary**: /orbit:ship');
   });
 
+  it('quick runtime blocks when the requested issue does not match the active feature branch', () => {
+    const output = renderQuick({
+      issue: '#148',
+      branch: 'feat/150-executable-next-runtime',
+      implementationStatus: 'in_progress',
+    });
+
+    expect(output).toContain('State:    context_switch_required');
+    expect(output).toContain('Next:     branch_aligned');
+    expect(output).toContain('**Primary**: /orbit:quick #148');
+    expect(output).toContain('Requested issue #148 does not match active branch feat/150-executable-next-runtime (#150)');
+    expect(output).toContain('Issue:      #148');
+  });
+
   it('plan runtime emits the standard status blocks', () => {
     expectParity(renderPlan(trackedArgs), '/orbit:plan');
   });

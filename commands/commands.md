@@ -344,6 +344,7 @@ If the user gives a plain prompt that implies a tracked implementation task, Orb
    - identify the issue number or create one if missing
    - ensure work is on a feature branch from freshly pulled `develop`
    - keep scope limited to that issue
+   - if the requested issue does not match the active feature-branch issue, stop and switch context before continuing
 3. Define single XML task:
    ```xml
    <task type="...">
