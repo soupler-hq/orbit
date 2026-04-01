@@ -39,7 +39,8 @@ When the active repository is Orbit itself, use Orbit workflows to evolve Orbit.
 
 - Use `architect` for: system design, tech selection, architecture review.
 - Use `engineer` for: implement, build, debug, refactor.
-- Use `strategist` for: plan, roadmap, requirements, milestones.
+- Use `strategist` for: plan, roadmap, milestones.
+- Use `product-manager` for: prd, user story, feature spec, prioritization, acceptance criteria, backlog, product requirements.
 - Use `reviewer` for: review, audit, quality gate, ship gate.
 - Use `devops` for: deploy, monitor, ci/cd, infra.
 - Use `researcher` for: research, compare, feasibility, unknown domain.
