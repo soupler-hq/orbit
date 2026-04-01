@@ -42,6 +42,7 @@
 - `strategist` loads: skills/planning.md, skills/brainstorming.md.
 - `product-manager` loads: skills/planning.md, skills/brainstorming.md, skills/riper.md.
 - `business-analyst` loads: skills/planning.md, skills/brainstorming.md, skills/riper.md.
+- `qa-engineer` loads: skills/tdd.md, skills/review.md, skills/observability.md.
 - `reviewer` loads: skills/review.md, skills/reflection.md.
 - `devops` loads: skills/deployment.md, skills/observability.md.
 - `researcher` loads: skills/brainstorming.md.

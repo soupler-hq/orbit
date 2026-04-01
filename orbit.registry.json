@@ -177,6 +177,36 @@
       ]
     },
     {
+      "name": "qa-engineer",
+      "file": "agents/qa-engineer.md",
+      "domains": [
+        "REVIEW",
+        "ENGINEERING"
+      ],
+      "triggers": [
+        "test strategy",
+        "test plan",
+        "automation framework",
+        "acceptance criteria validation",
+        "release gate",
+        "regression suite",
+        "quality assurance",
+        "qa"
+      ],
+      "skills": [
+        "skills/tdd.md",
+        "skills/review.md",
+        "skills/observability.md"
+      ],
+      "outputs": [
+        "TEST-PLAN.md",
+        "AUTOMATION-SPEC.md",
+        "QA-REPORT.md",
+        "REGRESSION-SUITE.md",
+        "RELEASE-GATE.md"
+      ]
+    },
+    {
       "name": "reviewer",
       "file": "agents/reviewer.md",
       "domains": [

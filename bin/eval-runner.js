@@ -307,6 +307,7 @@ const registrySkillFiles = new Set(registry.skills.map((s) => s.file));
 const REQUIRED_V29_AGENT_CONTRACTS = [
   'product-manager',
   'business-analyst',
+  'qa-engineer',
   'designer',
   'security-engineer',
   'data-engineer',

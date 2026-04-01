@@ -42,6 +42,7 @@ When the active repository is Orbit itself, use Orbit workflows to evolve Orbit.
 - Use `strategist` for: plan, roadmap, milestones.
 - Use `product-manager` for: prd, requirements, user story, feature spec, prioritization, acceptance criteria, backlog, product requirements.
 - Use `business-analyst` for: functional spec, user story breakdown, edge cases, process map, requirements analysis, use case, acceptance criteria definition.
+- Use `qa-engineer` for: test strategy, test plan, automation framework, acceptance criteria validation, release gate, regression suite, quality assurance, qa.
 - Use `reviewer` for: review, audit, quality gate, ship gate.
 - Use `devops` for: deploy, monitor, ci/cd, infra.
 - Use `researcher` for: research, compare, feasibility, unknown domain.
