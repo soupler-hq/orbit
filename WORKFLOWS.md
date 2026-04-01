@@ -7,6 +7,7 @@
 
 ## All Workflows
 <!-- GENERATED:START workflows_list -->
+- `/orbit:discover` [collaborative] — inputs: problem statement, target user hypothesis → outputs: DISCOVERY.md
 - `/orbit:new-project` [collaborative] — inputs: scope, users, constraints, existing systems → outputs: PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md
 - `/orbit:plan` [collaborative] — inputs: STATE.md, ROADMAP.md, REQUIREMENTS.md → outputs: PHASE-{N}-PLAN.md
 - `/orbit:build` [autonomous] — inputs: PHASE-{N}-PLAN.md, ARCH.md, STATE.md → outputs: task outputs, SUMMARY.md, PHASE-{N}-VERIFICATION.md
@@ -50,7 +51,8 @@
 6. Update state after completion and before compaction.
 
 ## Artifact Chain
-- Discovery produces `PROJECT.md`, `REQUIREMENTS.md`, and `ROADMAP.md`.
+- `/orbit:discover` produces `DISCOVERY.md`.
+- `/orbit:new-project` produces `PROJECT.md`, `REQUIREMENTS.md`, and `ROADMAP.md`.
 - Planning produces `PHASE-{N}-PLAN.md`.
 - Execution produces task outputs and `SUMMARY.md`.
 - Verification produces `PHASE-{N}-VERIFICATION.md` and `PHASE-{N}-UAT.md`.

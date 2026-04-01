@@ -324,6 +324,7 @@ const REQUIRED_V29_SKILLS = ['skills/instructor.md', 'skills/workflow-audit.md']
 const REQUIRED_V29_WORKFLOWS = [
   { command: '/orbit:ask', doc: 'commands/orbit/ask.md' },
   { command: '/orbit:clarify', doc: 'commands/orbit/clarify.md' },
+  { command: '/orbit:discover', doc: 'commands/orbit/discover.md' },
   { command: '/orbit:eval', doc: 'commands/orbit/eval.md' },
   { command: '/orbit:riper', doc: 'commands/orbit/riper.md' },
 ];

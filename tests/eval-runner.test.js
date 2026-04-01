@@ -45,6 +45,10 @@ describe('eval-runner issue #85 coverage', () => {
       expect(checks.get('workflow contract: /orbit:clarify references agents')).toBe(true);
       expect(checks.get('workflow contract: /orbit:clarify agent refs exist')).toBe(true);
       expect(checks.get('workflow contract: /orbit:clarify doc exists')).toBe(true);
+      expect(checks.get('workflow contract: /orbit:discover defines inputs')).toBe(true);
+      expect(checks.get('workflow contract: /orbit:discover references agents')).toBe(true);
+      expect(checks.get('workflow contract: /orbit:discover agent refs exist')).toBe(true);
+      expect(checks.get('workflow contract: /orbit:discover doc exists')).toBe(true);
       expect(checks.get('workflow contract: /orbit:eval defines outputs')).toBe(true);
       expect(checks.get('workflow contract: /orbit:eval references agents')).toBe(true);
       expect(checks.get('workflow contract: /orbit:eval agent refs exist')).toBe(true);

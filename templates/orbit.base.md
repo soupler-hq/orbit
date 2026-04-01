@@ -149,6 +149,7 @@ Override model IDs via: `orbit.config.json` → `models.routing` or `models.prof
 **PROJECT**:
 
 ```
+/orbit:discover    → problem validation + user insights + go/no-go recommendation (optional but recommended)
 /orbit:new-project → vision + requirements + roadmap
 Repeat PHASE per phase until milestone complete
 /orbit:milestone   → archive + tag + next milestone
@@ -326,6 +327,7 @@ When no agent fits >60%:
 
 ```
 /orbit:help            — all commands
+/orbit:discover       — validate problem/user before planning
 /orbit:new-project     — initialize from scratch
 /orbit:plan [N]        — research + spec + task plan for phase N
 /orbit:build [N]       — parallel wave execution
