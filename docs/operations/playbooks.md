@@ -63,8 +63,8 @@ When autonomous execution repeats the same dispatch pattern without making progr
 
 The loop detection contract is:
 - `orbit.config.json` defines `loop_detection.enabled`, `loop_detection.window_size`, and `loop_detection.threshold`
-- `bin/orchestrator.js` tracks repeated dispatch signatures within a wave
-- once the same signature repeats at or above the threshold, Orbit emits a `LOOP_DETECTED` runtime event into `.orbit/state/STATE.md`
+- `bin/orchestrator.js` tracks repeated dispatch signatures per subagent session within a wave
+- once the same session repeats the same signature at or above the threshold, Orbit emits a `LOOP_DETECTED` runtime event into `.orbit/state/STATE.md`
 - the repeated task is terminated and surfaced as blocked instead of being dispatched again
 
 Use this as the execution-level guardrail for autonomous wave churn, especially when the same tool route or prompt keeps reappearing without new state.

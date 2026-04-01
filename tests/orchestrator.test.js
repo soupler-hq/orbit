@@ -259,6 +259,7 @@ describe('OrbitOrchestrator — executeWave', () => {
         agent: 'engineer',
         issue: '#72',
         prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-001',
         toolName: 'bash_command',
         toolInput: { command: 'npm test' },
       },
@@ -266,6 +267,7 @@ describe('OrbitOrchestrator — executeWave', () => {
         agent: 'engineer',
         issue: '#72',
         prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-001',
         toolName: 'bash_command',
         toolInput: { command: 'npm test' },
       },
@@ -273,6 +275,7 @@ describe('OrbitOrchestrator — executeWave', () => {
         agent: 'engineer',
         issue: '#72',
         prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-001',
         toolName: 'bash_command',
         toolInput: { command: 'npm test' },
       },
@@ -291,6 +294,7 @@ describe('OrbitOrchestrator — executeWave', () => {
     expect(fs.readFileSync(stateFile, 'utf8')).toContain('[LOOP_DETECTED]');
     expect(fs.readFileSync(stateFile, 'utf8')).toContain('wave: loop001');
     expect(fs.readFileSync(stateFile, 'utf8')).toContain('issue: #72');
+    expect(fs.readFileSync(stateFile, 'utf8')).toContain('session: engineer-session-001');
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining('LOOP_DETECTED')
     );
@@ -305,12 +309,14 @@ describe('OrbitOrchestrator — executeWave', () => {
       {
         agent: 'engineer',
         prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-002',
         toolName: 'bash_command',
         toolInput: { command: 'npm test' },
       },
       {
         agent: 'engineer',
         prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-002',
         toolName: 'bash_command',
         toolInput: { command: 'npm test' },
       },
@@ -319,6 +325,41 @@ describe('OrbitOrchestrator — executeWave', () => {
     const results = await orch.executeWave(tasks, 'loop002');
 
     expect(results.map((result) => result.status)).toEqual(['DISPATCHED', 'DISPATCHED']);
+  });
+
+  it('does not flag similar tasks from different subagent sessions as loops', async () => {
+    const orch = new OrbitOrchestrator(tmpDir);
+    const tasks = [
+      {
+        agent: 'engineer',
+        prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-a',
+        toolName: 'bash_command',
+        toolInput: { command: 'npm test' },
+      },
+      {
+        agent: 'engineer',
+        prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-b',
+        toolName: 'bash_command',
+        toolInput: { command: 'npm test' },
+      },
+      {
+        agent: 'engineer',
+        prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-c',
+        toolName: 'bash_command',
+        toolInput: { command: 'npm test' },
+      },
+    ];
+
+    const results = await orch.executeWave(tasks, 'loop003');
+
+    expect(results.map((result) => result.status)).toEqual([
+      'DISPATCHED',
+      'DISPATCHED',
+      'DISPATCHED',
+    ]);
   });
 
   it('explains the current workflow state and next transition', () => {

@@ -70,6 +70,16 @@ class OrbitOrchestrator {
     };
   }
 
+  resolveLoopSessionKey(task, waveId, index) {
+    return (
+      task.sessionKey ||
+      task.session_key ||
+      task.sessionId ||
+      task.session_id ||
+      `task_${waveId}_${index}`
+    );
+  }
+
   detectLoop(history, signature) {
     const config = this.loopDetectionConfig();
     if (!config.enabled) {
@@ -113,6 +123,7 @@ class OrbitOrchestrator {
       `repeats: ${fields.repeats}`,
       `threshold: ${fields.threshold}`,
       `issue: ${fields.issue || 'n/a'}`,
+      `session: ${fields.session}`,
       `task: ${fields.task}`,
       `detected_at: ${fields.detectedAt}`,
       'action: task_terminated',
@@ -270,7 +281,7 @@ class OrbitOrchestrator {
     console.log(`\n🚀 Starting Wave ${waveId} with ${tasks.length} agents...\n`);
 
     const results = [];
-    let loopHistory = [];
+    const loopHistoryBySession = new Map();
 
     for (const [index, task] of tasks.entries()) {
       const agent = this.registry.agents.find((a) => a.name === task.agent);
@@ -280,8 +291,9 @@ class OrbitOrchestrator {
         );
 
       const signature = this.buildLoopSignature(task);
-      const loop = this.detectLoop(loopHistory, signature);
-      loopHistory = loop.history;
+      const sessionKey = this.resolveLoopSessionKey(task, waveId, index);
+      const loop = this.detectLoop(loopHistoryBySession.get(sessionKey) || [], signature);
+      loopHistoryBySession.set(sessionKey, loop.history);
 
       if (loop.detected) {
         const taskName = `task_${waveId}_${index}`;
@@ -290,6 +302,7 @@ class OrbitOrchestrator {
           wave: waveId,
           agent: task.agent,
           issue: task.issue,
+          session: sessionKey,
           pattern: signature.display,
           repeats: loop.consecutiveMatches,
           threshold: loop.threshold,
@@ -315,6 +328,7 @@ class OrbitOrchestrator {
           model: this.resolveModelForAgent(agent),
           loop: {
             wave: waveId,
+            session: sessionKey,
             pattern: signature.display,
             threshold: loop.threshold,
             repeats: loop.consecutiveMatches,
@@ -343,6 +357,7 @@ class OrbitOrchestrator {
             model: modelEnv,
             path: executionPath,
             timestamp: new Date().toISOString(),
+            loop_session: sessionKey,
             loop_signature: signature.display,
           },
           null,
