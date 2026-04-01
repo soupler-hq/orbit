@@ -38,7 +38,10 @@
 (findings here)
 ```
 
-**Residual risks disposition**: <!-- link the hardening issue, link the existing umbrella issue, say "none", or explain the waiver -->
+**Residual risks** (use one label per item: `Tracked by #...`, `Waived: ...`, or `Operational: ...`, or `none`):
+```
+(residual risks here)
+```
 
 ---
 

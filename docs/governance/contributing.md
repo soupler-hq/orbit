@@ -83,7 +83,14 @@ Branch names should follow `<type>/<slug>` such as `feat/143-pr-governance-enfor
 
 If the branch evolves after the PR is opened, update the PR body before the next review request. The PR body is part of the control plane and must stay aligned with the actual branch scope, verification steps, and issue linkage. Keep the `Head SHA` marker aligned with the current branch head so CI can detect stale PR bodies before re-review. PR progression also requires evidence: `## Test plan` must list the commands actually run, and `Orbit Self-Review` must record the executed review command, dispatched agents, ship decision, and findings handled.
 
-If a review still leaves residual risks, do not leave them as free-floating prose. Record a disposition before treating the review as complete:
+When review leaves residual risks, classify each one explicitly instead of leaving it implied:
+
+- `Tracked by #...`
+- `Waived: ...`
+- `Operational: ...`
+
+Use `Operational` for branch-behind sync work, stale-check reruns, or other workflow hygiene that is not a product hardening issue.
+Also record the disposition before treating the review as complete:
 
 - link an existing hardening issue if the risk is already covered
 - create a new hardening issue if the risk is not yet tracked

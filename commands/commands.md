@@ -86,6 +86,16 @@ Appended at the end of completed commands so the user has a concrete next step.
 - {alt 2}
 ```
 
+## Review residual rule
+
+When `/orbit:review` ends with residual risks, Orbit must classify each one explicitly:
+
+- `Tracked by #...` for a linked hardening or follow-up issue
+- `Waived: ...` for an intentionally accepted risk with rationale
+- `Operational: ...` for branch hygiene, CI timing, or other non-product follow-up work
+
+Do not leave residual risks as unlabeled prose.
+
 ---
 
 # Orbit Command: /orbit:new-project
