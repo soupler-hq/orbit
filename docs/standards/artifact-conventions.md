@@ -39,6 +39,15 @@ Use `.orbit/state/` only for runtime state and session artifacts.
   tool-usage.log
 ```
 
+Use `.orbit/reports/` for generated operator-facing runtime artifacts that should not live in the repo root.
+
+```text
+.orbit/reports/
+  eval/
+    EVAL-REPORT.md
+    eval-report.json
+```
+
 ## Root Contract
 
 Keep the repository root intentionally thin.
