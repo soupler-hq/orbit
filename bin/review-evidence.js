@@ -31,10 +31,15 @@ function extractLabeledValue(body, label) {
 }
 
 function normalizeValue(value) {
-  return String(value || '')
-    .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/`/g, '')
-    .trim();
+  let result = String(value || '');
+  let previous;
+
+  do {
+    previous = result;
+    result = result.replace(/<!--[\s\S]*?-->/g, '');
+  } while (result !== previous);
+
+  return result.replace(/`/g, '').trim();
 }
 
 function extractFindingsBlock(body) {
