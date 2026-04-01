@@ -4,7 +4,7 @@
   "title": "Orbit Configuration",
   "type": "object",
   "additionalProperties": false,
-  "required": ["project", "mode", "models", "agents", "git", "skills", "hooks", "security", "loop_detection", "clarification_gate", "notifications", "mcp", "adapters", "runtimes"],
+  "required": ["project", "mode", "models", "agents", "git", "skills", "hooks", "security", "loop_detection", "clarification_gate", "distributed_mutex_warning", "notifications", "mcp", "adapters", "runtimes"],
   "properties": {
     "project": {
       "type": "object",
@@ -148,6 +148,9 @@
       }
     },
     "clarification_gate": {
+      "type": "boolean"
+    },
+    "distributed_mutex_warning": {
       "type": "boolean"
     },
     "notifications": {

@@ -119,6 +119,17 @@ Typical subagent output: 5-20k tokens
 Main session never sees the subagent's working
 ```
 
+### Distributed CI Limitation
+
+Orbit's `STATE.md` mutex uses an atomic local directory create (`.orbit/state/.orbit.lock`). That is safe for one filesystem, but it is not a distributed lock across separate CI runners or remote subagent hosts.
+
+What this means:
+- local worktrees on the same machine still benefit from the mutex
+- distributed CI should not assume `STATE.md` writes are serialized across runners
+- when `CI=true` or `distributed_mutex_warning` is enabled in `orbit.config.json`, `bin/orchestrator.js` emits a warning before using the local mutex
+
+This is intentional for now: Orbit is local-first. The warning exists to prevent a false sense of cross-runner safety, not to replace a real distributed lock service.
+
 ---
 
 ## Layer 3: Lazy Skill Loading

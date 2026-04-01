@@ -67,6 +67,7 @@
     "threshold": 3
   },
   "clarification_gate": true,
+  "distributed_mutex_warning": false,
   "notifications": {
     "slack_webhook_url": "",
     "on_phase_complete": false,
