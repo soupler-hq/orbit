@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
+const DEFAULT_OUTPUT_DIR = path.join(ROOT, '.orbit', 'reports', 'eval');
 
 function parseArgs(argv) {
   const args = {};
@@ -164,7 +165,7 @@ function writeMarkdownReport(reportPath, payload) {
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
-  const outputDir = path.resolve(args['output-dir'] || ROOT);
+  const outputDir = path.resolve(args['output-dir'] || DEFAULT_OUTPUT_DIR);
   fs.mkdirSync(outputDir, { recursive: true });
 
   const jsonReportPath = path.join(outputDir, 'eval-report.json');

@@ -9,6 +9,7 @@
 .orbit/state/sessions.log
 .orbit/state/tool-usage.log
 .orbit/state/compact.log
+.orbit/reports/
 
 # Git Worktrees
 .worktrees/

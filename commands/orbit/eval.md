@@ -8,5 +8,6 @@ Load `docs/quality/evaluation-framework.md` and `docs/quality/eval-dataset.md` f
 Run `bash bin/eval.sh` or the equivalent runtime adapter eval flow.
 Report pass/fail results, drift findings, and any follow-up work required.
 Confirm the generated artifacts:
-- `EVAL-REPORT.md`
-- `eval-report.json`
+- `.orbit/reports/eval/EVAL-REPORT.md` by default
+- `.orbit/reports/eval/eval-report.json` by default
+- or the equivalent files under `--output-dir <path>` when an override is supplied
