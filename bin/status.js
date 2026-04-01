@@ -6,16 +6,18 @@
 
 'use strict';
 
-function formatClassification({ domain, complexity, agent, mode, issue }) {
+function formatClassification({ domain, complexity, agent, mode, issue, branch, pr }) {
   const lines = [
     '━━━ Orbit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
     `  Domain:     ${domain}`,
     `  Complexity: ${complexity}`,
     `  Agent:      ${agent}`,
     `  Mode:       ${mode}`,
+    `  Working target: ${issue ? `Issue ${issue}` : 'untracked task'}`,
+    `  Branch:     ${branch || 'unknown'}`,
+    `  PR:         ${pr || 'not opened yet'}`,
     '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
   ];
-  if (issue) lines.splice(5, 0, `  Issue:      ${issue}`);
   return lines.join('\n');
 }
 

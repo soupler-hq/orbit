@@ -29,7 +29,7 @@ function readGit(args) {
 function readGitHubCurrentPullRequest() {
   const result = runCommand(
     'gh',
-    ['pr', 'view', '--json', 'state,reviewDecision,statusCheckRollup,body'],
+    ['pr', 'view', '--json', 'number,state,reviewDecision,statusCheckRollup,body'],
     null
   );
   return result ? JSON.parse(result) : null;
@@ -109,6 +109,7 @@ function buildEvidence(args = {}, deps = {}) {
   return {
     issue,
     branch,
+    prNumber: args.prNumber || (prData?.number ? `#${prData.number}` : null),
     implementationStatus: args.implementationStatus || (dirty ? 'in_progress' : 'not_started'),
     testsStatus: args.testsStatus || inferTestsStatus(prData),
     reviewStatus: args.reviewStatus || inferReviewStatus(prData),

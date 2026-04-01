@@ -116,6 +116,11 @@ function buildRuntimeCommandOutput(args, profile) {
     workflow.blockers[0] ||
     profile.defaultWhy ||
     `Orbit classified this as ${profile.command} and emitted the next workflow step.`;
+  const prLabel =
+    args.pr ||
+    args.prNumber ||
+    evidence.prNumber ||
+    (evidence.prStatus === 'not_open' ? 'not opened yet' : null);
 
   const sections = [
     formatClassification({
@@ -124,6 +129,8 @@ function buildRuntimeCommandOutput(args, profile) {
       agent: profile.agent,
       mode: profile.mode || 'AUTONOMOUS',
       issue: profile.classificationIssue || evidence.issue || args.issue || null,
+      branch: evidence.branch || args.branch || null,
+      pr: prLabel,
     }),
     formatProgressStatus({
       command: profile.command,

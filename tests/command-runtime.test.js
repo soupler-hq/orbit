@@ -48,7 +48,9 @@ describe('runtime command status parity', () => {
     expect(output).toContain('Next:     branch_aligned');
     expect(output).toContain('**Primary**: /orbit:quick #148');
     expect(output).toContain('Requested issue #148 does not match active branch feat/150-executable-next-runtime (#150)');
-    expect(output).toContain('Issue:      #148');
+    expect(output).toContain('Working target: Issue #148');
+    expect(output).toContain('Branch:     feat/150-executable-next-runtime');
+    expect(output).toContain('PR:         not opened yet');
   });
 
   it('quick runtime consults operational rules and blocks the wrong route before execution', () => {
@@ -193,7 +195,8 @@ describe('runtime command status parity', () => {
 
     expect(output).toContain('**Primary**: /orbit:quick #150 feat(workflow): implement `/orbit:next` as an executable runtime command');
     expect(output).toContain('State:    issue_ready');
-    expect(output).toContain('Issue:      #150');
+    expect(output).toContain('Working target: Issue #150');
+    expect(output).toContain('Branch:     develop');
   });
 
   it('next runtime honors active phase metadata even when the section is not marked CURRENT', () => {
@@ -221,7 +224,8 @@ describe('runtime command status parity', () => {
     });
 
     expect(output).toContain('**Primary**: /orbit:quick #151 feat(governance): enforce documentation updates for behavior changes');
-    expect(output).toContain('Issue:      #151');
+    expect(output).toContain('Working target: Issue #151');
+    expect(output).toContain('Branch:     develop');
   });
 
   it('next runtime uses a planning-aligned workflow gate when the active phase backlog is empty', () => {
