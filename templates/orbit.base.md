@@ -190,21 +190,34 @@ Repeat PHASE per phase until milestone complete
 
 ## STATE MANAGEMENT
 
-`context.db` is the primary structured session cache when present. `STATE.md` remains the human-readable ledger and fallback source.
+`context.db` is the primary structured session cache when present. `STATE.md` remains the human-readable project ledger, and `DECISIONS-LOG.md` is the additive temporal decision history.
 
-Every session reads `context.db` first when available. Every session writes STATE.md on completion, and the git/session hooks keep `context.db` synced from it.
+Every session reads `context.db` first when available. Every session writes `STATE.md` on completion, appends durable decision changes to `DECISIONS-LOG.md` when they happen, and the git/session hooks keep `context.db` synced from both state files.
 
-STATE.md contains:
+`STATE.md` contains:
 
 - Project vision (1-paragraph)
 - Active milestone + phase number
-- Decisions log (rationale, not just outcomes)
+- Current decision surface summary
 - Tech stack snapshot
 - Blockers + resolutions
 - Todos + seeds (forward ideas)
 - Last 5 completed tasks
 
-Rule: if STATE.md missing → create before doing anything else. If `context.db` exists, keep it synchronized from STATE.md after meaningful progress.
+`DECISIONS-LOG.md` contains additive entries with:
+
+- `decision`
+- `made_at`
+- `version`
+- `phase`
+- `made_by`
+- `context`
+- `rationale`
+- `supersedes`
+- `still_valid`
+- `invalidated_at`
+
+Rule: if `STATE.md` or `DECISIONS-LOG.md` are missing, create them before doing anything else. If `context.db` exists, keep it synchronized from both files after meaningful progress.
 
 ---
 

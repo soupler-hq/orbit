@@ -13,10 +13,12 @@ let Database;
 let initSchema;
 let loadMinimal;
 let findExistingTask;
+let parseDecisionLog;
 try {
   Database = require('better-sqlite3');
   ({ initSchema } = require('../bin/db'));
   ({ loadMinimal, findExistingTask } = require('../bin/context'));
+  ({ parseDecisionLog } = require('../bin/decision-log'));
 } catch {
   console.warn('better-sqlite3 not installed — context.test.js tests will be skipped');
 }
@@ -33,11 +35,8 @@ Test project vision paragraph.
 - **Current Branch**: test/132-enforcement-e2e
 - **Active PR**: #141 — test(enforcement): add end-to-end coverage for runtime gates
 
-## Decisions Log
-| Date | Version | Decision | Rationale |
-|------|---------|----------|-----------|
-| 2026-03-31 | v2.8.1 | SQLite chosen over Redis | No daemon, no network, single file |
-| 2026-03-30 | v2.8.0 | Orbit self-orchestrates v2.9.0 | Dogfood the framework |
+## Decision Ledger
+See .orbit/state/DECISIONS-LOG.md for the additive decision history.
 
 ## Todos + Seeds
 
@@ -156,10 +155,17 @@ describeIfSqlite('context.js — schema and load levels', () => {
       'open'
     );
 
-    const output = loadMinimal(db);
+    const originalExecFileSync = require('child_process').execFileSync;
+    require('child_process').execFileSync = () => 'fix/145-state-freshness\n';
 
-    expect(output).toContain('## Active Work');
-    expect(output).toContain('- Issue: #145');
+    try {
+      const output = loadMinimal(db);
+
+      expect(output).toContain('## Active Work');
+      expect(output).toContain('- Issue: #145');
+    } finally {
+      require('child_process').execFileSync = originalExecFileSync;
+    }
   });
 
   it('--load minimal: ignores stale active issue and PR when the live branch has changed', () => {
@@ -235,14 +241,21 @@ describeIfSqlite('context.js — schema and load levels', () => {
       'open'
     );
 
-    const output = loadMinimal(db);
+    const originalExecFileSync = require('child_process').execFileSync;
+    require('child_process').execFileSync = () => 'fix/145-minimal-context-priority\n';
 
-    expect(output).toContain('- Issue: #145');
-    expect(output).toContain('#142 epic(enforcement): close documented-vs-enforced workflow gaps');
-    expect(output).toContain('#132 test(enforcement): add end-to-end coverage for setup, routing, and review gates');
-    expect(output).toContain('#125 feat(context): provenance-driven context synthesis and recovery');
-    expect(output).not.toContain('#64 feat(agents): add product-manager agent');
-    expect(output).not.toContain('#65 feat(agents): add business-analyst agent');
+    try {
+      const output = loadMinimal(db);
+
+      expect(output).toContain('- Issue: #145');
+      expect(output).toContain('#142 epic(enforcement): close documented-vs-enforced workflow gaps');
+      expect(output).toContain('#132 test(enforcement): add end-to-end coverage for setup, routing, and review gates');
+      expect(output).toContain('#125 feat(context): provenance-driven context synthesis and recovery');
+      expect(output).not.toContain('#64 feat(agents): add product-manager agent');
+      expect(output).not.toContain('#65 feat(agents): add business-analyst agent');
+    } finally {
+      require('child_process').execFileSync = originalExecFileSync;
+    }
   });
 
   it('--load minimal: still finds current-milestone tasks even when newer unrelated tasks exceed the generic limit', () => {
@@ -344,6 +357,25 @@ describeIfSqlite('context.js — migrate from STATE.md', () => {
     const prMatch = text.match(/\*\*Active PR\*\*:\s*(.+)/);
     expect(prMatch).not.toBeNull();
     expect(prMatch[1].trim()).toBe('#141 — test(enforcement): add end-to-end coverage for runtime gates');
+  });
+
+  it('parses the new DECISIONS-LOG.md schema', () => {
+    const entries = parseDecisionLog(`- decision: "SQLite chosen over Redis"
+  made_at: "2026-03-31"
+  version: "v2.8.1"
+  phase: "Enforcement Hardening"
+  made_by: "orbit"
+  context: "Structured state cache selection"
+  rationale: "No daemon, no network, single file"
+  supersedes: []
+  still_valid: true
+  invalidated_at: ""`);
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0].decision).toBe('SQLite chosen over Redis');
+    expect(entries[0].made_at).toBe('2026-03-31');
+    expect(entries[0].phase).toBe('Enforcement Hardening');
+    expect(entries[0].still_valid).toBe(true);
   });
 
   it('decisions table rows are idempotent on duplicate insert', () => {

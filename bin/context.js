@@ -22,6 +22,12 @@
 const fs = require('fs');
 const path = require('path');
 const { openDb, DB_PATH } = require('./db');
+const {
+  DECISIONS_LOG_PATH,
+  parseDecisionLogFile,
+  parseStateDecisionTable,
+  renderDecisionLog,
+} = require('./decision-log');
 
 const ROOT = path.resolve(__dirname, '..');
 const STATE_PATH = path.join(ROOT, '.orbit', 'state', 'STATE.md');
@@ -188,7 +194,9 @@ function loadMinimal(db) {
 function loadStandard(db) {
   const minimal = loadMinimal(db);
   const decisions = db
-    .prepare('SELECT date, version, decision, rationale FROM decisions ORDER BY id DESC LIMIT 10')
+    .prepare(
+      'SELECT date, version, decision, rationale, phase, made_by, still_valid FROM decisions ORDER BY id DESC LIMIT 10'
+    )
     .all();
 
   const lines = [minimal, '', '## Recent Decisions (last 10)'];
@@ -196,7 +204,9 @@ function loadStandard(db) {
     lines.push('_(none)_');
   } else {
     for (const d of decisions) {
-      lines.push(`- ${d.date} [${d.version || '—'}] ${d.decision}`);
+      const validity = Number(d.still_valid) === 0 ? ' (invalidated)' : '';
+      const provenance = [d.version || '—', d.phase || '—', d.made_by || '—'].join(' · ');
+      lines.push(`- ${d.date} [${provenance}] ${d.decision}${validity}`);
       lines.push(`  > ${d.rationale}`);
     }
   }
@@ -227,7 +237,9 @@ function loadFull(db) {
 
 function loadDecisions(db) {
   const decisions = db
-    .prepare('SELECT date, version, decision, rationale FROM decisions ORDER BY id DESC')
+    .prepare(
+      'SELECT date, version, decision, rationale, phase, made_by, context, supersedes, still_valid, invalidated_at FROM decisions ORDER BY id DESC'
+    )
     .all();
 
   const lines = ['## Decisions Log'];
@@ -235,8 +247,14 @@ function loadDecisions(db) {
     lines.push('_(none)_');
   } else {
     for (const d of decisions) {
-      lines.push(`- ${d.date} [${d.version || '—'}] ${d.decision}`);
+      const validity = Number(d.still_valid) === 0 ? ' (invalidated)' : '';
+      lines.push(`- ${d.date} [${d.version || '—'}] ${d.decision}${validity}`);
+      if (d.phase) lines.push(`  phase: ${d.phase}`);
+      if (d.made_by) lines.push(`  made_by: ${d.made_by}`);
+      if (d.context) lines.push(`  context: ${d.context}`);
       lines.push(`  > ${d.rationale}`);
+      if (d.supersedes) lines.push(`  supersedes: ${d.supersedes}`);
+      if (d.invalidated_at) lines.push(`  invalidated_at: ${d.invalidated_at}`);
     }
   }
 
@@ -331,30 +349,32 @@ function migrate(db) {
     deleteState.run('active_title');
   }
 
-  // Parse decisions table (markdown format: | date | version | decision | rationale |)
-  const decisionSection = text.match(/## Decisions Log\n([\s\S]*?)(?=\n##|$)/);
-  if (decisionSection) {
-    const rows = decisionSection[1]
-      .split('\n')
-      .filter((l) => l.startsWith('|') && !l.includes('---') && !l.includes('Date'));
-    const insertDecision = db.prepare(
-      'INSERT INTO decisions (date, version, decision, rationale) VALUES (?, ?, ?, ?)'
-    );
-    for (const row of rows) {
-      const cols = row
-        .split('|')
-        .map((c) => c.trim())
-        .filter(Boolean);
-      if (cols.length >= 4) {
-        // Check for duplicate
-        const existing = db
-          .prepare('SELECT id FROM decisions WHERE date = ? AND decision = ?')
-          .get(cols[0], cols[2]);
-        if (!existing) {
-          insertDecision.run(cols[0], cols[1] || null, cols[2], cols[3]);
-          count.decisions++;
-        }
-      }
+  const decisionEntries = parseDecisionLogFile(DECISIONS_LOG_PATH);
+  const fallbackDecisionEntries = decisionEntries.length === 0 ? parseStateDecisionTable(text) : [];
+  const insertDecision = db.prepare(
+    `INSERT INTO decisions
+      (date, version, decision, rationale, phase, made_by, context, supersedes, still_valid, invalidated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+
+  for (const entry of [...decisionEntries, ...fallbackDecisionEntries]) {
+    const existing = db
+      .prepare('SELECT id FROM decisions WHERE date = ? AND decision = ?')
+      .get(entry.made_at, entry.decision);
+    if (!existing) {
+      insertDecision.run(
+        entry.made_at,
+        entry.version || null,
+        entry.decision,
+        entry.rationale,
+        entry.phase || null,
+        entry.made_by || null,
+        entry.context || null,
+        JSON.stringify(entry.supersedes || []),
+        entry.still_valid === false ? 0 : 1,
+        entry.invalidated_at || null
+      );
+      count.decisions++;
     }
   }
 
@@ -409,11 +429,35 @@ function exportStateFile(db) {
   process.stdout.write(header + output + '\n');
 }
 
+function exportDecisionLogFile(db) {
+  const decisions = db
+    .prepare(
+      'SELECT date, version, decision, rationale, phase, made_by, context, supersedes, still_valid, invalidated_at FROM decisions ORDER BY id DESC'
+    )
+    .all()
+    .map((decision) => ({
+      decision: decision.decision,
+      made_at: decision.date,
+      version: decision.version || '',
+      phase: decision.phase || '',
+      made_by: decision.made_by || '',
+      context: decision.context || '',
+      rationale: decision.rationale,
+      supersedes: decision.supersedes ? JSON.parse(decision.supersedes) : [],
+      still_valid: Number(decision.still_valid) !== 0,
+      invalidated_at: decision.invalidated_at || '',
+    }));
+
+  fs.mkdirSync(path.dirname(DECISIONS_LOG_PATH), { recursive: true });
+  fs.writeFileSync(DECISIONS_LOG_PATH, renderDecisionLog(decisions), 'utf8');
+}
+
 // ── Save: write deltas from STATE.md to context.db ───────────────────────────
 
 function save(db) {
   // Re-run migrate (idempotent — won't create duplicates)
   migrate(db);
+  exportDecisionLogFile(db);
   console.log('✓ context.db updated from STATE.md');
 }
 
@@ -497,4 +541,5 @@ module.exports = {
   save,
   currentGitBranch,
   findExistingTask,
+  exportDecisionLogFile,
 };

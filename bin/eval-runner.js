@@ -606,7 +606,18 @@ integrityResults.push({
   pass: Boolean(decisionsLogTemplateText),
   reason: decisionsLogTemplateText ? 'ok' : 'templates/DECISIONS-LOG.md missing',
 });
-for (const field of ['Date', 'Version', 'Decision', 'Rationale']) {
+for (const field of [
+  'decision:',
+  'made_at:',
+  'version:',
+  'phase:',
+  'made_by:',
+  'context:',
+  'rationale:',
+  'supersedes:',
+  'still_valid:',
+  'invalidated_at:',
+]) {
   integrityResults.push({
     check: `template contract: DECISIONS-LOG.md includes ${field}`,
     pass: decisionsLogTemplateText.includes(field),

@@ -1,7 +1,14 @@
-# Decisions Log Template
+# DECISIONS-LOG.md
+> Temporal decision ledger for durable architectural and workflow choices.
+> Add entries; do not overwrite history.
 
-Use this template when a project needs a durable decision ledger outside `STATE.md`.
-
-| Date | Version | Decision | Rationale |
-|------|---------|----------|-----------|
-| YYYY-MM-DD | vX.Y.Z | Describe the decision in one sentence | Explain why this was chosen and what alternatives were rejected |
+- decision: "Describe the decision in one sentence"
+  made_at: "YYYY-MM-DD"
+  version: "vX.Y.Z"
+  phase: "Wave / phase / milestone name"
+  made_by: "orbit"
+  context: "What changed or what decision point triggered this entry"
+  rationale: "Why this was chosen and what alternatives were rejected"
+  supersedes: []
+  still_valid: true
+  invalidated_at: ""

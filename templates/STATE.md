@@ -34,16 +34,9 @@ Monitoring: {datadog / grafana / etc}
 |-----|----------|------|--------|
 | 001 | {e.g., Use PostgreSQL over MongoDB} | {date} | Accepted |
 
-## Decisions Log
-Chronological record of significant decisions made during the project.
-
-```text
-{YYYY-MM-DD}: Decided to use X instead of Y because Z.
-              Considered: A, B, C. Rejected because: ...
-
-{YYYY-MM-DD}: Changed approach to database schema for users table.
-              Original plan assumed single tenancy. Now multi-tenant.
-```
+## Decision Ledger
+See `.orbit/state/DECISIONS-LOG.md` for the additive decision history.
+Use this file to summarize the current decision surface, not to duplicate the full log.
 
 ## Blockers
 ```text
