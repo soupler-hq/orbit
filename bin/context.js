@@ -63,6 +63,51 @@ function issueRefFromBranch(branch) {
   return match ? `#${match[1]}` : '';
 }
 
+function milestonePrefix(value) {
+  const normalized = String(value || '').trim();
+  const match = normalized.match(/^(v[0-9]+(?:\.[0-9]+){1,2})\b/i);
+  return match ? match[1] : normalized;
+}
+
+function selectMinimalTasks(db, { activeIssue, activeMilestone }) {
+  const baseOrder = `
+    ORDER BY
+      CASE WHEN issue_ref = ? THEN 0 ELSE 1 END,
+      CASE status
+        WHEN 'in_progress' THEN 0
+        WHEN 'blocked' THEN 1
+        ELSE 2
+      END,
+      id DESC
+    LIMIT 10
+  `;
+
+  if (activeMilestone) {
+    const milestoneTasks = db
+      .prepare(
+        `SELECT issue_ref, title, status, blocker, milestone
+         FROM tasks
+         WHERE status IN ('open','blocked','in_progress')
+           AND milestone LIKE ?
+         ${baseOrder}`
+      )
+      .all(`${activeMilestone}%`, activeIssue);
+
+    if (milestoneTasks.length > 0) {
+      return milestoneTasks;
+    }
+  }
+
+  return db
+    .prepare(
+      `SELECT issue_ref, title, status, blocker, milestone
+       FROM tasks
+       WHERE status IN ('open','blocked','in_progress')
+       ${baseOrder}`
+    )
+    .all(activeIssue);
+}
+
 function parseActiveIssueFromState(text, branch) {
   const lines = String(text || '').split(/\r?\n/);
   for (let index = 0; index < lines.length; index += 1) {
@@ -103,22 +148,8 @@ function loadMinimal(db) {
     : issueRefFromBranch(branch);
   const activeTitle = branchMatchesState ? factMap.active_title || '' : '';
   const activePr = branchMatchesState ? factMap.active_pr || '' : '';
-  const tasks = db
-    .prepare(
-      `SELECT issue_ref, title, status, blocker
-       FROM tasks
-       WHERE status IN ('open','blocked','in_progress')
-       ORDER BY
-         CASE WHEN issue_ref = ? THEN 0 ELSE 1 END,
-         CASE status
-           WHEN 'in_progress' THEN 0
-           WHEN 'blocked' THEN 1
-           ELSE 2
-         END,
-         id DESC
-       LIMIT 10`
-    )
-    .all(activeIssue);
+  const activeMilestone = milestonePrefix(factMap.milestone || '');
+  const tasks = selectMinimalTasks(db, { activeIssue, activeMilestone });
 
   const lines = [
     '## Project Context (minimal)',
