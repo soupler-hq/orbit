@@ -2,6 +2,28 @@ import { describe, it, expect } from 'vitest';
 import progress from '../bin/progress.js';
 import ship from '../bin/ship.js';
 
+const REVIEW_EVIDENCE_BODY = [
+  '## Summary',
+  '## Issues',
+  '## Ship Decision',
+  '- Head SHA: `abc1234`',
+  '## Test plan',
+  '- `npm test`',
+  '## Orbit Self-Review',
+  '**Command run**: `/orbit:review`',
+  '**Agent(s) dispatched**: reviewer',
+  '**Ship decision**: APPROVED',
+  '**Findings addressed** (paste critical/high findings and how you resolved them, or "none"):',
+  '```',
+  'none',
+  '```',
+].join('\n');
+
+const BLOCKED_REVIEW_EVIDENCE_BODY = REVIEW_EVIDENCE_BODY.replace(
+  '**Ship decision**: APPROVED',
+  '**Ship decision**: BLOCKED'
+);
+
 describe('runtime enforcement entrypoints', () => {
   it('progress runtime emits execution, workflow gate, and next command', () => {
     const output = progress.renderProgress({
@@ -105,6 +127,8 @@ describe('runtime enforcement entrypoints', () => {
         testsStatus: 'passed',
         reviewStatus: 'approved',
         prStatus: 'not_open',
+        reviewEvidenceStatus: 'present',
+        testEvidenceStatus: 'present',
       }),
     });
 
@@ -122,11 +146,97 @@ describe('runtime enforcement entrypoints', () => {
         testsStatus: 'passed',
         reviewStatus: 'approved',
         prStatus: 'open',
+        reviewEvidenceStatus: 'present',
+        testEvidenceStatus: 'present',
       }),
     });
 
     expect(result.exitCode).toBe(0);
     expect(result.output).toContain('State:    pr_open');
     expect(result.output).toContain('**Primary**: /orbit:progress');
+  });
+
+  it('ship runtime blocks when review evidence is missing from an open PR', () => {
+    const result = ship.renderShipDecision({
+      json: JSON.stringify({
+        issue: '#144',
+        branch: 'feat/144-review-ship-evidence',
+        implementationStatus: 'done',
+        testsStatus: 'passed',
+        reviewStatus: 'approved',
+        prStatus: 'open',
+        reviewEvidenceStatus: 'missing',
+        testEvidenceStatus: 'present',
+      }),
+    });
+
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('Review evidence missing');
+    expect(result.output).toContain('/orbit:review');
+  });
+
+  it('progress runtime reads evidence status from a live PR body', () => {
+    const evidence = progress.buildEvidence(
+      {},
+      {
+        gitReader: (args) => {
+          if (args[0] === 'rev-parse') return 'feat/144-review-ship-evidence';
+          if (args[0] === 'status') return '';
+          return '';
+        },
+        githubReader: () => ({
+          state: 'OPEN',
+          reviewDecision: 'APPROVED',
+          statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+          body: REVIEW_EVIDENCE_BODY,
+        }),
+      }
+    );
+
+    expect(evidence.reviewEvidenceStatus).toBe('present');
+    expect(evidence.testEvidenceStatus).toBe('present');
+    expect(evidence.shipDecisionStatus).toBe('approved');
+  });
+
+  it('ship runtime blocks when self-review decision is blocked', () => {
+    const result = ship.renderShipDecision({
+      json: JSON.stringify({
+        issue: '#144',
+        branch: 'feat/144-review-ship-evidence',
+        implementationStatus: 'done',
+        testsStatus: 'passed',
+        reviewStatus: 'approved',
+        prStatus: 'open',
+        reviewEvidenceStatus: 'present',
+        testEvidenceStatus: 'present',
+        shipDecisionStatus: 'blocked',
+      }),
+    });
+
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('Orbit self-review is blocked');
+    expect(result.output).toContain('/orbit:review');
+  });
+
+  it('progress runtime reads blocked self-review status from a live PR body', () => {
+    const evidence = progress.buildEvidence(
+      {},
+      {
+        gitReader: (args) => {
+          if (args[0] === 'rev-parse') return 'feat/144-review-ship-evidence';
+          if (args[0] === 'status') return '';
+          return '';
+        },
+        githubReader: () => ({
+          state: 'OPEN',
+          reviewDecision: 'APPROVED',
+          statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+          body: BLOCKED_REVIEW_EVIDENCE_BODY,
+        }),
+      }
+    );
+
+    expect(evidence.reviewEvidenceStatus).toBe('present');
+    expect(evidence.shipDecisionStatus).toBe('blocked');
   });
 });

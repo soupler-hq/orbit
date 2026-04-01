@@ -348,6 +348,9 @@ If the user gives a plain prompt that implies a tracked implementation task, Orb
 4. Execute with relevant skill loaded
 5. Verify, commit, update STATE.md
 6. If the task is review-ready, push branch, refresh the PR body if the branch scope changed, update the `Head SHA` marker, and then run `/orbit:review`
+7. Before requesting review or ship progression, refresh the PR body evidence:
+   - `## Test plan` lists the commands actually run
+   - `Orbit Self-Review` records the review command, dispatched agents, ship decision, and findings handled
 
 **After completion, emit:**
 

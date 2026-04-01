@@ -6,6 +6,27 @@ import { execFileSync, spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const REVIEW_EVIDENCE_BODY = [
+  '## Summary',
+  '## Issues',
+  '## Ship Decision',
+  '- Head SHA: `abc1234`',
+  '## Test plan',
+  '- `npm test`',
+  '## Orbit Self-Review',
+  '**Command run**: `/orbit:review`',
+  '**Agent(s) dispatched**: reviewer',
+  '**Ship decision**: APPROVED',
+  '**Findings addressed** (paste critical/high findings and how you resolved them, or "none"):',
+  '```',
+  'none',
+  '```',
+].join('\n');
+
+const BLOCKED_REVIEW_EVIDENCE_BODY = REVIEW_EVIDENCE_BODY.replace(
+  '**Ship decision**: APPROVED',
+  '**Ship decision**: BLOCKED'
+);
 
 function makeExecutable(filePath, content) {
   fs.writeFileSync(filePath, content, { mode: 0o755 });
@@ -131,6 +152,7 @@ describe('enforcement end-to-end command paths', () => {
         state: 'OPEN',
         reviewDecision: 'APPROVED',
         statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+        body: REVIEW_EVIDENCE_BODY,
       },
     });
 
@@ -169,6 +191,7 @@ describe('enforcement end-to-end command paths', () => {
         state: 'OPEN',
         reviewDecision: 'APPROVED',
         statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+        body: REVIEW_EVIDENCE_BODY,
       },
     });
 
@@ -237,6 +260,58 @@ describe('runtime capability generation', () => {
       expect(antigravityText).toContain("prefer the runtime's documented explicit Orbit command path");
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('blocks PR-open progression when review evidence is missing from the body', () => {
+    const runtime = buildFakeRuntime({
+      branch: 'feat/144-review-ship-evidence',
+      prData: {
+        state: 'OPEN',
+        reviewDecision: 'APPROVED',
+        statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+        body: '## Summary\n## Issues\n## Ship Decision\n- Head SHA: `abc1234`\n## Test plan\n- `npm test`',
+      },
+    });
+
+    try {
+      const result = spawnSync('node', [path.join(ROOT, 'bin', 'ship.js')], {
+        cwd: ROOT,
+        encoding: 'utf8',
+        env: runtime.env,
+      });
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain('Review evidence missing');
+      expect(result.stderr).toContain('/orbit:review');
+    } finally {
+      runtime.cleanup();
+    }
+  });
+
+  it('blocks PR-open progression when the self-review verdict is blocked', () => {
+    const runtime = buildFakeRuntime({
+      branch: 'feat/144-review-ship-evidence',
+      prData: {
+        state: 'OPEN',
+        reviewDecision: 'APPROVED',
+        statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+        body: BLOCKED_REVIEW_EVIDENCE_BODY,
+      },
+    });
+
+    try {
+      const result = spawnSync('node', [path.join(ROOT, 'bin', 'ship.js')], {
+        cwd: ROOT,
+        encoding: 'utf8',
+        env: runtime.env,
+      });
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain('Orbit self-review is blocked');
+      expect(result.stderr).toContain('/orbit:review');
+    } finally {
+      runtime.cleanup();
     }
   });
 });

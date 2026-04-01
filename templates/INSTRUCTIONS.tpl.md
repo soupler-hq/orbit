@@ -78,6 +78,7 @@ When the active repository is Orbit itself, use Orbit workflows to evolve Orbit.
 - Keep one issue scope per branch and carry the issue id through branch naming, PR, and STATE updates. Branch names should follow `<type>/<slug>` such as `feat/143-pr-governance-enforcement` or `fix/145-context-minimal-dedup`.
 - Open PRs using the repository's established PR structure: `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` when relevant.
 - If a branch changes materially after the PR is opened, update the PR body before requesting review again so the description stays truthful. Refresh the PR body's `Head SHA` marker to the current branch head in the same pass. Treat this as part of the work, not optional cleanup.
+- PR progression requires evidence in the body: `## Test plan` must list the commands actually run, and `Orbit Self-Review` must record the review command, dispatched agents, ship decision, and findings handled.
 - Use git worktrees when parallel waves need isolated write spaces.
 
 ## Docs Rules

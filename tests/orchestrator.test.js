@@ -250,6 +250,7 @@ describe('OrbitOrchestrator — executeWave', () => {
       branch: 'feat/131-enforce-workflow-state-machine',
       implementationStatus: 'done',
       testsStatus: 'passed',
+      testEvidenceStatus: 'present',
       reviewStatus: 'not_requested',
     });
 
@@ -265,6 +266,7 @@ describe('OrbitOrchestrator — executeWave', () => {
         branch: 'feat/131-enforce-workflow-state-machine',
         implementationStatus: 'done',
         testsStatus: 'passed',
+        testEvidenceStatus: 'present',
         reviewStatus: 'pending',
       })
     ).toThrow('Pull request gate blocked');
@@ -277,7 +279,9 @@ describe('OrbitOrchestrator — executeWave', () => {
       branch: 'feat/131-enforce-workflow-state-machine',
       implementationStatus: 'done',
       testsStatus: 'passed',
+      testEvidenceStatus: 'present',
       reviewStatus: 'approved',
+      reviewEvidenceStatus: 'present',
     });
 
     expect(output).toContain('Workflow Gate');
