@@ -541,6 +541,27 @@ for (const { command, doc } of REQUIRED_V29_WORKFLOWS) {
         : `${command} missing non-empty outputs`,
   });
   integrityResults.push({
+    check: `workflow contract: ${command} references agents`,
+    pass: Array.isArray(workflow?.agents) && workflow.agents.length > 0,
+    reason:
+      Array.isArray(workflow?.agents) && workflow.agents.length > 0
+        ? 'ok'
+        : `${command} missing non-empty agents list`,
+  });
+  integrityResults.push({
+    check: `workflow contract: ${command} agent refs exist`,
+    pass:
+      Array.isArray(workflow?.agents) &&
+      workflow.agents.length > 0 &&
+      workflow.agents.every((agentName) => registryAgentNames.has(agentName)),
+    reason:
+      Array.isArray(workflow?.agents) &&
+      workflow.agents.length > 0 &&
+      workflow.agents.every((agentName) => registryAgentNames.has(agentName))
+        ? 'ok'
+        : `${command} references missing workflow agent(s)`,
+  });
+  integrityResults.push({
     check: `workflow contract: ${command} doc exists`,
     pass: fileExists(doc),
     reason: fileExists(doc) ? 'ok' : `missing file: ${doc}`,
