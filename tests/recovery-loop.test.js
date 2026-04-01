@@ -90,4 +90,24 @@ describe('recovery loop', () => {
 
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
+
+  it('riper runtime automatically invokes recovery when an execute step fails', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-riper-auto-'));
+    const stateDir = path.join(tmpDir, '.orbit', 'state');
+    const output = renderRiper({
+      issue: '#147',
+      branch: 'feat/147-executable-recovery-loop',
+      implementationStatus: 'in_progress',
+      task: 'auto recovery step',
+      'state-dir': stateDir,
+      execute: JSON.stringify(['node', '-e', 'process.stderr.write("boom\\n"); process.exit(1)']),
+    });
+
+    expect(output).toContain('━━━ Recovery Loop');
+    expect(output).toContain('Decision: retry');
+    expect(output).toContain('Error:    boom');
+    expect(loadLastError(stateDir)?.error_message).toBe('boom');
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
 });

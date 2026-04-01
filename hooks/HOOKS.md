@@ -235,7 +235,7 @@ fi
 node "$ROOT_DIR/bin/recovery-loop.js" "${ARGS[@]}"
 ```
 
-This writes `.orbit/state/last_error.json`, appends `.orbit/errors/<date>.log`, and returns a deterministic retry-or-halt decision after repeated failures.
+This writes `.orbit/state/last_error.json`, appends `.orbit/errors/<date>.log`, and returns a deterministic retry-or-halt decision after repeated failures. The repo-local `/orbit:riper` runtime uses the same controller automatically when its execute step fails.
 
 Optional policy:
 - keep `OnError` non-blocking for the first bounded retries

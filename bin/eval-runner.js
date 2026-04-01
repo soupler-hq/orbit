@@ -586,6 +586,45 @@ const runtimeEnforcementResults = [
     })(),
   },
   {
+    check: 'riper runtime automatically triggers recovery when execute step fails',
+    ...(() => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-eval-riper-auto-'));
+      const stateDir = path.join(tmpDir, '.orbit', 'state');
+      try {
+        const output = runNode('bin/riper.js', [
+          '--issue',
+          '#147',
+          '--branch',
+          'feat/147-executable-recovery-loop',
+          '--state-dir',
+          stateDir,
+          '--execute',
+          '["node","-e","process.stderr.write(\\"boom\\\\n\\"); process.exit(1)"]',
+        ]);
+        const persisted = JSON.parse(
+          fs.readFileSync(path.join(stateDir, 'last_error.json'), 'utf8')
+        );
+        const pass =
+          output.includes('━━━ Recovery Loop') &&
+          output.includes('Decision: retry') &&
+          persisted.error_message === 'boom';
+        return {
+          pass,
+          reason: pass
+            ? 'ok'
+            : 'bin/riper.js did not automatically invoke recovery on execute-step failure',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `bin/riper.js auto-recovery check failed: ${error.message}`,
+        };
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    })(),
+  },
+  {
     check: 'instruction generator enforces supported vs unsupported plain-prompt routing',
     ...(() => {
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-eval-routing-'));
