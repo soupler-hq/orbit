@@ -77,11 +77,12 @@ Use the repo-standard PR body sections:
 - `Issues`
 - `Ship Decision`
 - `Test plan`
+- `Docs update`
 - `Merge notes` when relevant
 
 Branch names should follow `<type>/<slug>` such as `feat/143-pr-governance-enforcement` or `fix/145-context-minimal-dedup`.
 
-If the branch evolves after the PR is opened, update the PR body before the next review request. The PR body is part of the control plane and must stay aligned with the actual branch scope, verification steps, and issue linkage. Keep the `Head SHA` marker aligned with the current branch head so CI can detect stale PR bodies before re-review. PR progression also requires evidence: `## Test plan` must list the commands actually run, and `Orbit Self-Review` must record the executed review command, dispatched agents, ship decision, and findings handled.
+If the branch evolves after the PR is opened, update the PR body before the next review request. The PR body is part of the control plane and must stay aligned with the actual branch scope, verification steps, and issue linkage. Keep the `Head SHA` marker aligned with the current branch head so CI can detect stale PR bodies before re-review. PR progression also requires evidence: `## Test plan` must list the commands actually run, and `Orbit Self-Review` must record the executed review command, dispatched agents, ship decision, and findings handled. Behavior-sensitive changes must also record `## Docs update` as either `UPDATED` with the docs touched or `EXEMPT` with a concrete reason.
 
 When review leaves residual risks, classify each one explicitly instead of leaving it implied:
 

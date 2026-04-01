@@ -16,6 +16,10 @@
 ## Merge notes
 - <!-- optional notes / relevant exceptions -->
 
+## Docs update
+- Status: `<!-- UPDATED or EXEMPT -->`
+- Notes: <!-- list updated docs or explain the exemption -->
+
 ---
 
 ## Orbit Self-Review
@@ -71,6 +75,7 @@
 - [ ] `CHANGELOG.md` updated with this version's entry
 - [ ] `README.md` updated if behaviour or interface changed
 - [ ] `STATE.md` anti-patterns list updated if a known issue was fixed or a new one introduced
+- [ ] `## Docs update` reflects either the updated contract docs or the explicit exemption
 
 ### Release (only for version bumps)
 - [ ] `package.json` version bumped — this is the single source of version truth
