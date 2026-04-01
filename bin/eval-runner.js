@@ -624,6 +624,20 @@ integrityResults.push({
     : 'templates/STATE.md missing clarification requests section',
 });
 integrityResults.push({
+  check: 'template contract: STATE.md includes runtime events section',
+  pass: stateTemplateText.includes('## Runtime Events'),
+  reason: stateTemplateText.includes('## Runtime Events')
+    ? 'ok'
+    : 'templates/STATE.md missing runtime events section',
+});
+integrityResults.push({
+  check: 'template contract: STATE.md includes LOOP_DETECTED event example',
+  pass: stateTemplateText.includes('[LOOP_DETECTED]'),
+  reason: stateTemplateText.includes('[LOOP_DETECTED]')
+    ? 'ok'
+    : 'templates/STATE.md missing LOOP_DETECTED event example',
+});
+integrityResults.push({
   check: 'template contract: DECISIONS-LOG.md exists',
   pass: Boolean(decisionsLogTemplateText),
   reason: decisionsLogTemplateText ? 'ok' : 'templates/DECISIONS-LOG.md missing',

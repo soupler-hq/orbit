@@ -38,6 +38,11 @@ function buildFixtureRoot(tmpDir) {
       },
     },
     git: { worktree_per_task: false },
+    loop_detection: {
+      enabled: true,
+      window_size: 8,
+      threshold: 3,
+    },
   };
   fs.writeFileSync(path.join(tmpDir, 'orbit.registry.json'), JSON.stringify(registry));
   fs.writeFileSync(path.join(tmpDir, 'orbit.config.json'), JSON.stringify(config));
@@ -241,6 +246,120 @@ describe('OrbitOrchestrator — executeWave', () => {
     expect(worktreeSpy).toHaveBeenCalledWith('task_w005_0', 'feat/orbit-task-w005-0');
     worktreeSpy.mockRestore();
     logSpy.mockRestore();
+  });
+
+  it('detects repeated loop signatures and terminates the repeated task', async () => {
+    const orch = new OrbitOrchestrator(tmpDir);
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const stateFile = path.join(tmpDir, '.orbit', 'state', 'STATE.md');
+
+    const tasks = [
+      {
+        agent: 'engineer',
+        issue: '#72',
+        prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-001',
+        toolName: 'bash_command',
+        toolInput: { command: 'npm test' },
+      },
+      {
+        agent: 'engineer',
+        issue: '#72',
+        prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-001',
+        toolName: 'bash_command',
+        toolInput: { command: 'npm test' },
+      },
+      {
+        agent: 'engineer',
+        issue: '#72',
+        prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-001',
+        toolName: 'bash_command',
+        toolInput: { command: 'npm test' },
+      },
+    ];
+
+    const results = await orch.executeWave(tasks, 'loop001');
+
+    expect(results).toHaveLength(3);
+    expect(results[0].status).toBe('DISPATCHED');
+    expect(results[1].status).toBe('DISPATCHED');
+    expect(results[2].status).toBe('LOOP_DETECTED');
+    expect(results[2].loop.threshold).toBe(3);
+    expect(results[2].loop.repeats).toBe(3);
+    expect(results[2].context).toBeNull();
+    expect(fs.existsSync(path.join(tmpDir, '.orbit', 'state', 'task_loop001_2'))).toBe(false);
+    expect(fs.readFileSync(stateFile, 'utf8')).toContain('[LOOP_DETECTED]');
+    expect(fs.readFileSync(stateFile, 'utf8')).toContain('wave: loop001');
+    expect(fs.readFileSync(stateFile, 'utf8')).toContain('issue: #72');
+    expect(fs.readFileSync(stateFile, 'utf8')).toContain('session: engineer-session-001');
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('LOOP_DETECTED')
+    );
+
+    warnSpy.mockRestore();
+    logSpy.mockRestore();
+  });
+
+  it('does not detect loops before the configured threshold', async () => {
+    const orch = new OrbitOrchestrator(tmpDir);
+    const tasks = [
+      {
+        agent: 'engineer',
+        prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-002',
+        toolName: 'bash_command',
+        toolInput: { command: 'npm test' },
+      },
+      {
+        agent: 'engineer',
+        prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-002',
+        toolName: 'bash_command',
+        toolInput: { command: 'npm test' },
+      },
+    ];
+
+    const results = await orch.executeWave(tasks, 'loop002');
+
+    expect(results.map((result) => result.status)).toEqual(['DISPATCHED', 'DISPATCHED']);
+  });
+
+  it('does not flag similar tasks from different subagent sessions as loops', async () => {
+    const orch = new OrbitOrchestrator(tmpDir);
+    const tasks = [
+      {
+        agent: 'engineer',
+        prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-a',
+        toolName: 'bash_command',
+        toolInput: { command: 'npm test' },
+      },
+      {
+        agent: 'engineer',
+        prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-b',
+        toolName: 'bash_command',
+        toolInput: { command: 'npm test' },
+      },
+      {
+        agent: 'engineer',
+        prompt: 'Retry autonomous bash step',
+        sessionKey: 'engineer-session-c',
+        toolName: 'bash_command',
+        toolInput: { command: 'npm test' },
+      },
+    ];
+
+    const results = await orch.executeWave(tasks, 'loop003');
+
+    expect(results.map((result) => result.status)).toEqual([
+      'DISPATCHED',
+      'DISPATCHED',
+      'DISPATCHED',
+    ]);
   });
 
   it('explains the current workflow state and next transition', () => {

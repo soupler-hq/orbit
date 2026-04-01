@@ -61,6 +61,10 @@ describe('eval-runner issue #85 coverage', () => {
       expect(checks.get('template contract: STATE.md includes clarification requests section')).toBe(
         true
       );
+      expect(checks.get('template contract: STATE.md includes runtime events section')).toBe(true);
+      expect(checks.get('template contract: STATE.md includes LOOP_DETECTED event example')).toBe(
+        true
+      );
       expect(checks.get('template contract: DECISIONS-LOG.md includes decision:')).toBe(true);
       expect(checks.get('template contract: DECISIONS-LOG.md includes made_at:')).toBe(true);
       expect(checks.get('template contract: DECISIONS-LOG.md includes version:')).toBe(true);
