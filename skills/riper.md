@@ -56,4 +56,4 @@ Think of it as: RIPER is the outer loop, RALPH is the inner recovery loop.
 | RIPER | Full task lifecycle | Every non-trivial task |
 | RALPH | Error recovery only | Inside Execute, on failure |
 
-For `/orbit:quick` tasks: RIPER Lite (Research → Plan → Execute → Verify) applies. RALPH fires on any execution error within the Execute step. You never invoke RALPH directly — it activates autonomously when an execution attempt fails.
+For `/orbit:quick` tasks: RIPER Lite (Research → Plan → Execute → Verify) applies. RALPH fires on any execution error within the Execute step. In the repo-local RIPER runtime, Orbit activates that recovery loop automatically when the execute step fails.

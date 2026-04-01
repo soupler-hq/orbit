@@ -523,6 +523,108 @@ const runtimeEnforcementResults = [
     })(),
   },
   {
+    check: 'recovery loop persists retry and halt decisions deterministically',
+    ...(() => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-eval-recovery-'));
+      const stateDir = path.join(tmpDir, '.orbit', 'state');
+      try {
+        runNode('bin/recovery-loop.js', [
+          '--state-dir',
+          stateDir,
+          '--command',
+          '/orbit:riper',
+          '--phase',
+          'execute',
+          '--task',
+          'eval-check',
+          '--error-message',
+          'TypeError: missing dependency',
+        ]);
+
+        try {
+          runNode('bin/recovery-loop.js', [
+            '--state-dir',
+            stateDir,
+            '--command',
+            '/orbit:riper',
+            '--phase',
+            'execute',
+            '--task',
+            'eval-check',
+            '--error-message',
+            'TypeError: missing dependency',
+            '--max-attempts',
+            '2',
+          ]);
+          return {
+            pass: false,
+            reason: 'bin/recovery-loop.js did not halt after repeated identical failures',
+          };
+        } catch (error) {
+          const persisted = JSON.parse(
+            fs.readFileSync(path.join(stateDir, 'last_error.json'), 'utf8')
+          );
+          const pass =
+            persisted.decision === 'halt' &&
+            persisted.attempt === 2 &&
+            String(error.status) === '2';
+          return {
+            pass,
+            reason: pass
+              ? 'ok'
+              : 'bin/recovery-loop.js did not persist deterministic retry/halt state',
+          };
+        }
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `bin/recovery-loop.js failed to execute: ${error.message}`,
+        };
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    })(),
+  },
+  {
+    check: 'riper runtime automatically triggers recovery when execute step fails',
+    ...(() => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-eval-riper-auto-'));
+      const stateDir = path.join(tmpDir, '.orbit', 'state');
+      try {
+        const output = runNode('bin/riper.js', [
+          '--issue',
+          '#147',
+          '--branch',
+          'feat/147-executable-recovery-loop',
+          '--state-dir',
+          stateDir,
+          '--execute',
+          '["node","-e","process.stderr.write(\\"boom\\\\n\\"); process.exit(1)"]',
+        ]);
+        const persisted = JSON.parse(
+          fs.readFileSync(path.join(stateDir, 'last_error.json'), 'utf8')
+        );
+        const pass =
+          output.includes('━━━ Recovery Loop') &&
+          output.includes('Decision: retry') &&
+          persisted.error_message === 'boom';
+        return {
+          pass,
+          reason: pass
+            ? 'ok'
+            : 'bin/riper.js did not automatically invoke recovery on execute-step failure',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `bin/riper.js auto-recovery check failed: ${error.message}`,
+        };
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    })(),
+  },
+  {
     check: 'instruction generator enforces supported vs unsupported plain-prompt routing',
     ...(() => {
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-eval-routing-'));
@@ -639,6 +741,15 @@ const OBS_CHECKS = [
     ...checkRuntimeCommandOutput(
       'bin/next.js',
       ['--issue', '#146', '--branch', 'feat/146-runtime-status-parity'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
+  },
+  {
+    id: 'OBS012',
+    check: 'orbit:riper runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/riper.js',
+      ['--issue', '#147', '--branch', 'feat/147-executable-recovery-loop'],
       ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
     ),
   },
