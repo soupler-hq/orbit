@@ -55,6 +55,7 @@ describe('eval-runner issue #85 coverage', () => {
       expect(checks.get('config contract: loop_detection.window_size exists')).toBe(true);
       expect(checks.get('config contract: loop_detection.threshold exists')).toBe(true);
       expect(checks.get('config contract: clarification_gate boolean exists')).toBe(true);
+      expect(checks.get('config contract: distributed_mutex_warning boolean exists')).toBe(true);
       expect(checks.get('hook contract: pre-tool-use references clarification gate helper')).toBe(
         true
       );
