@@ -7,6 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { execSync } = require('child_process');
 const {
   formatNextCommand,
@@ -27,6 +28,7 @@ class OrbitOrchestrator {
     this.registryPath = path.join(projectRoot, 'orbit.registry.json');
     this.configPath = path.join(projectRoot, 'orbit.config.json');
     this.stateDir = path.join(projectRoot, '.orbit', 'state');
+    this.stateFile = path.join(this.stateDir, 'STATE.md');
 
     this.registry = JSON.parse(fs.readFileSync(this.registryPath, 'utf8'));
     this.config = fs.existsSync(this.configPath)
@@ -51,6 +53,105 @@ class OrbitOrchestrator {
       '[WARN-ORBIT-DISTRIBUTED-MUTEX] Orbit state locking uses a local .orbit.lock directory and is not safe across distributed CI runners or remote subagent hosts. STATE.md writes remain local-only in this mode; do not assume cross-runner mutual exclusion.'
     );
     this.hasWarnedDistributedMutex = true;
+  }
+
+  loopDetectionConfig() {
+    const config = this.config.loop_detection || {};
+    return {
+      enabled: config.enabled !== false,
+      windowSize:
+        Number.isInteger(config.window_size) && config.window_size > 0 ? config.window_size : 8,
+      threshold: Number.isInteger(config.threshold) && config.threshold > 0 ? config.threshold : 3,
+    };
+  }
+
+  buildLoopSignature(task) {
+    const toolName = task.toolName || task.tool_name || 'agent_dispatch';
+    const toolInput = task.toolInput ||
+      task.tool_input || {
+        agent: task.agent || '',
+        issue: task.issue || '',
+        prompt: task.prompt || '',
+      };
+    const serializedInput = JSON.stringify(toolInput);
+    const argsHash = crypto.createHash('sha1').update(serializedInput).digest('hex').slice(0, 12);
+
+    return {
+      toolName,
+      argsHash,
+      display: `${toolName}:${argsHash}`,
+      fingerprint: `${toolName}|${argsHash}`,
+    };
+  }
+
+  resolveLoopSessionKey(task, waveId, index) {
+    return (
+      task.sessionKey ||
+      task.session_key ||
+      task.sessionId ||
+      task.session_id ||
+      `task_${waveId}_${index}`
+    );
+  }
+
+  detectLoop(history, signature) {
+    const config = this.loopDetectionConfig();
+    if (!config.enabled) {
+      return { detected: false, history };
+    }
+
+    const nextHistory = history.concat(signature.fingerprint).slice(-config.windowSize);
+    let consecutiveMatches = 0;
+    for (let index = nextHistory.length - 1; index >= 0; index -= 1) {
+      if (nextHistory[index] !== signature.fingerprint) break;
+      consecutiveMatches += 1;
+    }
+
+    return {
+      detected: consecutiveMatches >= config.threshold,
+      history: nextHistory,
+      threshold: config.threshold,
+      consecutiveMatches,
+    };
+  }
+
+  appendLoopDetectedEvent(fields) {
+    const heading = '## Runtime Events';
+    let text;
+    try {
+      text = fs.readFileSync(this.stateFile, 'utf8');
+    } catch (error) {
+      if (error && error.code === 'ENOENT') {
+        text = '# Orbit State\n';
+      } else {
+        throw error;
+      }
+    }
+
+    const content = String(text || '').trimEnd();
+    const eventLine = [
+      '[LOOP_DETECTED]',
+      `wave: ${fields.wave}`,
+      `agent: ${fields.agent}`,
+      `pattern: ${fields.pattern}`,
+      `repeats: ${fields.repeats}`,
+      `threshold: ${fields.threshold}`,
+      `issue: ${fields.issue || 'n/a'}`,
+      `session: ${fields.session}`,
+      `task: ${fields.task}`,
+      `detected_at: ${fields.detectedAt}`,
+      'action: task_terminated',
+    ].join(' | ');
+
+    let updated;
+    if (content.includes(heading)) {
+      updated = content.replace(heading, `${heading}\n${eventLine}`);
+    } else {
+      updated = `${content}\n\n${heading}\n\`\`\`text\n${eventLine}\n\`\`\``;
+    }
+
+    fs.mkdirSync(this.stateDir, { recursive: true });
+    fs.writeFileSync(this.stateFile, `${updated}\n`);
   }
 
   /**
@@ -194,71 +295,121 @@ class OrbitOrchestrator {
     console.log(formatWaveStart({ wave: waveId, taskCount: tasks.length }));
     console.log(`\n🚀 Starting Wave ${waveId} with ${tasks.length} agents...\n`);
 
-    const results = await Promise.all(
-      tasks.map(async (task, index) => {
-        const agent = this.registry.agents.find((a) => a.name === task.agent);
-        if (!agent)
-          throw new Error(
-            `[ERR-ORBIT-004] Agent '${task.agent}' not found in registry at ≥60% match. Run /orbit:forge to create a specialist agent.`
-          );
+    const results = [];
+    const loopHistoryBySession = new Map();
 
-        // 1. Model Routing Enforcement (Task 2.1)
-        const modelEnv = this.resolveModelForAgent(agent);
-
-        // 2. Git Worktree Handoff (Task 2.2)
-        const taskName = `task_${waveId}_${index}`;
-        const branchName = `feat/orbit-task-${waveId}-${index}`;
-        const executionPath = this.setupWorktree(taskName, branchName);
-
-        // 3. Context Creation
-        const taskDir = path.join(this.stateDir, taskName);
-        fs.mkdirSync(taskDir, { recursive: true });
-        fs.writeFileSync(path.join(taskDir, 'INSTRUCTIONS.md'), task.prompt);
-        fs.writeFileSync(
-          path.join(taskDir, 'METADATA.json'),
-          JSON.stringify(
-            {
-              agent: task.agent,
-              model: modelEnv,
-              path: executionPath,
-              timestamp: new Date().toISOString(),
-            },
-            null,
-            2
-          )
+    for (const [index, task] of tasks.entries()) {
+      const agent = this.registry.agents.find((a) => a.name === task.agent);
+      if (!agent)
+        throw new Error(
+          `[ERR-ORBIT-004] Agent '${task.agent}' not found in registry at ≥60% match. Run /orbit:forge to create a specialist agent.`
         );
 
-        console.log(`[${task.agent}] Dispatched (Model: ${modelEnv}, Path: ${executionPath})`);
+      const signature = this.buildLoopSignature(task);
+      const sessionKey = this.resolveLoopSessionKey(task, waveId, index);
+      const loop = this.detectLoop(loopHistoryBySession.get(sessionKey) || [], signature);
+      loopHistoryBySession.set(sessionKey, loop.history);
+
+      if (loop.detected) {
+        const taskName = `task_${waveId}_${index}`;
+        const detectedAt = new Date().toISOString();
+        this.appendLoopDetectedEvent({
+          wave: waveId,
+          agent: task.agent,
+          issue: task.issue,
+          session: sessionKey,
+          pattern: signature.display,
+          repeats: loop.consecutiveMatches,
+          threshold: loop.threshold,
+          task: taskName,
+          detectedAt,
+        });
+        console.warn(
+          `[${task.agent}] LOOP_DETECTED (${signature.display}) — terminating ${taskName}`
+        );
         console.log(
           formatProgressStatus({
             command: `wave ${waveId}`,
             agent: task.agent,
             wave: waveId,
-            status: 'dispatched',
-            details: path.basename(executionPath),
+            status: 'blocked',
+            details: `LOOP_DETECTED ${signature.display}`,
           })
         );
-        if (task.issue) {
-          console.log(
-            this.renderWorkflowGate({
-              issue: task.issue,
-              branch: branchName,
-              implementationStatus: 'in_progress',
-              testsStatus: 'not_run',
-              reviewStatus: 'not_requested',
-              prStatus: 'not_open',
-            })
-          );
-        }
-
-        return {
+        results.push({
           agent: task.agent,
-          status: 'DISPATCHED',
-          context: taskDir,
-          model: modelEnv,
-        };
-      })
-    );
+          status: 'LOOP_DETECTED',
+          context: null,
+          model: this.resolveModelForAgent(agent),
+          loop: {
+            wave: waveId,
+            session: sessionKey,
+            pattern: signature.display,
+            threshold: loop.threshold,
+            repeats: loop.consecutiveMatches,
+          },
+        });
+        continue;
+      }
+
+      // 1. Model Routing Enforcement (Task 2.1)
+      const modelEnv = this.resolveModelForAgent(agent);
+
+      // 2. Git Worktree Handoff (Task 2.2)
+      const taskName = `task_${waveId}_${index}`;
+      const branchName = `feat/orbit-task-${waveId}-${index}`;
+      const executionPath = this.setupWorktree(taskName, branchName);
+
+      // 3. Context Creation
+      const taskDir = path.join(this.stateDir, taskName);
+      fs.mkdirSync(taskDir, { recursive: true });
+      fs.writeFileSync(path.join(taskDir, 'INSTRUCTIONS.md'), task.prompt);
+      fs.writeFileSync(
+        path.join(taskDir, 'METADATA.json'),
+        JSON.stringify(
+          {
+            agent: task.agent,
+            model: modelEnv,
+            path: executionPath,
+            timestamp: new Date().toISOString(),
+            loop_session: sessionKey,
+            loop_signature: signature.display,
+          },
+          null,
+          2
+        )
+      );
+
+      console.log(`[${task.agent}] Dispatched (Model: ${modelEnv}, Path: ${executionPath})`);
+      console.log(
+        formatProgressStatus({
+          command: `wave ${waveId}`,
+          agent: task.agent,
+          wave: waveId,
+          status: 'dispatched',
+          details: path.basename(executionPath),
+        })
+      );
+      if (task.issue) {
+        console.log(
+          this.renderWorkflowGate({
+            issue: task.issue,
+            branch: branchName,
+            implementationStatus: 'in_progress',
+            testsStatus: 'not_run',
+            reviewStatus: 'not_requested',
+            prStatus: 'not_open',
+          })
+        );
+      }
+
+      results.push({
+        agent: task.agent,
+        status: 'DISPATCHED',
+        context: taskDir,
+        model: modelEnv,
+      });
+    }
 
     return results;
   }
