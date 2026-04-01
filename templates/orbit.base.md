@@ -143,6 +143,7 @@ Override model IDs via: `orbit.config.json` → `models.routing` or `models.prof
 /orbit:build  → wave execution (parallel subagents)
 /orbit:verify → test + UAT + review
 /orbit:ship   → PR + deploy + STATE update
+/orbit:launch → launch planning + GTM artifacts
 ```
 
 **PROJECT**:
@@ -330,6 +331,7 @@ When no agent fits >60%:
 /orbit:build [N]       — parallel wave execution
 /orbit:verify [N]      — test + UAT + review
 /orbit:ship [N]        — PR + deploy + release
+/orbit:launch          — post-ship launch planning + announcement drafting
 /orbit:next            — auto-detect next step
 /orbit:quick <task>    — ad-hoc, no full planning
 /orbit:forge <desc>    — build a specialized agent

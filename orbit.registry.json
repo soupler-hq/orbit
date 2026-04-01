@@ -204,6 +204,52 @@
       ]
     },
     {
+      "name": "launch-planner",
+      "file": "agents/launch-planner.md",
+      "domains": [
+        "PRODUCT",
+        "OPERATIONS"
+      ],
+      "triggers": [
+        "launch plan",
+        "go-to-market checklist",
+        "announcement timing",
+        "release launch"
+      ],
+      "skills": [
+        "skills/planning.md",
+        "skills/brainstorming.md"
+      ],
+      "outputs": [
+        "LAUNCH-PLAN.md",
+        "GTM-CHECKLIST.md",
+        "launch execution timeline"
+      ]
+    },
+    {
+      "name": "technical-writer",
+      "file": "agents/technical-writer.md",
+      "domains": [
+        "PRODUCT",
+        "SYNTHESIS"
+      ],
+      "triggers": [
+        "release notes",
+        "announcement draft",
+        "docs copy",
+        "launch messaging"
+      ],
+      "skills": [
+        "skills/review.md",
+        "skills/brainstorming.md"
+      ],
+      "outputs": [
+        "ANNOUNCEMENT-DRAFT.md",
+        "release notes",
+        "launch copy"
+      ]
+    },
+    {
       "name": "security-engineer",
       "file": "agents/security-engineer.md",
       "domains": [
@@ -576,6 +622,25 @@
       "outputs": [
         "release summary",
         "STATE.md update"
+      ]
+    },
+    {
+      "name": "launch",
+      "command": "/orbit:launch",
+      "mode": "collaborative",
+      "agents": [
+        "launch-planner",
+        "technical-writer"
+      ],
+      "inputs": [
+        "release artifacts",
+        "target audience",
+        "launch channels"
+      ],
+      "outputs": [
+        "LAUNCH-PLAN.md",
+        "GTM-CHECKLIST.md",
+        "ANNOUNCEMENT-DRAFT.md"
       ]
     },
     {

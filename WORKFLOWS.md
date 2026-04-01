@@ -12,6 +12,7 @@
 - `/orbit:build` [autonomous] — inputs: PHASE-{N}-PLAN.md, ARCH.md, STATE.md → outputs: task outputs, SUMMARY.md, PHASE-{N}-VERIFICATION.md
 - `/orbit:verify` [audit] — inputs: PHASE-{N}-PLAN.md, build outputs → outputs: PHASE-{N}-UAT.md
 - `/orbit:ship` [audit] — inputs: PHASE-{N}-UAT.md, review output → outputs: release summary, STATE.md update
+- `/orbit:launch` [collaborative] — inputs: release artifacts, target audience, launch channels → outputs: LAUNCH-PLAN.md, GTM-CHECKLIST.md, ANNOUNCEMENT-DRAFT.md
 - `/orbit:quick` [collaborative] — inputs: task description → outputs: focused task result, verification, state update
 - `/orbit:forge` [collaborative] — inputs: task description → outputs: new agent file, registry update
 - `/orbit:review` [audit] — inputs: changed files, ARCH.md, REQUIREMENTS.md → outputs: review report
