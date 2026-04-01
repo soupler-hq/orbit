@@ -30,7 +30,6 @@ The Strategist is strongest in roadmap architecture, milestone and phase plannin
 
 ## OUTPUT FORMAT
 - `PROJECT.md` — vision, goals, constraints, success criteria
-- `REQUIREMENTS.md` — v1/v2/out-of-scope requirements with rationale
 - `ROADMAP.md` — phases mapped to requirements
 - `PHASE-{N}.md` — detailed task breakdown for each phase with wave design
 - `OKR.md` — milestone-level objectives, outcomes, and success signals

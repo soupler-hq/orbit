@@ -112,7 +112,6 @@
       ],
       "outputs": [
         "PROJECT.md",
-        "REQUIREMENTS.md",
         "ROADMAP.md",
         "PHASE-*.md",
         "OKR.md",
