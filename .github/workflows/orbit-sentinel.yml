@@ -22,10 +22,13 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
-      - name: 🧭 PR governance gate
+      - name: 📥 Load live PR body
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node bin/validate-pr-governance.js
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr view "$PR_NUMBER" --json body --jq .body > /tmp/orbit-pr-body.md
+      - name: 🧭 PR governance gate
+        run: node bin/validate-pr-governance.js --event-file "$GITHUB_EVENT_PATH" --body-file /tmp/orbit-pr-body.md
       - name: 🔒 Verify package-lock.json is up to date
         run: npm ci --dry-run
 

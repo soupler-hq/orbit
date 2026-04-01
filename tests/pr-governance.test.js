@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 const {
-  fetchLivePullRequestBody,
+  loadPayload,
   validateBranchName,
   validateBody,
   validateGovernance,
@@ -70,13 +70,26 @@ describe('validate-pr-governance', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('does not attempt a live fetch without required CI metadata', async () => {
-    const liveBody = await fetchLivePullRequestBody({
-      pull_request: {
-        number: 154,
-      },
+  it('overlays a provided body file on top of event payload data', () => {
+    const fixturePath = require('node:path').join(
+      require('node:os').tmpdir(),
+      `orbit-pr-body-${Date.now()}.md`
+    );
+    require('node:fs').writeFileSync(
+      fixturePath,
+      ['## Summary', '## Issues', '## Ship Decision', '- Head SHA: `abc1234`', '## Test plan'].join(
+        '\n'
+      )
+    );
+
+    const payload = loadPayload({
+      'body-file': fixturePath,
+      'head-ref': 'feat/143-pr-governance-enforcement',
+      'head-sha': 'abc1234',
+      'base-ref': 'develop',
     });
 
-    expect(liveBody).toBeNull();
+    expect(payload.pull_request.body).toContain('## Summary');
+    expect(payload.pull_request.head.sha).toBe('abc1234');
   });
 });
