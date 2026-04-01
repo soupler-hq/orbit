@@ -8,6 +8,7 @@ const { validateReviewEvidence, validateTestEvidence } = require('./review-evide
 const ALLOWED_BRANCH_RE =
   /^(feat|fix|docs|chore|refactor|test|release|hotfix)\/(?:\d+-)?[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const REQUIRED_HEADINGS = ['## Summary', '## Issues', '## Ship Decision', '## Test plan'];
+const RESIDUAL_RISK_LABEL_RE = /^(Tracked by #\d+(?::\s+.+)?|Waived:\s+.+|Operational:\s+.+)$/;
 
 function parseArgs(argv) {
   const args = {};
@@ -100,8 +101,43 @@ function validateBody(body, headSha) {
 
   errors.push(...validateTestEvidence(normalizedBody));
   errors.push(...validateReviewEvidence(normalizedBody));
+  errors.push(...validateResidualRisks(normalizedBody));
 
   return errors;
+}
+
+function extractResidualRiskBlock(body) {
+  const match = String(body || '').match(/\*\*Residual risks\*\*[\s\S]*?```([\s\S]*?)```/i);
+  return match ? match[1].trim() : '';
+}
+
+function validateResidualRisks(body) {
+  const residualBlock = extractResidualRiskBlock(body);
+
+  if (!residualBlock) {
+    return [
+      'Orbit Self-Review must include a residual-risk disposition block using `Tracked by #...`, `Waived: ...`, `Operational: ...`, or `none`.',
+    ];
+  }
+
+  if (residualBlock.toLowerCase() === 'none') {
+    return [];
+  }
+
+  const lines = residualBlock
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const invalidLines = lines.filter((line) => !RESIDUAL_RISK_LABEL_RE.test(line));
+
+  if (invalidLines.length > 0) {
+    return [
+      `Residual risks must be labeled as \`Tracked by #...\`, \`Waived: ...\`, \`Operational: ...\`, or \`none\`. Invalid entries: ${invalidLines.join('; ')}`,
+    ];
+  }
+
+  return [];
 }
 
 function validateGovernance(payload) {
@@ -163,9 +199,12 @@ if (require.main === module) {
 module.exports = {
   ALLOWED_BRANCH_RE,
   REQUIRED_HEADINGS,
+  RESIDUAL_RISK_LABEL_RE,
+  extractResidualRiskBlock,
   isReleaseBridge,
   loadPayload,
   validateBranchName,
   validateBody,
+  validateResidualRisks,
   validateGovernance,
 };

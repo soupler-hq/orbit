@@ -7,6 +7,7 @@ const {
   loadPayload,
   validateBranchName,
   validateBody,
+  validateResidualRisks,
   validateGovernance,
 } = require('../bin/validate-pr-governance');
 
@@ -26,6 +27,10 @@ describe('validate-pr-governance', () => {
     '**Findings addressed** (paste critical/high findings and how you resolved them, or "none"):',
     '```',
     'none',
+    '```',
+    '**Residual risks** (use one label per item: `Tracked by #...`, `Waived: ...`, or `Operational: ...`, or `none`):',
+    '```',
+    'Operational: normal CI timing and merge queue behavior may still delay green checks.',
     '```',
   ].join('\n');
 
@@ -67,6 +72,37 @@ describe('validate-pr-governance', () => {
     expect(result.ok).toBe(true);
   });
 
+  it('accepts explicitly labeled residual risks', () => {
+    expect(
+      validateResidualRisks(
+        [
+          '**Residual risks**',
+          '```',
+          'Tracked by #145: minimal context still depends on task-table quality.',
+          'Waived: Acceptable for this internal-only refactor.',
+          'Operational: Merge queue timing may still delay final green state.',
+          '```',
+        ].join('\n')
+      )
+    ).toEqual([]);
+  });
+
+  it('accepts `none` as a valid residual-risk disposition', () => {
+    expect(
+      validateResidualRisks(
+        ['**Residual risks**', '```', 'none', '```'].join('\n')
+      )
+    ).toEqual([]);
+  });
+
+  it('fails when residual risks are unlabeled prose', () => {
+    const errors = validateResidualRisks(
+      ['**Residual risks**', '```', 'Need to revisit later.', '```'].join('\n')
+    );
+
+    expect(errors.join('\n')).toContain('Residual risks must be labeled');
+  });
+
   it('overlays a provided body file on top of event payload data', () => {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-pr-body-'));
     const fixturePath = path.join(tempDir, 'body.md');
@@ -102,6 +138,10 @@ describe('validate-pr-governance', () => {
         '```',
         '(findings here)',
         '```',
+        '**Residual risks** (use one label per item: `Tracked by #...`, `Waived: ...`, or `Operational: ...`, or `none`):',
+        '```',
+        '(residual risks here)',
+        '```',
       ].join('\n'),
       'abc1234'
     );
@@ -109,5 +149,6 @@ describe('validate-pr-governance', () => {
     expect(errors.join('\n')).toContain('missing test evidence');
     expect(errors.join('\n')).toContain('missing executed review evidence');
     expect(errors.join('\n')).toContain('missing review evidence: `Agent(s) dispatched`');
+    expect(errors.join('\n')).toContain('Residual risks must be labeled');
   });
 });
