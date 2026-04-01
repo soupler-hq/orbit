@@ -51,18 +51,69 @@ function findExistingTask(db, issueRef, title) {
   return db.prepare('SELECT id FROM tasks WHERE issue_ref IS NULL AND title = ?').get(title);
 }
 
+function normalizeStateValue(value) {
+  return String(value || '')
+    .replace(/^`|`$/g, '')
+    .trim();
+}
+
+function issueRefFromBranch(branch) {
+  const match = String(branch || '').match(/\/(\d+)(?:-|$)/);
+  return match ? `#${match[1]}` : '';
+}
+
+function parseActiveIssueFromState(text, branch) {
+  const lines = String(text || '').split(/\r?\n/);
+  for (let index = 0; index < lines.length; index += 1) {
+    const taskMatch = lines[index].match(/^- \[[ x]\] (#[0-9]+)\s+[—-]\s+(.+)$/);
+    if (!taskMatch) continue;
+
+    const issueRef = taskMatch[1];
+    const title = taskMatch[2].trim();
+    let activeBranch = '';
+
+    for (let offset = index + 1; offset < lines.length; offset += 1) {
+      const line = lines[offset];
+      if (/^- \[[ x]\] /.test(line) || /^### /.test(line) || /^## /.test(line)) break;
+      const branchMatch = line.match(/^\s*-\s+Active branch:\s+`?([^`]+?)`?\s*$/);
+      if (branchMatch) {
+        activeBranch = branchMatch[1].trim();
+      }
+    }
+
+    if (branch && activeBranch === branch) {
+      return { issueRef, title };
+    }
+  }
+
+  return null;
+}
+
 // ── Load levels ───────────────────────────────────────────────────────────────
 
 function loadMinimal(db) {
   const facts = db.prepare('SELECT key, value FROM state').all();
+  const factMap = Object.fromEntries(facts.map((r) => [r.key, r.value]));
+  const branch = currentGitBranch() || factMap.branch || '(not set)';
+  const activeIssue = factMap.active_issue || issueRefFromBranch(branch);
+  const activeTitle = factMap.active_title || '';
+  const activePr = factMap.active_pr || '';
   const tasks = db
     .prepare(
-      "SELECT issue_ref, title, status, blocker FROM tasks WHERE status IN ('open','blocked','in_progress') ORDER BY id"
+      `SELECT issue_ref, title, status, blocker
+       FROM tasks
+       WHERE status IN ('open','blocked','in_progress')
+       ORDER BY
+         CASE WHEN issue_ref = ? THEN 0 ELSE 1 END,
+         CASE status
+           WHEN 'in_progress' THEN 0
+           WHEN 'blocked' THEN 1
+           ELSE 2
+         END,
+         id DESC
+       LIMIT 10`
     )
-    .all();
-
-  const factMap = Object.fromEntries(facts.map((r) => [r.key, r.value]));
-  const branch = factMap.branch || currentGitBranch() || '(not set)';
+    .all(activeIssue);
 
   const lines = [
     '## Project Context (minimal)',
@@ -70,9 +121,19 @@ function loadMinimal(db) {
     `- Phase: ${factMap.phase || '(not set)'}`,
     `- Version: ${factMap.version || '(not set)'}`,
     `- Branch: ${branch}`,
-    '',
-    '## Open / In-Progress / Blocked Tasks',
   ];
+
+  if (activeIssue || activePr) {
+    lines.push('', '## Active Work');
+    if (activeIssue) {
+      lines.push(`- Issue: ${activeIssue}${activeTitle ? ` — ${activeTitle}` : ''}`);
+    }
+    if (activePr) {
+      lines.push(`- PR: ${activePr}`);
+    }
+  }
+
+  lines.push('', '## Open / In-Progress / Blocked Tasks');
 
   if (tasks.length === 0) {
     lines.push('_(none)_');
@@ -181,10 +242,12 @@ function migrate(db) {
   const phaseMatch = text.match(/\*\*Active Phase\*\*:\s*(.+)/);
   const versionMatch = text.match(/\*\*Current Version\*\*:\s*(.+)/);
   const branchMatch = text.match(/\*\*Current Branch\*\*:\s*(.+)/);
+  const activePrMatch = text.match(/\*\*Active PR\*\*:\s*(#[0-9]+.*)/);
 
   const upsertState = db.prepare(
     'INSERT OR REPLACE INTO state (key, value, updated_at) VALUES (?, ?, unixepoch())'
   );
+  const deleteState = db.prepare('DELETE FROM state WHERE key = ?');
 
   if (milestoneMatch) {
     upsertState.run('milestone', milestoneMatch[1].trim());
@@ -198,10 +261,38 @@ function migrate(db) {
     upsertState.run('version', versionMatch[1].trim());
     count.state++;
   }
-  const branch = branchMatch?.[1]?.trim() || currentGitBranch();
+  const liveBranch = currentGitBranch();
+  const stateBranch = normalizeStateValue(branchMatch?.[1]);
+  const branch = liveBranch || stateBranch;
   if (branch) {
     upsertState.run('branch', branch);
     count.state++;
+  }
+  if (activePrMatch && (!liveBranch || liveBranch === stateBranch)) {
+    upsertState.run('active_pr', normalizeStateValue(activePrMatch[1]));
+    count.state++;
+  } else {
+    deleteState.run('active_pr');
+  }
+  const activeIssue =
+    parseActiveIssueFromState(text, branch) ||
+    (() => {
+      const inferredIssueRef = issueRefFromBranch(branch);
+      if (!inferredIssueRef) return null;
+      return { issueRef: inferredIssueRef, title: '' };
+    })();
+  if (activeIssue) {
+    upsertState.run('active_issue', activeIssue.issueRef);
+    if (activeIssue.title) {
+      upsertState.run('active_title', activeIssue.title);
+      count.state += 2;
+    } else {
+      deleteState.run('active_title');
+      count.state += 1;
+    }
+  } else {
+    deleteState.run('active_issue');
+    deleteState.run('active_title');
   }
 
   // Parse decisions table (markdown format: | date | version | decision | rationale |)
