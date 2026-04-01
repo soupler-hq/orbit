@@ -112,9 +112,9 @@
       ],
       "outputs": [
         "PROJECT.md",
-        "REQUIREMENTS.md",
         "ROADMAP.md",
         "PHASE-*.md",
+        "OKR.md",
         "STATE.md"
       ]
     },
@@ -126,6 +126,7 @@
       ],
       "triggers": [
         "prd",
+        "requirements",
         "user story",
         "feature spec",
         "prioritization",

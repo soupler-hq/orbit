@@ -22,8 +22,8 @@ Specialized roles with deep domain expertise. Each agent has clear trigger condi
 |-------|--------|-------------|
 | `architect` | ENGINEERING | System design, tech selection, scalability, architecture review |
 | `engineer` | ENGINEERING | Coding, TDD, debugging, refactoring, API integration |
-| `strategist` | PRODUCT | Project planning, roadmaps, milestones, OKRs |
-| `product-manager` | PRODUCT | PRDs, user stories, feature specs, backlog prioritization |
+| `strategist` | PRODUCT | Roadmaps, milestones, OKRs, strategic sequencing |
+| `product-manager` | PRODUCT | Requirements, PRDs, user stories, feature specs, backlog prioritization |
 | `reviewer` | REVIEW | Code review, QA, performance — TS/Python/Go language axes |
 | `devops` | OPERATIONS | CI/CD, Docker, K8s, cloud infra, monitoring, deployment |
 | `researcher` | RESEARCH | Domain research, feasibility, competitive analysis, tech eval |
@@ -39,7 +39,7 @@ Single clear match           → dispatch that agent
 TypeScript/Python/Go review  → reviewer with language context
 Security concern             → security-engineer (always parallel)
 PR touches .github/workflows → devops (always parallel)
-PRDs / user stories / feature specs → product-manager
+PRDs / requirements / user stories / feature specs → product-manager
 Spans 2-3 domains            → parallel wave, merge results
 All domains                  → strategist first, then parallelize
 No agent ≥60% match          → trigger Agent Forge
