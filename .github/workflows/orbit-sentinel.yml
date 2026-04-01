@@ -49,8 +49,32 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: gh pr diff "$PR_NUMBER" --name-only > /tmp/orbit-pr-files.txt
+      - name: 🧷 Load tracked residual issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          refs=$(grep -oE 'Tracked by #[0-9]+' /tmp/orbit-pr-body.md | awk '{print $3}' | sort -u || true)
+          printf '[]' > /tmp/orbit-tracked-issues.json
+
+          if [ -z "$refs" ]; then
+            exit 0
+          fi
+
+          output='['
+          first=1
+          for ref in $refs; do
+            number="${ref#\#}"
+            issue_json=$(gh issue view "$number" --json number,state,title,url)
+            if [ $first -eq 0 ]; then
+              output="$output,"
+            fi
+            output="$output$(printf '%s' "$issue_json" | node -e 'const issue = JSON.parse(require(\"fs\").readFileSync(0, \"utf8\")); process.stdout.write(JSON.stringify({ issue_ref: `#${issue.number}`, number: issue.number, state: issue.state, title: issue.title, url: issue.url }));')"
+            first=0
+          done
+          output="$output]"
+          printf '%s' "$output" > /tmp/orbit-tracked-issues.json
       - name: 🧭 PR governance gate
-        run: node bin/validate-pr-governance.js --event-file "$GITHUB_EVENT_PATH" --body-file /tmp/orbit-pr-body.md
+        run: node bin/validate-pr-governance.js --event-file "$GITHUB_EVENT_PATH" --body-file /tmp/orbit-pr-body.md --tracked-issues-file /tmp/orbit-tracked-issues.json
       - name: 📚 Docs-update governance gate
         run: node bin/validate-doc-updates.js --body-file /tmp/orbit-pr-body.md --changed-files-file /tmp/orbit-pr-files.txt
       - name: 🔒 Verify package-lock.json is up to date

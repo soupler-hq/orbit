@@ -68,6 +68,24 @@ function loadPayload(args) {
   };
 }
 
+function loadTrackedIssueMetadata(args) {
+  if (!args['tracked-issues-file']) {
+    return [];
+  }
+
+  const filePath = path.resolve(args['tracked-issues-file']);
+  if (!fs.existsSync(filePath)) {
+    return [];
+  }
+
+  const text = fs.readFileSync(filePath, 'utf8').trim();
+  if (!text) {
+    return [];
+  }
+
+  return JSON.parse(text);
+}
+
 function isReleaseBridge(headRef, baseRef) {
   return headRef === 'develop' && baseRef === 'main';
 }
@@ -111,6 +129,23 @@ function extractResidualRiskBlock(body) {
   return match ? match[1].trim() : '';
 }
 
+function parseTrackedIssueRefs(body) {
+  const residualBlock = extractResidualRiskBlock(body);
+  if (!residualBlock || residualBlock.toLowerCase() === 'none') {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      residualBlock
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .map((line) => line.match(/^Tracked by (#[0-9]+)(?::\s+.+)?$/)?.[1] || '')
+        .filter(Boolean)
+    )
+  );
+}
+
 function validateResidualRisks(body) {
   const residualBlock = extractResidualRiskBlock(body);
 
@@ -138,6 +173,36 @@ function validateResidualRisks(body) {
   }
 
   return [];
+}
+
+function validateTrackedIssueMetadata(body, trackedIssues) {
+  const trackedRefs = parseTrackedIssueRefs(body);
+  if (trackedRefs.length === 0) {
+    return [];
+  }
+
+  const metadataByRef = new Map(
+    trackedIssues.map((issue) => [issue.issue_ref || `#${issue.number}`, issue])
+  );
+  const errors = [];
+
+  for (const ref of trackedRefs) {
+    const metadata = metadataByRef.get(ref);
+    if (!metadata) {
+      errors.push(
+        `Residual risk ${ref} is not backed by loaded issue metadata. Refresh the tracked issue fetch.`
+      );
+      continue;
+    }
+
+    if (metadata.state !== 'OPEN') {
+      errors.push(
+        `Residual risk ${ref} must point to an open follow-up issue, but ${ref} is ${String(metadata.state || 'unknown').toLowerCase()}.`
+      );
+    }
+  }
+
+  return errors;
 }
 
 function validateGovernance(payload) {
@@ -170,6 +235,7 @@ function validateGovernance(payload) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const payload = loadPayload(args);
+  const trackedIssues = loadTrackedIssueMetadata(args);
   const result = validateGovernance(payload);
 
   if (result.skipped) {
@@ -177,8 +243,14 @@ async function main() {
     return;
   }
 
-  if (!result.ok) {
-    for (const error of result.errors) {
+  const metadataErrors = validateTrackedIssueMetadata(
+    payload.pull_request?.body || '',
+    trackedIssues
+  );
+  const allErrors = [...result.errors, ...metadataErrors];
+
+  if (!result.ok || allErrors.length > 0) {
+    for (const error of allErrors) {
       console.error(`ERROR: ${error}`);
     }
     process.exit(1);
@@ -203,8 +275,11 @@ module.exports = {
   extractResidualRiskBlock,
   isReleaseBridge,
   loadPayload,
+  loadTrackedIssueMetadata,
+  parseTrackedIssueRefs,
   validateBranchName,
   validateBody,
   validateResidualRisks,
+  validateTrackedIssueMetadata,
   validateGovernance,
 };

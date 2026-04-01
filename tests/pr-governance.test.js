@@ -5,9 +5,11 @@ import path from 'node:path';
 
 const {
   loadPayload,
+  parseTrackedIssueRefs,
   validateBranchName,
   validateBody,
   validateResidualRisks,
+  validateTrackedIssueMetadata,
   validateGovernance,
 } = require('../bin/validate-pr-governance');
 
@@ -87,6 +89,22 @@ describe('validate-pr-governance', () => {
     ).toEqual([]);
   });
 
+  it('extracts tracked issue refs from the residual-risk block', () => {
+    expect(parseTrackedIssueRefs(compliantBody)).toEqual([]);
+    expect(
+      parseTrackedIssueRefs(
+        [
+          '**Residual risks**',
+          '```',
+          'Tracked by #145: minimal context still depends on task-table quality.',
+          'Operational: merge queue timing may still delay final green state.',
+          'Tracked by #163',
+          '```',
+        ].join('\n')
+      )
+    ).toEqual(['#145', '#163']);
+  });
+
   it('accepts `none` as a valid residual-risk disposition', () => {
     expect(
       validateResidualRisks(
@@ -101,6 +119,23 @@ describe('validate-pr-governance', () => {
     );
 
     expect(errors.join('\n')).toContain('Residual risks must be labeled');
+  });
+
+  it('fails when a tracked residual issue is closed or missing', () => {
+    const body = [
+      '**Residual risks**',
+      '```',
+      'Tracked by #145: still needs follow-up',
+      'Tracked by #163: governance follow-through',
+      '```',
+    ].join('\n');
+
+    const errors = validateTrackedIssueMetadata(body, [
+      { issue_ref: '#145', state: 'CLOSED', title: 'old follow-up' },
+    ]);
+
+    expect(errors.join('\n')).toContain('#145 must point to an open follow-up issue');
+    expect(errors.join('\n')).toContain('#163 is not backed by loaded issue metadata');
   });
 
   it('overlays a provided body file on top of event payload data', () => {
