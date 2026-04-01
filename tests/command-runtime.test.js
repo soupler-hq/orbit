@@ -86,6 +86,25 @@ describe('runtime command status parity', () => {
     expect(output).toContain('**Primary**: /orbit:review');
   });
 
+  it('quick runtime routes review findings into a remediation loop', () => {
+    const output = renderQuick({
+      issue: '#181',
+      branch: 'feat/181-quick-review-pr-autochain',
+      implementationStatus: 'done',
+      testsStatus: 'passed',
+      testEvidenceStatus: 'present',
+      reviewStatus: 'changes_requested',
+      reviewEvidenceStatus: 'present',
+      prStatus: 'not_open',
+    });
+
+    expect(output).toContain('Orbit Auto-Chain');
+    expect(output).toContain('Review:       changes_requested');
+    expect(output).toContain('PR Action:    blocked');
+    expect(output).toContain('Final State:  remediation_required');
+    expect(output).toContain('**Primary**: /orbit:quick #181');
+  });
+
   it('quick runtime creates or updates the PR once the chained state is clean', () => {
     const result = runQuick(
       {

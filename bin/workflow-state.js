@@ -14,6 +14,7 @@ const WORKFLOW_STATES = [
   'implementation_done',
   'tests_green',
   'review_required',
+  'remediation_required',
   'review_clean',
   'pr_ready',
   'pr_open',
@@ -28,6 +29,7 @@ const NEXT_TRANSITIONS = {
   implementation_done: 'tests_green',
   tests_green: 'review_required',
   review_required: 'review_clean',
+  remediation_required: 'implementation_done',
   review_clean: 'pr_ready',
   pr_ready: 'pr_open',
   pr_open: 'merged',
@@ -42,6 +44,7 @@ const NEXT_COMMANDS = {
   implementation_done: (evidence) => `/orbit:quick ${evidence.issue || '#NNN'}`,
   tests_green: () => '/orbit:review',
   review_required: () => '/orbit:review',
+  remediation_required: (evidence) => `/orbit:quick ${evidence.issue || '#NNN'}`,
   review_clean: () => '/orbit:ship',
   pr_ready: () => '/orbit:ship',
   pr_open: () => '/orbit:progress',
@@ -179,7 +182,7 @@ function evaluateWorkflowState(rawEvidence = {}) {
 
   if (evidence.reviewStatus === 'changes_requested') {
     blockers.push('Review requested changes; fix findings and rerun tests before re-review.');
-    return buildSummary('implementation_done', evidence, blockers);
+    return buildSummary('remediation_required', evidence, blockers);
   }
 
   if (evidence.reviewStatus === 'pending') {

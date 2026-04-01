@@ -76,7 +76,7 @@ describe('workflow state engine', () => {
     expect(summary.blockers.some((blocker) => blocker.includes('Await review completion'))).toBe(true);
   });
 
-  it('routes review changes back to implementation_done', () => {
+  it('routes review changes into remediation_required', () => {
     const summary = workflowState.evaluateWorkflowState({
       issue: '#131',
       branch: 'feat/131-enforce-workflow-state-machine',
@@ -87,7 +87,9 @@ describe('workflow state engine', () => {
       prStatus: 'not_open',
     });
 
-    expect(summary.state).toBe('implementation_done');
+    expect(summary.state).toBe('remediation_required');
+    expect(summary.nextTransition).toBe('implementation_done');
+    expect(summary.nextCommand).toBe('/orbit:quick #131');
     expect(summary.blockers.some((blocker) => blocker.includes('Review requested changes'))).toBe(true);
   });
 
