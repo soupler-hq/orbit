@@ -92,7 +92,7 @@ When the active repository is Orbit itself, use Orbit workflows to evolve Orbit.
 - Never work directly on `develop` or `main`; cut a feature branch from a freshly pulled `develop`.
 - Keep one issue scope per branch and carry the issue id through branch naming, PR, and STATE updates.
 - Open PRs using the repository's established PR structure: `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` when relevant.
-- If a branch changes materially after the PR is opened, update the PR body before requesting review again so the description stays truthful.
+- If a branch changes materially after the PR is opened, update the PR body before requesting review again so the description stays truthful. Treat this as part of the work, not optional cleanup.
 - Use git worktrees when parallel waves need isolated write spaces.
 
 ## Docs Rules

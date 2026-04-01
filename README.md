@@ -54,7 +54,7 @@ npm install
 bash install.sh --local --tool claude
 ```
 
-Core development follows Orbit-on-Orbit rules: create or identify the issue, cut a feature branch from freshly pulled `develop`, use an Orbit workflow command as the task entrypoint, run review on the feature branch, and open a PR using the repo's standard body structure. If the branch scope changes after the PR is opened, update the PR body in the same pass so `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` remain truthful.
+Core development follows Orbit-on-Orbit rules: create or identify the issue, cut a feature branch from freshly pulled `develop`, use an Orbit workflow command as the task entrypoint, run review on the feature branch, and open a PR using the repo's standard body structure. If the branch scope changes after the PR is opened, update the PR body in the same pass so `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` remain truthful. Treat that refresh as part of the work, not optional cleanup.
 
 ---
 

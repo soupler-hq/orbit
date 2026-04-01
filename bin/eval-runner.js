@@ -11,7 +11,9 @@
 
 'use strict';
 
+const { execFileSync } = require('child_process');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -28,6 +30,62 @@ function readFile(rel) {
 
 function fileExists(rel) {
   return fs.existsSync(path.join(ROOT, rel));
+}
+
+function makeExecutable(filePath, content) {
+  fs.writeFileSync(filePath, content, { mode: 0o755 });
+}
+
+function buildFakeRuntime({ branch, dirty = false, prData = null }) {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-eval-runtime-'));
+  const binDir = path.join(tmpDir, 'bin');
+  fs.mkdirSync(binDir, { recursive: true });
+
+  const gitScript = `#!/usr/bin/env bash
+set -euo pipefail
+if [[ "$1" == "rev-parse" && "$2" == "--abbrev-ref" && "$3" == "HEAD" ]]; then
+  printf '%s\\n' '${branch}'
+  exit 0
+fi
+if [[ "$1" == "status" && "$2" == "--porcelain" ]]; then
+  if [[ "${dirty ? '1' : '0'}" == "1" ]]; then
+    printf ' M src/example.js\\n'
+  fi
+  exit 0
+fi
+exit 1
+`;
+
+  const ghBody = JSON.stringify(prData ?? {});
+  const ghScript = `#!/usr/bin/env bash
+set -euo pipefail
+if [[ "$1" == "pr" && "$2" == "view" ]]; then
+  cat <<'EOF'
+${ghBody}
+EOF
+  exit 0
+fi
+exit 1
+`;
+
+  makeExecutable(path.join(binDir, 'git'), gitScript);
+  makeExecutable(path.join(binDir, 'gh'), ghScript);
+
+  return {
+    env: {
+      ...process.env,
+      PATH: `${binDir}:${process.env.PATH}`,
+    },
+    cleanup: () => fs.rmSync(tmpDir, { recursive: true, force: true }),
+  };
+}
+
+function runNode(relPath, args = [], options = {}) {
+  return execFileSync('node', [path.join(ROOT, relPath), ...args], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    ...options,
+  });
 }
 
 /** Parse the eval-dataset.md Markdown table into case objects. */
@@ -291,7 +349,162 @@ const promptRoutingCapabilityResults = [
   },
 ];
 
-// ── Metric 7: Observability ────────────────────────────────────────────────
+// ── Metric 7: Runtime Enforcement ──────────────────────────────────────────
+// Distinguish executable enforcement from documentation/structural coverage.
+
+const installTestText = readFile('tests/install.test.sh') || '';
+const runtimeEnforcementResults = [
+  {
+    check: 'progress runtime exists',
+    pass: fileExists('bin/progress.js'),
+    reason: fileExists('bin/progress.js') ? 'ok' : 'bin/progress.js missing',
+  },
+  {
+    check: 'ship runtime exists',
+    pass: fileExists('bin/ship.js'),
+    reason: fileExists('bin/ship.js') ? 'ok' : 'bin/ship.js missing',
+  },
+  {
+    check: 'runtime enforcement unit coverage exists',
+    pass: fileExists('tests/runtime-enforcement.test.js'),
+    reason: fileExists('tests/runtime-enforcement.test.js')
+      ? 'ok'
+      : 'tests/runtime-enforcement.test.js missing',
+  },
+  {
+    check: 'runtime enforcement end-to-end coverage exists',
+    pass: fileExists('tests/enforcement-e2e.test.js'),
+    reason: fileExists('tests/enforcement-e2e.test.js')
+      ? 'ok'
+      : 'tests/enforcement-e2e.test.js missing',
+  },
+  {
+    check: 'install tests cover normal-repo hook installation',
+    pass: installTestText.includes('Local install wires git hooks in a normal repo'),
+    reason: installTestText.includes('Local install wires git hooks in a normal repo')
+      ? 'ok'
+      : 'tests/install.test.sh missing normal-repo hook coverage',
+  },
+  {
+    check: 'install tests cover linked-worktree hook installation',
+    pass: installTestText.includes('Local install wires git hooks in a linked worktree'),
+    reason: installTestText.includes('Local install wires git hooks in a linked worktree')
+      ? 'ok'
+      : 'tests/install.test.sh missing linked-worktree hook coverage',
+  },
+  {
+    check: 'install tests cover setup-path hook activation',
+    pass: installTestText.includes('Setup path also ensures git hooks are active'),
+    reason: installTestText.includes('Setup path also ensures git hooks are active')
+      ? 'ok'
+      : 'tests/install.test.sh missing setup-path hook coverage',
+  },
+  {
+    check: 'progress runtime executes review gate from live runtime evidence',
+    ...(() => {
+      const runtime = buildFakeRuntime({
+        branch: 'feat/132-runtime-enforcement',
+        prData: {
+          state: 'CLOSED',
+          reviewDecision: 'REVIEW_REQUIRED',
+          statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+        },
+      });
+      try {
+        const output = runNode('bin/progress.js', ['--agent', 'engineer', '--wave', '1'], {
+          env: runtime.env,
+        });
+        const pass =
+          output.includes('Workflow Gate') &&
+          output.includes('State:    review_required') &&
+          output.includes('Command:  /orbit:review');
+        return {
+          pass,
+          reason: pass
+            ? 'ok'
+            : 'bin/progress.js did not surface the review gate from runtime truth',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `bin/progress.js failed to execute: ${error.message}`,
+        };
+      } finally {
+        runtime.cleanup();
+      }
+    })(),
+  },
+  {
+    check: 'ship runtime blocks progression when review is incomplete',
+    ...(() => {
+      const runtime = buildFakeRuntime({
+        branch: 'feat/132-runtime-enforcement',
+        prData: {
+          state: 'CLOSED',
+          reviewDecision: 'REVIEW_REQUIRED',
+          statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+        },
+      });
+      try {
+        runNode('bin/ship.js', [], {
+          env: runtime.env,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        });
+        return {
+          pass: false,
+          reason: 'bin/ship.js allowed PR progression even though review was still required',
+        };
+      } catch (error) {
+        const stderr = String(error.stdout || '') + String(error.stderr || '');
+        const pass =
+          stderr.includes('Pull request gate blocked') && stderr.includes('/orbit:review');
+        return {
+          pass,
+          reason: pass ? 'ok' : 'bin/ship.js did not block progression with review guidance',
+        };
+      } finally {
+        runtime.cleanup();
+      }
+    })(),
+  },
+  {
+    check: 'instruction generator enforces supported vs unsupported plain-prompt routing',
+    ...(() => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-eval-routing-'));
+      const codexOut = path.join(tmpDir, 'codex.md');
+      const antigravityOut = path.join(tmpDir, 'antigravity.md');
+      try {
+        runNode('bin/generate-instructions.js', ['--runtime', 'codex', '--output', codexOut]);
+        runNode('bin/generate-instructions.js', [
+          '--runtime',
+          'antigravity',
+          '--output',
+          antigravityOut,
+        ]);
+        const codexText = fs.readFileSync(codexOut, 'utf8');
+        const antigravityText = fs.readFileSync(antigravityOut, 'utf8');
+        const pass =
+          codexText.includes('supports Orbit workflow inference for plain prompts') &&
+          antigravityText.includes('does not provide reliable plain-prompt interception');
+        return {
+          pass,
+          reason: pass
+            ? 'ok'
+            : 'instruction generation did not honor runtime prompt-routing capabilities',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `instruction generation failed: ${error.message}`,
+        };
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    })(),
+  },
+];
+
+// ── Metric 8: Observability ────────────────────────────────────────────────
 // Commands quick, build, and plan must emit a structured classification block.
 // Wave completion block must be present in build command spec.
 
@@ -367,6 +580,7 @@ const metrics = {
   forge: score(forgeIntegrityResults),
   portability: score(portabilityResults),
   promptRouting: score(promptRoutingCapabilityResults),
+  runtimeEnforcement: score(runtimeEnforcementResults),
   observability: score(observabilityResults),
 };
 
@@ -377,6 +591,7 @@ const allResults = [
   ...forgeIntegrityResults,
   ...portabilityResults,
   ...promptRoutingCapabilityResults,
+  ...runtimeEnforcementResults,
   ...observabilityResults,
 ];
 const overall = score(allResults);
@@ -402,6 +617,10 @@ const report = {
       ...metrics.promptRouting,
       score: (metrics.promptRouting.pct * 100).toFixed(1) + '%',
     },
+    runtimeEnforcement: {
+      ...metrics.runtimeEnforcement,
+      score: (metrics.runtimeEnforcement.pct * 100).toFixed(1) + '%',
+    },
     observability: {
       ...metrics.observability,
       score: (metrics.observability.pct * 100).toFixed(1) + '%',
@@ -415,6 +634,7 @@ const report = {
     forge: forgeIntegrityResults,
     portability: portabilityResults,
     promptRouting: promptRoutingCapabilityResults,
+    runtimeEnforcement: runtimeEnforcementResults,
     observability: observabilityResults,
   },
 };
@@ -447,6 +667,9 @@ if (JSON_OUT) {
   );
   console.log(
     `  Prompt routing      ${bar(metrics.promptRouting).padEnd(30)}  ${pct(metrics.promptRouting)}`
+  );
+  console.log(
+    `  Runtime enforcement ${bar(metrics.runtimeEnforcement).padEnd(30)}  ${pct(metrics.runtimeEnforcement)}`
   );
   console.log(
     `  Observability       ${bar(metrics.observability).padEnd(30)}  ${pct(metrics.observability)}`
