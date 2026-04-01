@@ -213,36 +213,33 @@ exit 2  # exit code 2 = trigger rollback
 ```bash
 #!/usr/bin/env bash
 # Runs when any Orbit task fails
+# Bridges into the executable recovery loop.
 
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TASK_NAME="${1:-unknown}"
-PHASE="${2:-unknown}"
+PHASE="${2:-execute}"
 ERROR_MSG="${3:-no details}"
+SUMMARY_FILE="${4:-}"
 
-echo "💥 Task failed: $TASK_NAME (Phase $PHASE)"
-echo "   Error: $ERROR_MSG"
+ARGS=(
+  --command /orbit:riper
+  --phase "$PHASE"
+  --task "$TASK_NAME"
+  --error-message "$ERROR_MSG"
+)
 
-# Write to error log
-mkdir -p .orbit/errors
-cat >> ".orbit/errors/$(date +%Y-%m-%d).log" << EOF
-[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] TASK FAILED
-Task: $TASK_NAME
-Phase: $PHASE
-Error: $ERROR_MSG
-Branch: $(git branch --show-current)
-Commit: $(git rev-parse --short HEAD)
----
-EOF
-
-# Alert on repeated failures (3+ in same session)
-FAILURE_COUNT=$(grep -c "TASK FAILED" ".orbit/errors/$(date +%Y-%m-%d).log" 2>/dev/null || echo 0)
-if [[ "$FAILURE_COUNT" -ge 3 ]] && [[ -n "$SLACK_WEBHOOK_URL" ]]; then
-  curl -s -X POST "$SLACK_WEBHOOK_URL" \
-    -H 'Content-type: application/json' \
-    -d "{\"text\": \"⚠️ Orbit: $FAILURE_COUNT task failures today — investigation needed\"}" > /dev/null
+if [[ -n "$SUMMARY_FILE" ]]; then
+  ARGS+=(--summary-file "$SUMMARY_FILE")
 fi
 
-exit 0  # non-blocking — errors are logged but don't prevent recovery
+node "$ROOT_DIR/bin/recovery-loop.js" "${ARGS[@]}"
 ```
+
+This writes `.orbit/state/last_error.json`, appends `.orbit/errors/<date>.log`, and returns a deterministic retry-or-halt decision after repeated failures.
+
+Optional policy:
+- keep `OnError` non-blocking for the first bounded retries
+- alert or halt upstream once `last_error.json` reports `decision: "halt"`
 
 ---
 

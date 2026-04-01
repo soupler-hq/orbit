@@ -25,11 +25,13 @@ required_files=(
   "docs/quality/eval-dataset.md"
   "commands/commands.md"
   "commands/orbit/eval.md"
+  "commands/orbit/riper.md"
   "hooks/HOOKS.md"
   "install.sh"
   "package.json"
   "orbit.config.json"
   "templates/STATE.md"
+  "bin/recovery-loop.js"
   "bin/install.js"
   "bin/eval.sh"
   "bin/generate-plan-index.js"
@@ -37,6 +39,7 @@ required_files=(
   "bin/plan.js"
   "bin/progress.js"
   "bin/quick.js"
+  "bin/riper.js"
   "bin/runtime-adapter.js"
   "bin/review-evidence.js"
   "bin/review.js"
@@ -45,6 +48,7 @@ required_files=(
   "bin/validate-pr-governance.js"
   "bin/verify.js"
   "bin/workflow-state.js"
+  "hooks/scripts/on-error.sh"
 )
 
 required_dirs=(
