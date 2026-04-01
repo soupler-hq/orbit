@@ -4,6 +4,9 @@ import { renderPlan } from '../bin/plan.js';
 import { renderReview } from '../bin/review.js';
 import { renderVerify } from '../bin/verify.js';
 import { renderNext } from '../bin/next.js';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 function expectParity(output, command) {
   expect(output).toContain('━━━ Orbit');
@@ -46,6 +49,34 @@ describe('runtime command status parity', () => {
 
   it('next runtime emits the standard status blocks', () => {
     expectParity(renderNext(trackedArgs), '/orbit:next');
+  });
+
+  it('next runtime resolves the next issue from STATE.md when no tracked branch is active', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-next-state-'));
+    const stateFile = path.join(tmpDir, 'STATE.md');
+    fs.writeFileSync(
+      stateFile,
+      [
+        '# Orbit Project State',
+        '## Project Context',
+        '- **Active Milestone**: v2.9.0 — Idea to Market',
+        '- **Active Phase**: Enforcement Hardening',
+        '',
+        '## Todos + Seeds',
+        '### v2.9.0 — Idea to Market',
+        '#### Enforcement Hardening (CURRENT)',
+        '- [ ] #150 — feat(workflow): implement `/orbit:next` as an executable runtime command',
+      ].join('\n')
+    );
+
+    const output = renderNext({
+      branch: 'develop',
+      implementationStatus: 'not_started',
+      stateFile,
+    });
+
+    expect(output).toContain('**Primary**: /orbit:quick #150 feat(workflow): implement `/orbit:next` as an executable runtime command');
+    expect(output).toContain('State:    issue_ready');
   });
 
   it('early-stage runtime output uses the concrete issue and avoids premature PR blockers', () => {

@@ -29,7 +29,7 @@ function parseArgs(argv) {
 
 function buildRuntimeCommandOutput(args, profile) {
   const evidence = buildEvidence(args);
-  const workflow = evaluateWorkflowState(evidence);
+  const workflow = profile.workflowOverride || evaluateWorkflowState(evidence);
   const primary =
     workflow.nextCommand && workflow.nextCommand !== profile.command
       ? workflow.nextCommand

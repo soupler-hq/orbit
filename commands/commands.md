@@ -288,6 +288,13 @@ Read STATE.md + ROADMAP.md. Determine:
 
 The repo-local runtime entrypoint for `/orbit:next` must emit the standard status blocks and the recommended next command. Full automatic dispatch can remain a higher-level workflow concern.
 
+Implementation order for the repo-local runtime:
+
+1. If the current branch is a tracked feature branch with an active issue, derive the next step from live workflow evidence.
+2. Otherwise, inspect `.orbit/state/STATE.md` and recommend the next open issue in the active `(CURRENT)` phase section.
+3. If no tracked backlog remains, recommend `/orbit:plan`.
+4. If no project state exists yet, recommend `/orbit:new-project`.
+
 ---
 
 # Orbit Rule: Implicit Routing For Plain Prompts
