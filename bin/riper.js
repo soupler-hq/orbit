@@ -14,9 +14,10 @@ function parseExecuteStep(args) {
   let parsed;
   try {
     parsed = JSON.parse(args.execute);
-  } catch (_error) {
+  } catch (error) {
     throw new Error(
-      'Invalid --execute payload: expected JSON array like ["node","-e","process.exit(1)"]'
+      'Invalid --execute payload: expected JSON array like ["node","-e","process.exit(1)"]',
+      { cause: error }
     );
   }
   if (
