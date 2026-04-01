@@ -120,6 +120,34 @@
       ]
     },
     {
+      "name": "product-manager",
+      "file": "agents/product-manager.md",
+      "domains": [
+        "PRODUCT"
+      ],
+      "triggers": [
+        "prd",
+        "user story",
+        "feature spec",
+        "prioritization",
+        "acceptance criteria",
+        "backlog",
+        "product requirements"
+      ],
+      "skills": [
+        "skills/planning.md",
+        "skills/brainstorming.md",
+        "skills/riper.md"
+      ],
+      "outputs": [
+        "PRD.md",
+        "USER-STORIES.md",
+        "FEATURE-SPEC.md",
+        "BACKLOG.md",
+        "ACCEPTANCE-CRITERIA.md"
+      ]
+    },
+    {
       "name": "reviewer",
       "file": "agents/reviewer.md",
       "domains": [

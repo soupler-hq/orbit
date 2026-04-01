@@ -31,6 +31,7 @@ Each entry should be evaluated for:
 | E06 | Build an ML inference monitoring loop | SYNTHESIS | forge | `/orbit:forge` | Routes to forge; forge creates a domain-specific ml-engineer agent on demand |
 | E07 | Audit prompt injection risks in the workflow docs | REVIEW | security-engineer | `/orbit:audit` | Security plus prompt-safety |
 | E08 | Resume a compacted session and continue phase work | OPERATIONS | strategist or engineer | `/orbit:resume` | State recovery test |
+| E09 | Write the PRD, user stories, and acceptance criteria for this feature | PRODUCT | product-manager | `/orbit:plan` | Product requirement lifecycle should route to product-manager instead of strategist |
 
 ## Expected Signals
 

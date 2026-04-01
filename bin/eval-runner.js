@@ -305,6 +305,7 @@ const registryWorkflowCmds = new Set(registry.workflows.map((w) => w.command));
 const registrySkillFiles = new Set(registry.skills.map((s) => s.file));
 
 const REQUIRED_V29_AGENT_CONTRACTS = [
+  'product-manager',
   'designer',
   'security-engineer',
   'data-engineer',
