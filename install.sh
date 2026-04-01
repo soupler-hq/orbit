@@ -48,6 +48,14 @@ install_git_lifecycle_hooks() {
   fi
 }
 
+write_runtime_adapter_contract() {
+  local runtime="$1"
+  local target_dir="$2"
+  qrun node "$FRAMEWORK_DIR/bin/runtime-adapter.js" \
+    --runtime "$runtime" --output "$target_dir/adapter.contract.json"
+  qecho "  ✓ adapter.contract.json ($runtime capability contract)"
+}
+
 if [[ "$INSTALL_MODE" == "global" ]]; then
   CLAUDE_DIR="$HOME/.claude"
 else
@@ -124,6 +132,7 @@ install_for_claude() {
   cp "$FRAMEWORK_DIR/WORKFLOWS.md" "$CLAUDE_DIR/WORKFLOWS.md"
   cp "$FRAMEWORK_DIR/orbit.registry.json" "$CLAUDE_DIR/orbit.registry.json"
   cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$CLAUDE_DIR/orbit.config.schema.json"
+  write_runtime_adapter_contract "claude" "$CLAUDE_DIR"
   qecho "  ✓ control plane docs + registry + schema"
 
   # ── Core Agents ───────────────────────────────────────────────────────────
@@ -220,6 +229,7 @@ install_for_codex() {
   cp "$FRAMEWORK_DIR/orbit.registry.json"      "$codex_dir/orbit.registry.json"
   cp "$FRAMEWORK_DIR/orbit.config.json"        "$codex_dir/orbit.config.json"
   cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$codex_dir/orbit.config.schema.json"
+  write_runtime_adapter_contract "codex" "$codex_dir"
   cp "$FRAMEWORK_DIR/templates/STATE.md"  "$codex_dir/state/STATE.template.md"
   qecho "  ✓ operator surface + registry + config + state template"
 
@@ -275,6 +285,7 @@ install_for_antigravity() {
   cp "$FRAMEWORK_DIR/orbit.registry.json"      "$ag_dir/orbit.registry.json"
   cp "$FRAMEWORK_DIR/orbit.config.json"        "$ag_dir/orbit.config.json"
   cp "$FRAMEWORK_DIR/orbit.config.schema.json" "$ag_dir/orbit.config.schema.json"
+  write_runtime_adapter_contract "antigravity" "$ag_dir"
   cp "$FRAMEWORK_DIR/templates/STATE.md"  "$ag_dir/state/STATE.template.md"
   qecho "  ✓ control plane docs + registry + config + state template"
 

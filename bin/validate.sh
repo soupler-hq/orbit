@@ -37,6 +37,7 @@ required_files=(
   "bin/plan.js"
   "bin/progress.js"
   "bin/quick.js"
+  "bin/runtime-adapter.js"
   "bin/review-evidence.js"
   "bin/review.js"
   "bin/runtime-command.js"

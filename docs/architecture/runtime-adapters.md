@@ -3,7 +3,7 @@ id: runtime-adapters-v1
 doc_type: reference
 status: Final
 version: v1
-last_updated: 2026-03-30
+last_updated: 2026-04-01
 ---
 
 # Runtime Adapters
@@ -75,6 +75,7 @@ Codex does not read `CLAUDE.md`. Instead, Orbit maps the control plane to Codex'
 This installs to `.codex/` (local) or `~/.codex/` (global) with:
 - `INSTRUCTIONS.md` — operator surface (equivalent to `CLAUDE.md`)
 - `policy.md` — injected system context pointing to the Orbit control plane
+- `adapter.contract.json` — executable capability contract for routing and hook support
 - `orbit.registry.json`, `orbit.config.json` — registry and config
 - `agents/`, `skills/` — full agent and skill library
 - `templates/STATE.md` — source state template copied into runtime state directories during install
@@ -94,19 +95,25 @@ This installs to `.codex/` (local) or `~/.codex/` (global) with:
 
 Support level: `experimental`
 
-Antigravity can follow the Orbit control plane if it can read markdown instructions and execute repo-local workflows, but no stable hook or lifecycle API has been published. The install pathway is not yet implemented.
+Antigravity can follow the Orbit control plane if it can read markdown instructions and execute repo-local workflows, but no stable hook or lifecycle API has been published. Orbit now installs a best-effort adapter package, but plain-prompt routing still remains unsupported.
 
 **Current constraints:**
-- No `install_for_antigravity()` in `install.sh` — manual setup required
+- Best-effort `install_for_antigravity()` exists in `install.sh`, but the runtime contract still prefers explicit Orbit commands
 - Hook injection mechanism is unspecified in Antigravity's public docs
 - State persistence pathway is untested
 - Plain-prompt Orbit workflow routing is not currently supported as a reliable runtime capability
 
 **Manual setup (best-effort):**
-1. Point Antigravity at `INSTRUCTIONS.md` as its operator context.
+1. Point Antigravity at `CLAUDE.md` as its operator context.
 2. Provide `orbit.registry.json` and `WORKFLOWS.md` as reference documents.
 3. Write session state manually to `.orbit/state/STATE.md`.
 4. Skip hook-based safety checks until Antigravity publishes a lifecycle API.
+
+Every installed adapter must also ship `adapter.contract.json`, which is the machine-readable source of truth for:
+- instruction/operator surfaces
+- plain-prompt routing support
+- explicit-command fallback requirements
+- hook support
 
 **Tracking:** Full implementation tracked in [issue #17](https://github.com/soupler-hq/orbit/issues/17). When Antigravity publishes a stable hook/lifecycle API, `install_for_antigravity()` will be added and the support level will be upgraded to `stable`.
 
@@ -125,3 +132,81 @@ Every runtime adapter must answer:
 ## Practical Rule
 
 If a runtime can follow the control plane without special-casing the repository structure, it is a first-class compatible runtime. Custom glue should be small, isolated, and documented here.
+
+## Verification Checklist
+
+Use this checklist when a user asks whether vague/plain prompts should be intercepted by Orbit first.
+
+### 1. Confirm the installed adapter contract
+
+Inspect the runtime's installed `adapter.contract.json`.
+
+- Claude:
+  - `.claude/adapter.contract.json`
+  - expect `"implicit_prompt_routing": true`
+- Codex:
+  - `.codex/adapter.contract.json`
+  - expect `"implicit_prompt_routing": true`
+  - expect `"policy_file": "policy.md"`
+- Antigravity:
+  - `.antigravity/adapter.contract.json`
+  - expect `"implicit_prompt_routing": false`
+  - expect `"explicit_command_preferred": true`
+
+If the installed contract does not match the runtime expectation, treat that as an Orbit install/runtime bug.
+
+### 2. Confirm the required operator files exist
+
+- Claude:
+  - `CLAUDE.md`
+- Codex:
+  - `INSTRUCTIONS.md`
+  - `policy.md`
+- Antigravity:
+  - `CLAUDE.md`
+
+If a required file is missing, vague-prompt routing should not be treated as trustworthy even if the config claims support.
+
+### 3. Confirm the runtime category
+
+- `native` or `stable` plus `"implicit_prompt_routing": true`:
+  - Orbit should classify the vague prompt first
+- `experimental` or `"implicit_prompt_routing": false`:
+  - prefer explicit `/orbit:*` commands
+
+### 4. Confirm expected prompt behavior
+
+Examples of vague prompts that should be classified first on supported runtimes:
+
+- `pick next task`
+- `go ahead`
+- `what next`
+- `continue`
+- `review this`
+
+Expected workflow mapping examples:
+
+- `pick next task` → `/orbit:next` or `/orbit:resume`
+- `go ahead` after active issue context → `/orbit:quick <active issue>`
+- `review this` on an active branch → `/orbit:review`
+
+### 5. Confirm unsupported-runtime fallback
+
+If the runtime contract says plain-prompt routing is unsupported:
+
+- do not claim Orbit intercepted the prompt natively
+- prefer explicit `/orbit:*` commands
+- explain that the runtime is explicit-command-first
+
+### 6. Use this to separate failure modes
+
+If vague-prompt routing appears wrong, classify the problem as one of:
+
+- install problem:
+  - required adapter files missing
+- contract problem:
+  - `adapter.contract.json` is wrong or stale
+- runtime-support limitation:
+  - runtime explicitly does not support implicit routing
+- inference problem:
+  - supported runtime is installed correctly, but Orbit mapped the prompt to the wrong workflow
