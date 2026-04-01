@@ -79,6 +79,7 @@ When the active repository is Orbit itself, use Orbit workflows to evolve Orbit.
 - Open PRs using the repository's established PR structure: `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` when relevant.
 - If a branch changes materially after the PR is opened, update the PR body before requesting review again so the description stays truthful. Refresh the PR body's `Head SHA` marker to the current branch head in the same pass. Treat this as part of the work, not optional cleanup.
 - PR progression requires evidence in the body: `## Test plan` must list the commands actually run, and `Orbit Self-Review` must record the review command, dispatched agents, ship decision, and findings handled.
+- If review output still includes residual risks, convert them into tracked hardening work before considering the review complete: link an existing issue, create a new hardening issue, or explicitly state why no issue is required.
 - Use git worktrees when parallel waves need isolated write spaces.
 
 ## Docs Rules
