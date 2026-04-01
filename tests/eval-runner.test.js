@@ -51,10 +51,10 @@ describe('eval-runner issue #85 coverage', () => {
       expect(checks.get('config contract: loop_detection.window_size exists')).toBe(true);
       expect(checks.get('config contract: loop_detection.threshold exists')).toBe(true);
       expect(checks.get('config contract: clarification_gate boolean exists')).toBe(true);
-      expect(checks.get('template contract: DECISIONS-LOG.md includes Date')).toBe(true);
-      expect(checks.get('template contract: DECISIONS-LOG.md includes Version')).toBe(true);
-      expect(checks.get('template contract: DECISIONS-LOG.md includes Decision')).toBe(true);
-      expect(checks.get('template contract: DECISIONS-LOG.md includes Rationale')).toBe(true);
+      expect(checks.get('template contract: DECISIONS-LOG.md includes decision:')).toBe(true);
+      expect(checks.get('template contract: DECISIONS-LOG.md includes made_at:')).toBe(true);
+      expect(checks.get('template contract: DECISIONS-LOG.md includes version:')).toBe(true);
+      expect(checks.get('template contract: DECISIONS-LOG.md includes rationale:')).toBe(true);
     },
     30000
   );

@@ -54,13 +54,41 @@ function normalizeDecisionEntry(entry) {
   };
 }
 
+function isPlaceholderValue(value) {
+  const normalized = String(value || '').trim();
+  return (
+    normalized === 'Describe the decision in one sentence' ||
+    normalized === 'YYYY-MM-DD' ||
+    normalized === 'vX.Y.Z' ||
+    normalized === 'Wave / phase / milestone name' ||
+    normalized === 'What changed or what decision point triggered this entry' ||
+    normalized === 'Why this was chosen and what alternatives were rejected'
+  );
+}
+
+function isPlaceholderEntry(entry) {
+  return [
+    entry.decision,
+    entry.made_at,
+    entry.version,
+    entry.phase,
+    entry.context,
+    entry.rationale,
+  ].some(isPlaceholderValue);
+}
+
 function parseDecisionLog(text) {
   const entries = [];
   let current = null;
+  let inCodeBlock = false;
 
   for (const rawLine of String(text || '').split(/\r?\n/)) {
     const line = rawLine.trim();
-    if (!line || line.startsWith('#') || line.startsWith('```')) continue;
+    if (line.startsWith('```')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    if (!line || inCodeBlock || line.startsWith('#')) continue;
 
     if (line.startsWith('- decision:')) {
       if (current) entries.push(normalizeDecisionEntry(current));
@@ -76,7 +104,9 @@ function parseDecisionLog(text) {
   }
 
   if (current) entries.push(normalizeDecisionEntry(current));
-  return entries.filter((entry) => entry.decision && entry.made_at && entry.rationale);
+  return entries.filter(
+    (entry) => entry.decision && entry.made_at && entry.rationale && !isPlaceholderEntry(entry)
+  );
 }
 
 function parseDecisionLogFile(filePath = DECISIONS_LOG_PATH) {

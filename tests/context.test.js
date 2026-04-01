@@ -378,6 +378,26 @@ describeIfSqlite('context.js — migrate from STATE.md', () => {
     expect(entries[0].still_valid).toBe(true);
   });
 
+  it('ignores placeholder or example-only decision-log content', () => {
+    const entries = parseDecisionLog(`## Example
+
+\`\`\`md
+- decision: "Describe the decision in one sentence"
+  made_at: "YYYY-MM-DD"
+  version: "vX.Y.Z"
+  phase: "Wave / phase / milestone name"
+  made_by: "orbit"
+  context: "What changed or what decision point triggered this entry"
+  rationale: "Why this was chosen and what alternatives were rejected"
+  supersedes: []
+  still_valid: true
+  invalidated_at: ""
+\`\`\`
+`);
+
+    expect(entries).toHaveLength(0);
+  });
+
   it('decisions table rows are idempotent on duplicate insert', () => {
     // Insert same decision twice — should not duplicate
     const insert = db.prepare('INSERT INTO decisions (date, version, decision, rationale) VALUES (?, ?, ?, ?)');

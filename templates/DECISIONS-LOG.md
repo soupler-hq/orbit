@@ -2,13 +2,17 @@
 > Temporal decision ledger for durable architectural and workflow choices.
 > Add entries; do not overwrite history.
 
-- decision: "Describe the decision in one sentence"
-  made_at: "YYYY-MM-DD"
-  version: "vX.Y.Z"
-  phase: "Wave / phase / milestone name"
+Example entry shape:
+
+```md
+- decision: "Adopt SQLite for local state caching"
+  made_at: "2026-04-01"
+  version: "v2.8.1"
+  phase: "Enforcement Hardening"
   made_by: "orbit"
-  context: "What changed or what decision point triggered this entry"
-  rationale: "Why this was chosen and what alternatives were rejected"
+  context: "Structured project memory bootstrap"
+  rationale: "SQLite keeps state local, queryable, and dependency-light."
   supersedes: []
   still_valid: true
   invalidated_at: ""
+```
