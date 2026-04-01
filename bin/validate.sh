@@ -31,6 +31,7 @@ required_files=(
   "orbit.config.json"
   "templates/STATE.md"
   "bin/install.js"
+  "bin/eval-contract.js"
   "bin/eval.sh"
   "bin/generate-plan-index.js"
   "bin/next.js"

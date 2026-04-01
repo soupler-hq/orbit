@@ -439,7 +439,9 @@ CRITICAL findings must be fixed before next ship.
 3. Verify the registry contains native and compatible runtime definitions.
 4. Confirm the runtime adapter doc covers Claude, Codex, and Antigravity.
 5. Confirm the eval doc and sample dataset cover routing, workflow compliance, registry integrity, and portability.
-6. Output: `EVAL-REPORT.md` with pass/fail results and any required follow-up actions.
+6. Output:
+   - `EVAL-REPORT.md` — human-readable pass/fail summary plus required follow-up actions
+   - `eval-report.json` — machine-readable eval runner output for CI/artifact consumers
 
 ---
 

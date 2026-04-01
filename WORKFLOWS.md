@@ -16,7 +16,7 @@
 - `/orbit:forge` [collaborative] — inputs: task description → outputs: new agent file, registry update
 - `/orbit:review` [audit] — inputs: changed files, ARCH.md, REQUIREMENTS.md → outputs: review report
 - `/orbit:audit` [audit] — inputs: changed files, dependency graph → outputs: security audit report
-- `/orbit:eval` [audit] — inputs: README.md, registry, runtime adapters, workflow docs → outputs: eval report
+- `/orbit:eval` [audit] — inputs: README.md, registry, runtime adapters, workflow docs → outputs: EVAL-REPORT.md, eval-report.json
 - `/orbit:resume` [collaborative] — inputs: STATE.md, pre-compact snapshot, git log → outputs: reconstructed context
 - `/orbit:next` [collaborative] — inputs: STATE.md, ROADMAP.md → outputs: next action
 - `/orbit:progress` [audit] — inputs: STATE.md, ROADMAP.md → outputs: project status summary

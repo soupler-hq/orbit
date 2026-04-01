@@ -639,7 +639,8 @@
         "workflow docs"
       ],
       "outputs": [
-        "eval report"
+        "EVAL-REPORT.md",
+        "eval-report.json"
       ]
     },
     {
