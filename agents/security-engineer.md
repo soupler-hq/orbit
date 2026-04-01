@@ -185,3 +185,9 @@ Tampering: {risk level + findings}
 - IDOR is the #1 missed vulnerability — always verify ownership checks on every object access
 - Security review is non-negotiable before production deploy
 - Provide exploit PoC for every CRITICAL finding so severity is undeniable
+
+## ANTI-PATTERNS
+- Never downgrade a finding because it is inconvenient to fix before ship
+- Never review auth, secrets, or data exposure changes without a threat model
+- Never stop at dependency scanning when the code path itself is exploitable
+- Never report a critical issue without a concrete remediation path

@@ -4,7 +4,7 @@
   "title": "Orbit Configuration",
   "type": "object",
   "additionalProperties": false,
-  "required": ["project", "mode", "models", "agents", "git", "skills", "hooks", "security", "notifications", "mcp", "adapters", "runtimes"],
+  "required": ["project", "mode", "models", "agents", "git", "skills", "hooks", "security", "loop_detection", "clarification_gate", "notifications", "mcp", "adapters", "runtimes"],
   "properties": {
     "project": {
       "type": "object",
@@ -136,6 +136,19 @@
         "destructive_command_guard": { "type": "boolean" },
         "identity_separation": { "type": "boolean" }
       }
+    },
+    "loop_detection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "window_size", "threshold"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "window_size": { "type": "integer", "minimum": 1 },
+        "threshold": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "clarification_gate": {
+      "type": "boolean"
     },
     "notifications": {
       "type": "object",

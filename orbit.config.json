@@ -61,6 +61,12 @@
     "destructive_command_guard": true,
     "identity_separation": false
   },
+  "loop_detection": {
+    "enabled": true,
+    "window_size": 8,
+    "threshold": 3
+  },
+  "clarification_gate": true,
   "notifications": {
     "slack_webhook_url": "",
     "on_phase_complete": false,

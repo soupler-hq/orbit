@@ -77,3 +77,6 @@ For a richer example corpus, see [eval-dataset.md](eval-dataset.md).
 - Check that the README, registry, and runtime adapter docs agree
 - Run a small prompt-routing eval set when changing agents or workflows
 - Fail CI if a runtime claim is made in docs but not represented in the registry
+- Assert structural contracts for newly added agents, skills, and workflows instead of relying on raw assertion count alone
+- Validate config-backed control-plane gates such as `loop_detection` and `clarification_gate`
+- Validate durable templates that underpin project memory, such as `templates/DECISIONS-LOG.md`

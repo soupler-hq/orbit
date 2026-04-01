@@ -632,6 +632,9 @@
       "name": "eval",
       "command": "/orbit:eval",
       "mode": "audit",
+      "agents": [
+        "reviewer"
+      ],
       "inputs": [
         "README.md",
         "registry",
@@ -772,6 +775,12 @@
       "name": "riper",
       "command": "/orbit:riper",
       "mode": "collaborative",
+      "agents": [
+        "researcher",
+        "strategist",
+        "engineer",
+        "reviewer"
+      ],
       "inputs": [
         "task description",
         "context"
@@ -820,6 +829,9 @@
       "name": "ask",
       "command": "/orbit:ask",
       "mode": "collaborative",
+      "agents": [
+        "strategist"
+      ],
       "inputs": [
         "question about project state"
       ],

@@ -144,3 +144,9 @@ Alert on:
 - **DLQ for every consumer** — never silently drop failed messages
 - **SCD Type 2 for slowly changing dimensions** — append-only audit trail
 - **Test data quality at source** — cheaper to reject early than fix downstream
+
+## ANTI-PATTERNS
+- Never ship append-only pipelines without deduplication or replay safety
+- Never put raw source queries directly in marts or dashboards
+- Never accept silent schema drift in ingestion or streaming paths
+- Never treat data quality checks as optional post-processing cleanup

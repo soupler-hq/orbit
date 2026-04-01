@@ -31,6 +31,26 @@ function fileExists(rel) {
   return fs.existsSync(path.join(ROOT, rel));
 }
 
+function readMarkdownSection(content, heading) {
+  if (!content) return '';
+  const escapedHeading = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = content.match(new RegExp(`(^|\\n)## ${escapedHeading}\\n([\\s\\S]*?)(?=\\n## |$)`));
+  return match ? match[0] : '';
+}
+
+function hasMarkdownListItems(sectionText) {
+  return /(^|\n)(- |\d+\.)\S?/.test(sectionText) || /(^|\n)(- |\d+\.)\s+\S/.test(sectionText);
+}
+
+function hasSectionContent(sectionText, heading) {
+  if (!sectionText) return false;
+  return sectionText.replace(new RegExp(`(^|\\n)## ${heading}\\n?`), '').trim().length > 0;
+}
+
+function extractMarkdownCodeRefs(sectionText) {
+  return [...sectionText.matchAll(/`([^`]+)`/g)].map((match) => match[1]);
+}
+
 function makeExecutable(filePath, content) {
   fs.writeFileSync(filePath, content, { mode: 0o755 });
 }
@@ -274,10 +294,35 @@ const adapterText = readFile('docs/architecture/runtime-adapters.md') || '';
 const commandsText = readFile('commands/commands.md') || '';
 const configText = readFile('orbit.config.json');
 const config = configText ? JSON.parse(configText) : { runtimes: {} };
+const decisionsLogTemplateText = readFile('templates/DECISIONS-LOG.md') || '';
 
 // Build lookup sets from registry
 const registryAgentNames = new Set(registry.agents.map((a) => a.name));
 const registryWorkflowCmds = new Set(registry.workflows.map((w) => w.command));
+const registrySkillFiles = new Set(registry.skills.map((s) => s.file));
+
+const REQUIRED_V29_AGENT_CONTRACTS = [
+  'designer',
+  'security-engineer',
+  'data-engineer',
+  'safety-evaluator',
+  'pedagogue',
+];
+const REQUIRED_AGENT_SECTIONS = [
+  'ROLE',
+  'TRIGGERS ON',
+  'DOMAIN EXPERTISE',
+  'OPERATING RULES',
+  'SKILLS LOADED',
+  'OUTPUT FORMAT',
+  'ANTI-PATTERNS',
+];
+const REQUIRED_V29_SKILLS = ['skills/instructor.md', 'skills/workflow-audit.md'];
+const REQUIRED_V29_WORKFLOWS = [
+  { command: '/orbit:ask', doc: 'commands/orbit/ask.md' },
+  { command: '/orbit:eval', doc: 'commands/orbit/eval.md' },
+  { command: '/orbit:riper', doc: 'commands/orbit/riper.md' },
+];
 
 // ── Metric 1: Routing Accuracy ─────────────────────────────────────────────
 // For each eval case: expected agent exists in registry AND agent file exists.
@@ -361,6 +406,213 @@ for (const wf of registry.workflows) {
     check: `workflow command format: ${wf.command}`,
     pass: valid,
     reason: valid ? 'ok' : `invalid format: "${wf.command}"`,
+  });
+}
+
+for (const agentName of REQUIRED_V29_AGENT_CONTRACTS) {
+  const agent = registry.agents.find((entry) => entry.name === agentName);
+  const content = agent ? readFile(agent.file) : '';
+  const baseLabel = `agent contract: ${agentName}`;
+
+  integrityResults.push({
+    check: `${baseLabel} is registered`,
+    pass: !!agent,
+    reason: agent ? 'ok' : `registry missing agent "${agentName}"`,
+  });
+
+  if (!agent || !content) {
+    integrityResults.push({
+      check: `${baseLabel} file exists`,
+      pass: false,
+      reason: agent ? `missing file: ${agent.file}` : `registry missing agent "${agentName}"`,
+    });
+    continue;
+  }
+
+  integrityResults.push({
+    check: `${baseLabel} file exists`,
+    pass: true,
+    reason: 'ok',
+  });
+
+  for (const heading of REQUIRED_AGENT_SECTIONS) {
+    const sectionText = readMarkdownSection(content, heading);
+    integrityResults.push({
+      check: `${baseLabel} includes ## ${heading}`,
+      pass: Boolean(sectionText.trim()),
+      reason: sectionText.trim() ? 'ok' : `${agent.file} missing ## ${heading}`,
+    });
+
+    if (heading === 'TRIGGERS ON') {
+      integrityResults.push({
+        check: `${baseLabel} has non-empty triggers`,
+        pass: hasMarkdownListItems(sectionText),
+        reason: hasMarkdownListItems(sectionText)
+          ? 'ok'
+          : `${agent.file} has no trigger list under ## TRIGGERS ON`,
+      });
+    }
+
+    if (heading === 'SKILLS LOADED') {
+      const skillRefs = extractMarkdownCodeRefs(sectionText).filter((ref) =>
+        ref.startsWith('skills/')
+      );
+      const invalidSkillRef = skillRefs.find(
+        (ref) => !registrySkillFiles.has(ref) || !fileExists(ref)
+      );
+      integrityResults.push({
+        check: `${baseLabel} skill refs are valid`,
+        pass: skillRefs.length > 0 && !invalidSkillRef,
+        reason:
+          skillRefs.length === 0
+            ? `${agent.file} has no skill refs under ## SKILLS LOADED`
+            : invalidSkillRef
+              ? `${agent.file} references missing skill: ${invalidSkillRef}`
+              : 'ok',
+      });
+    }
+
+    if (heading === 'OUTPUT FORMAT') {
+      integrityResults.push({
+        check: `${baseLabel} has non-empty outputs`,
+        pass: hasSectionContent(sectionText, 'OUTPUT FORMAT'),
+        reason: hasSectionContent(sectionText, 'OUTPUT FORMAT')
+          ? 'ok'
+          : `${agent.file} has no output contract under ## OUTPUT FORMAT`,
+      });
+    }
+
+    if (heading === 'ANTI-PATTERNS') {
+      integrityResults.push({
+        check: `${baseLabel} has non-empty anti-patterns`,
+        pass: hasMarkdownListItems(sectionText),
+        reason: hasMarkdownListItems(sectionText)
+          ? 'ok'
+          : `${agent.file} has no anti-pattern list under ## ANTI-PATTERNS`,
+      });
+    }
+  }
+}
+
+for (const skillFile of REQUIRED_V29_SKILLS) {
+  const content = readFile(skillFile);
+  integrityResults.push({
+    check: `skill contract: ${skillFile} exists`,
+    pass: Boolean(content),
+    reason: content ? 'ok' : `missing file: ${skillFile}`,
+  });
+  integrityResults.push({
+    check: `skill contract: ${skillFile} includes VERIFICATION WORKFLOW`,
+    pass: Boolean(readMarkdownSection(content, 'VERIFICATION WORKFLOW').trim()),
+    reason: readMarkdownSection(content, 'VERIFICATION WORKFLOW').trim()
+      ? 'ok'
+      : `${skillFile} missing ## VERIFICATION WORKFLOW`,
+  });
+}
+
+for (const { command, doc } of REQUIRED_V29_WORKFLOWS) {
+  const workflow = registry.workflows.find((entry) => entry.command === command);
+  integrityResults.push({
+    check: `workflow contract: ${command} is registered`,
+    pass: !!workflow,
+    reason: workflow ? 'ok' : `registry missing workflow "${command}"`,
+  });
+  integrityResults.push({
+    check: `workflow contract: ${command} has valid mode`,
+    pass: ['autonomous', 'collaborative', 'audit'].includes(workflow?.mode),
+    reason: ['autonomous', 'collaborative', 'audit'].includes(workflow?.mode)
+      ? 'ok'
+      : `${command} missing valid mode`,
+  });
+  integrityResults.push({
+    check: `workflow contract: ${command} defines inputs`,
+    pass: Array.isArray(workflow?.inputs) && workflow.inputs.length > 0,
+    reason:
+      Array.isArray(workflow?.inputs) && workflow.inputs.length > 0
+        ? 'ok'
+        : `${command} missing non-empty inputs`,
+  });
+  integrityResults.push({
+    check: `workflow contract: ${command} defines outputs`,
+    pass: Array.isArray(workflow?.outputs) && workflow.outputs.length > 0,
+    reason:
+      Array.isArray(workflow?.outputs) && workflow.outputs.length > 0
+        ? 'ok'
+        : `${command} missing non-empty outputs`,
+  });
+  integrityResults.push({
+    check: `workflow contract: ${command} references agents`,
+    pass: Array.isArray(workflow?.agents) && workflow.agents.length > 0,
+    reason:
+      Array.isArray(workflow?.agents) && workflow.agents.length > 0
+        ? 'ok'
+        : `${command} missing non-empty agents list`,
+  });
+  integrityResults.push({
+    check: `workflow contract: ${command} agent refs exist`,
+    pass:
+      Array.isArray(workflow?.agents) &&
+      workflow.agents.length > 0 &&
+      workflow.agents.every((agentName) => registryAgentNames.has(agentName)),
+    reason:
+      Array.isArray(workflow?.agents) &&
+      workflow.agents.length > 0 &&
+      workflow.agents.every((agentName) => registryAgentNames.has(agentName))
+        ? 'ok'
+        : `${command} references missing workflow agent(s)`,
+  });
+  integrityResults.push({
+    check: `workflow contract: ${command} doc exists`,
+    pass: fileExists(doc),
+    reason: fileExists(doc) ? 'ok' : `missing file: ${doc}`,
+  });
+}
+
+integrityResults.push({
+  check: 'config contract: loop_detection.enabled exists',
+  pass: typeof config.loop_detection?.enabled === 'boolean',
+  reason:
+    typeof config.loop_detection?.enabled === 'boolean'
+      ? 'ok'
+      : 'orbit.config.json missing loop_detection.enabled boolean',
+});
+integrityResults.push({
+  check: 'config contract: loop_detection.window_size exists',
+  pass:
+    Number.isInteger(config.loop_detection?.window_size) && config.loop_detection.window_size > 0,
+  reason:
+    Number.isInteger(config.loop_detection?.window_size) && config.loop_detection.window_size > 0
+      ? 'ok'
+      : 'orbit.config.json missing positive loop_detection.window_size',
+});
+integrityResults.push({
+  check: 'config contract: loop_detection.threshold exists',
+  pass: Number.isInteger(config.loop_detection?.threshold) && config.loop_detection.threshold > 0,
+  reason:
+    Number.isInteger(config.loop_detection?.threshold) && config.loop_detection.threshold > 0
+      ? 'ok'
+      : 'orbit.config.json missing positive loop_detection.threshold',
+});
+integrityResults.push({
+  check: 'config contract: clarification_gate boolean exists',
+  pass: typeof config.clarification_gate === 'boolean',
+  reason:
+    typeof config.clarification_gate === 'boolean'
+      ? 'ok'
+      : 'orbit.config.json missing clarification_gate boolean',
+});
+integrityResults.push({
+  check: 'template contract: DECISIONS-LOG.md exists',
+  pass: Boolean(decisionsLogTemplateText),
+  reason: decisionsLogTemplateText ? 'ok' : 'templates/DECISIONS-LOG.md missing',
+});
+for (const field of ['Date', 'Version', 'Decision', 'Rationale']) {
+  integrityResults.push({
+    check: `template contract: DECISIONS-LOG.md includes ${field}`,
+    pass: decisionsLogTemplateText.includes(field),
+    reason: decisionsLogTemplateText.includes(field)
+      ? 'ok'
+      : `templates/DECISIONS-LOG.md missing ${field}`,
   });
 }
 
