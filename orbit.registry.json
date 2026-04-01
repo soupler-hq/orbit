@@ -104,7 +104,6 @@
       "triggers": [
         "plan",
         "roadmap",
-        "requirements",
         "milestones"
       ],
       "skills": [
