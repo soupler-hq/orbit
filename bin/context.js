@@ -94,10 +94,14 @@ function parseActiveIssueFromState(text, branch) {
 function loadMinimal(db) {
   const facts = db.prepare('SELECT key, value FROM state').all();
   const factMap = Object.fromEntries(facts.map((r) => [r.key, r.value]));
-  const branch = currentGitBranch() || factMap.branch || '(not set)';
-  const activeIssue = factMap.active_issue || issueRefFromBranch(branch);
-  const activeTitle = factMap.active_title || '';
-  const activePr = factMap.active_pr || '';
+  const liveBranch = currentGitBranch();
+  const branch = liveBranch || factMap.branch || '(not set)';
+  const branchMatchesState = !liveBranch || !factMap.branch || liveBranch === factMap.branch;
+  const activeIssue = branchMatchesState
+    ? factMap.active_issue || issueRefFromBranch(branch)
+    : issueRefFromBranch(branch);
+  const activeTitle = branchMatchesState ? factMap.active_title || '' : '';
+  const activePr = branchMatchesState ? factMap.active_pr || '' : '';
   const tasks = db
     .prepare(
       `SELECT issue_ref, title, status, blocker

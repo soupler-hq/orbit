@@ -155,6 +155,36 @@ describeIfSqlite('context.js — schema and load levels', () => {
     expect(output).toContain('- Issue: #145');
   });
 
+  it('--load minimal: ignores stale active issue and PR when the live branch has changed', () => {
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('milestone', 'v2.9.0 — Idea to Market');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('phase', 'Enforcement Hardening');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('version', 'v2.8.1');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('branch', 'test/129-enforcement-e2e');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('active_issue', '#129');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run(
+      'active_title',
+      'test(enforcement): add end-to-end coverage for setup, routing, and review gates'
+    );
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run(
+      'active_pr',
+      '#165 — test(enforcement): execute install and setup hook paths'
+    );
+
+    const originalExecFileSync = require('child_process').execFileSync;
+    require('child_process').execFileSync = () => 'fix/145-state-freshness\n';
+
+    try {
+      const output = loadMinimal(db);
+
+      expect(output).toContain('- Branch: fix/145-state-freshness');
+      expect(output).toContain('- Issue: #145');
+      expect(output).not.toContain('#129');
+      expect(output).not.toContain('#165');
+    } finally {
+      require('child_process').execFileSync = originalExecFileSync;
+    }
+  });
+
   it('--load decisions: returns decisions ordered newest first', () => {
     db.prepare('INSERT INTO decisions (date, version, decision, rationale) VALUES (?, ?, ?, ?)').run('2026-03-30', 'v2.8.0', 'First decision', 'reason A');
     db.prepare('INSERT INTO decisions (date, version, decision, rationale) VALUES (?, ?, ?, ?)').run('2026-03-31', 'v2.8.1', 'Second decision', 'reason B');
