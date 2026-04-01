@@ -89,6 +89,28 @@ function runCli(binName, runtime, args = []) {
   });
 }
 
+function initGitRepo(repoDir) {
+  fs.mkdirSync(repoDir, { recursive: true });
+  spawnSync('git', ['init'], { cwd: repoDir, encoding: 'utf8' });
+  spawnSync('git', ['config', 'user.name', 'Orbit Test'], { cwd: repoDir, encoding: 'utf8' });
+  spawnSync('git', ['config', 'user.email', 'orbit-tests@example.com'], {
+    cwd: repoDir,
+    encoding: 'utf8',
+  });
+  fs.writeFileSync(path.join(repoDir, 'README.md'), '# test\n');
+  spawnSync('git', ['add', 'README.md'], { cwd: repoDir, encoding: 'utf8' });
+  spawnSync('git', ['commit', '-m', 'init'], { cwd: repoDir, encoding: 'utf8' });
+}
+
+function resolveHooksDir(repoDir) {
+  const result = spawnSync('git', ['rev-parse', '--git-path', 'hooks'], {
+    cwd: repoDir,
+    encoding: 'utf8',
+  });
+  const hooksPath = result.stdout.trim();
+  return path.isAbsolute(hooksPath) ? hooksPath : path.join(repoDir, hooksPath);
+}
+
 describe('enforcement end-to-end command paths', () => {
   it('progress CLI renders the workflow gate from live git/github evidence', () => {
     const runtime = buildFakeRuntime({
@@ -350,6 +372,77 @@ describe('runtime capability generation', () => {
       expect(result.stderr).toContain('/orbit:review');
     } finally {
       runtime.cleanup();
+    }
+  });
+});
+
+describe('install and setup enforcement paths', () => {
+  it('installs git hooks in a normal repo through install.sh', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-install-e2e-'));
+    const projectDir = path.join(tmpDir, 'repo');
+    initGitRepo(projectDir);
+
+    try {
+      execFileSync('bash', [path.join(ROOT, 'install.sh'), '--local', '--skip-verify', '--tool', 'claude'], {
+        cwd: projectDir,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+
+      const hooksDir = resolveHooksDir(projectDir);
+      expect(fs.lstatSync(path.join(hooksDir, 'pre-commit')).isSymbolicLink()).toBe(true);
+      expect(fs.lstatSync(path.join(hooksDir, 'pre-push')).isSymbolicLink()).toBe(true);
+      expect(fs.lstatSync(path.join(hooksDir, 'post-commit')).isSymbolicLink()).toBe(true);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('installs git hooks in a linked worktree through install.sh', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-worktree-e2e-'));
+    const rootRepo = path.join(tmpDir, 'root');
+    const worktreeRepo = path.join(tmpDir, 'worktree');
+    initGitRepo(rootRepo);
+
+    try {
+      spawnSync('git', ['worktree', 'add', worktreeRepo, '-b', 'feat/test-hooks'], {
+        cwd: rootRepo,
+        encoding: 'utf8',
+      });
+
+      execFileSync('bash', [path.join(ROOT, 'install.sh'), '--local', '--skip-verify', '--tool', 'claude'], {
+        cwd: worktreeRepo,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+
+      const hooksDir = resolveHooksDir(worktreeRepo);
+      expect(fs.lstatSync(path.join(hooksDir, 'pre-commit')).isSymbolicLink()).toBe(true);
+      expect(fs.lstatSync(path.join(hooksDir, 'pre-push')).isSymbolicLink()).toBe(true);
+      expect(fs.lstatSync(path.join(hooksDir, 'post-commit')).isSymbolicLink()).toBe(true);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('setup path still produces an install with active git hooks', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-setup-e2e-'));
+    const projectDir = path.join(tmpDir, 'repo');
+    initGitRepo(projectDir);
+
+    try {
+      execFileSync('bash', [path.join(ROOT, 'bin', 'setup.sh'), '--tool', 'claude'], {
+        cwd: projectDir,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+
+      const hooksDir = resolveHooksDir(projectDir);
+      expect(fs.lstatSync(path.join(hooksDir, 'pre-commit')).isSymbolicLink()).toBe(true);
+      expect(fs.lstatSync(path.join(hooksDir, 'pre-push')).isSymbolicLink()).toBe(true);
+      expect(fs.lstatSync(path.join(hooksDir, 'post-commit')).isSymbolicLink()).toBe(true);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 });
