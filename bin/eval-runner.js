@@ -1203,6 +1203,69 @@ const OBS_CHECKS = [
       ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
     ),
   },
+  {
+    id: 'OBS014',
+    check: 'checkpoint runtime exists',
+    pass: fileExists('bin/checkpoint-manifest.js'),
+    reason: fileExists('bin/checkpoint-manifest.js') ? 'ok' : 'missing bin/checkpoint-manifest.js',
+  },
+  {
+    id: 'OBS015',
+    check: 'orbit:quick runtime can emit a checkpoint manifest block',
+    ...(() => {
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-eval-checkpoint-'));
+      try {
+        const output = runNode('bin/quick.js', [
+          '--issue',
+          '#181',
+          '--branch',
+          'feat/181-quick-review-pr-autochain',
+          '--implementationStatus',
+          'done',
+          '--testsStatus',
+          'passed',
+          '--testEvidenceStatus',
+          'present',
+          '--reviewStatus',
+          'approved',
+          '--reviewEvidenceStatus',
+          'present',
+          '--shipDecisionStatus',
+          'approved',
+          '--prStatus',
+          'not_open',
+          '--write-checkpoint',
+          'true',
+          '--checkpoint-dir',
+          tmpDir,
+          '--headSha',
+          'abc1234',
+          '--changedFiles',
+          'bin/runtime-command.js,tests/command-runtime.test.js,docs/quality/evaluation-framework.md,orbit.registry.json',
+          '--verificationChecks',
+          'vitest:true,validate:true',
+        ]);
+        const latestPath = path.join(tmpDir, 'latest.json');
+        const manifest = JSON.parse(fs.readFileSync(latestPath, 'utf8'));
+        const pass =
+          output.includes('Orbit Checkpoint') &&
+          manifest.metadata.issue === '#181' &&
+          manifest.checkpoint === 'pr_ready' &&
+          manifest.verification_summary.status === 'success';
+        return {
+          pass,
+          reason: pass ? 'ok' : 'quick runtime failed to emit a usable checkpoint manifest',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `checkpoint runtime failed: ${error.message}`,
+        };
+      } finally {
+        fs.rmSync(tmpDir, { recursive: true, force: true });
+      }
+    })(),
+  },
 ];
 
 const observabilityResults = OBS_CHECKS.map((obs) => {

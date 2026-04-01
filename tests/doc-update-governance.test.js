@@ -42,6 +42,20 @@ describe('validate-doc-updates', () => {
     expect(errors).toEqual([]);
   });
 
+  it('treats command contract markdown as a valid docs update', () => {
+    const errors = validateDocUpdates({
+      body: [
+        '## Summary',
+        '## Docs update',
+        '- Status: `UPDATED`',
+        '- Notes: Updated commands/commands.md',
+      ].join('\n'),
+      changedFiles: ['bin/runtime-command.js', 'commands/commands.md'],
+    });
+
+    expect(errors).toEqual([]);
+  });
+
   it('requires explicit exemption when behavior-sensitive changes lack doc updates', () => {
     const errors = validateDocUpdates({
       body: ['## Summary', '## Docs update', '- Status: `UPDATED`', '- Notes: Updated README.md'].join(

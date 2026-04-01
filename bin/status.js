@@ -84,6 +84,17 @@ function formatOperationalRule(rule) {
   return lines.join('\n');
 }
 
+function formatCheckpointSummary(manifest, artifactPath) {
+  return [
+    '━━━ Orbit Checkpoint ━━━━━━━━━━━━━━━━━━',
+    `  Checkpoint: ${manifest.checkpoint}`,
+    `  Artifact:   ${artifactPath}`,
+    `  Verification: ${manifest.verification_summary.status}`,
+    `  Next:       ${manifest.orchestration.recommended_next_step || 'none'}`,
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+  ].join('\n');
+}
+
 function scopeDisplay(value) {
   if (Array.isArray(value)) return value.join(', ');
   return value || '-';
@@ -105,6 +116,7 @@ function formatNextCommand({ primary, why, alternatives = [] }) {
 
 module.exports = {
   formatClassification,
+  formatCheckpointSummary,
   formatNextCommand,
   formatOperationalRule,
   formatProgressStatus,
