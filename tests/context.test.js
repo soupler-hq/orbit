@@ -245,6 +245,44 @@ describeIfSqlite('context.js — schema and load levels', () => {
     expect(output).not.toContain('#65 feat(agents): add business-analyst agent');
   });
 
+  it('--load minimal: still finds current-milestone tasks even when newer unrelated tasks exceed the generic limit', () => {
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run(
+      'milestone',
+      'v2.9.0 — Idea to Market (self-orchestrated by Orbit)'
+    );
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run(
+      'branch',
+      'fix/145-minimal-context-priority'
+    );
+
+    db.prepare('INSERT INTO tasks (issue_ref, title, status, milestone) VALUES (?, ?, ?, ?)').run(
+      '#142',
+      'epic(enforcement): close documented-vs-enforced workflow gaps',
+      'open',
+      'v2.9.0'
+    );
+    db.prepare('INSERT INTO tasks (issue_ref, title, status, milestone) VALUES (?, ?, ?, ?)').run(
+      '#132',
+      'test(enforcement): add end-to-end coverage for setup, routing, and review gates',
+      'open',
+      'v2.9.0'
+    );
+
+    for (let index = 0; index < 30; index += 1) {
+      db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run(
+        `#9${index.toString().padStart(2, '0')}`,
+        `legacy backlog task ${index}`,
+        'open'
+      );
+    }
+
+    const output = loadMinimal(db);
+
+    expect(output).toContain('#142 epic(enforcement): close documented-vs-enforced workflow gaps');
+    expect(output).toContain('#132 test(enforcement): add end-to-end coverage for setup, routing, and review gates');
+    expect(output).not.toContain('legacy backlog task 29');
+  });
+
   it('--load decisions: returns decisions ordered newest first', () => {
     db.prepare('INSERT INTO decisions (date, version, decision, rationale) VALUES (?, ?, ?, ?)').run('2026-03-30', 'v2.8.0', 'First decision', 'reason A');
     db.prepare('INSERT INTO decisions (date, version, decision, rationale) VALUES (?, ?, ?, ?)').run('2026-03-31', 'v2.8.1', 'Second decision', 'reason B');
