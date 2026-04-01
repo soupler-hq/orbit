@@ -76,6 +76,29 @@ function initSchema(db) {
       blocker    TEXT
     );
   `);
+
+  normalizeTaskRows(db);
+
+  db.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_tasks_issue_ref
+    ON tasks(issue_ref)
+    WHERE issue_ref IS NOT NULL;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_tasks_title_without_issue
+    ON tasks(title)
+    WHERE issue_ref IS NULL;
+  `);
 }
 
-module.exports = { openDb, initSchema, DB_PATH };
+function normalizeTaskRows(db) {
+  db.exec(`
+    DELETE FROM tasks
+    WHERE id NOT IN (
+      SELECT MIN(id)
+      FROM tasks
+      GROUP BY COALESCE(issue_ref, '__no_issue__:' || title)
+    );
+  `);
+}
+
+module.exports = { openDb, initSchema, normalizeTaskRows, DB_PATH };
