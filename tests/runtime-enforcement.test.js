@@ -115,7 +115,8 @@ describe('runtime enforcement entrypoints', () => {
     });
 
     expect(result.exitCode).toBe(1);
-    expect(result.output).toContain('PR state unavailable');
+    expect(result.output).toContain('Test state unavailable');
+    expect(result.output).toContain('/orbit:quick #131');
   });
 
   it('ship runtime allows PR progression when tests and review are green', () => {

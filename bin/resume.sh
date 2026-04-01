@@ -26,6 +26,11 @@ if command -v node >/dev/null 2>&1 && [ -f "$PROGRESS_BIN" ]; then
   WORKFLOW_STATUS=$(node "$PROGRESS_BIN" --command /orbit:resume --status rehydrating 2>/dev/null || true)
 fi
 
+if [ -n "$WORKFLOW_STATUS" ]; then
+  echo "$WORKFLOW_STATUS"
+  echo ""
+fi
+
 # Generate the Resume Prompt
 RESUME_PROMPT="# 🔋 RESUME: $PROJECT_NAME (Snapshot: $SNAPSHOT_AT)
 

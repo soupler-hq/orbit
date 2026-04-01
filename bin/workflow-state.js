@@ -35,17 +35,17 @@ const NEXT_TRANSITIONS = {
 };
 
 const NEXT_COMMANDS = {
-  untracked: '/orbit:plan 1',
-  issue_ready: '/orbit:quick #NNN',
-  branch_ready: '/orbit:quick #NNN',
-  implementation_in_progress: '/orbit:quick #NNN',
-  implementation_done: '/orbit:quick #NNN',
-  tests_green: '/orbit:review',
-  review_required: '/orbit:review',
-  review_clean: '/orbit:ship',
-  pr_ready: '/orbit:ship',
-  pr_open: '/orbit:progress',
-  merged: '/orbit:resume',
+  untracked: () => '/orbit:plan 1',
+  issue_ready: (evidence) => `/orbit:quick ${evidence.issue || '#NNN'}`,
+  branch_ready: (evidence) => `/orbit:quick ${evidence.issue || '#NNN'}`,
+  implementation_in_progress: (evidence) => `/orbit:quick ${evidence.issue || '#NNN'}`,
+  implementation_done: (evidence) => `/orbit:quick ${evidence.issue || '#NNN'}`,
+  tests_green: () => '/orbit:review',
+  review_required: () => '/orbit:review',
+  review_clean: () => '/orbit:ship',
+  pr_ready: () => '/orbit:ship',
+  pr_open: () => '/orbit:progress',
+  merged: () => '/orbit:resume',
 };
 
 function normalizeStatus(value, allowed, fallback) {
@@ -129,10 +129,6 @@ function evaluateWorkflowState(rawEvidence = {}) {
     return buildSummary('merged', evidence, blockers);
   }
 
-  if (evidence.prStatus === 'unknown') {
-    blockers.push('PR state unavailable; authenticate GitHub or pass explicit PR evidence.');
-  }
-
   if (evidence.testsStatus === 'passed' && evidence.testEvidenceStatus === 'missing') {
     blockers.push(
       'Test evidence missing; update the PR body with the commands actually run before progression.'
@@ -166,10 +162,13 @@ function evaluateWorkflowState(rawEvidence = {}) {
   }
 
   if (evidence.reviewStatus === 'approved' && evidence.testsStatus === 'passed') {
+    if (evidence.prStatus === 'unknown') {
+      blockers.push('PR state unavailable; authenticate GitHub or pass explicit PR evidence.');
+    }
     return buildSummary('pr_ready', evidence, blockers);
   }
 
-  if (evidence.reviewStatus === 'unknown') {
+  if (evidence.reviewStatus === 'unknown' && evidence.testsStatus === 'passed') {
     blockers.push('Review state unavailable; fetch PR review status before shipping.');
   }
 
@@ -222,7 +221,7 @@ function buildSummary(state, evidence, blockers) {
     evidence,
     blockers,
     nextTransition,
-    nextCommand: NEXT_COMMANDS[state],
+    nextCommand: NEXT_COMMANDS[state](evidence),
     allowedTransitions: nextTransition ? [nextTransition] : [],
     canOpenPullRequest,
     prGate: canOpenPullRequest ? 'ready' : 'blocked',

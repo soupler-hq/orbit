@@ -88,6 +88,22 @@ function runNode(relPath, args = [], options = {}) {
   });
 }
 
+function checkRuntimeCommandOutput(relPath, args, expectations) {
+  try {
+    const output = runNode(relPath, args);
+    const pass = expectations.every((snippet) => output.includes(snippet));
+    return {
+      pass,
+      reason: pass ? 'ok' : `${relPath} missing expected runtime block output`,
+    };
+  } catch (error) {
+    return {
+      pass: false,
+      reason: `${relPath} failed to execute: ${error.message}`,
+    };
+  }
+}
+
 /** Parse the eval-dataset.md Markdown table into case objects. */
 function parseEvalDataset(content) {
   const cases = [];
@@ -542,9 +558,58 @@ const OBS_CHECKS = [
     section: '/orbit:resume',
     keyword: '## Recommended Next Command',
   },
+  {
+    id: 'OBS007',
+    check: 'orbit:quick runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/quick.js',
+      ['--issue', '#146', '--branch', 'feat/146-runtime-status-parity'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
+  },
+  {
+    id: 'OBS008',
+    check: 'orbit:plan runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/plan.js',
+      ['--issue', '#146', '--branch', 'feat/146-runtime-status-parity'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
+  },
+  {
+    id: 'OBS009',
+    check: 'orbit:review runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/review.js',
+      ['--issue', '#146', '--branch', 'feat/146-runtime-status-parity'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
+  },
+  {
+    id: 'OBS010',
+    check: 'orbit:verify runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/verify.js',
+      ['--issue', '#146', '--branch', 'feat/146-runtime-status-parity'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
+  },
+  {
+    id: 'OBS011',
+    check: 'orbit:next runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/next.js',
+      ['--issue', '#146', '--branch', 'feat/146-runtime-status-parity'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
+  },
 ];
 
 const observabilityResults = OBS_CHECKS.map((obs) => {
+  if (Object.prototype.hasOwnProperty.call(obs, 'pass')) {
+    return obs;
+  }
+
   const sectionStart = commandsText.indexOf(`# Orbit Command: ${obs.section}`);
   const nextSection = commandsText.indexOf('\n# Orbit Command:', sectionStart + 1);
   const sectionText =

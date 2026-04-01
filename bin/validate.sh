@@ -33,10 +33,16 @@ required_files=(
   "bin/install.js"
   "bin/eval.sh"
   "bin/generate-plan-index.js"
+  "bin/next.js"
+  "bin/plan.js"
   "bin/progress.js"
+  "bin/quick.js"
   "bin/review-evidence.js"
+  "bin/review.js"
+  "bin/runtime-command.js"
   "bin/ship.js"
   "bin/validate-pr-governance.js"
+  "bin/verify.js"
   "bin/workflow-state.js"
 )
 

@@ -273,7 +273,7 @@ Logic: same decision table as `/orbit:resume` inference block — first matching
 
 # Orbit Command: /orbit:next
 
-> Auto-detect current state and run the next logical step
+> Auto-detect current state and recommend the next logical step
 
 ## PROCESS
 
@@ -285,6 +285,8 @@ Read STATE.md + ROADMAP.md. Determine:
 - Phase verified but not shipped → run `/orbit:ship N`
 - All phases complete → run `/orbit:milestone`
 - Otherwise → show status and ask
+
+The repo-local runtime entrypoint for `/orbit:next` must emit the standard status blocks and the recommended next command. Full automatic dispatch can remain a higher-level workflow concern.
 
 ---
 
