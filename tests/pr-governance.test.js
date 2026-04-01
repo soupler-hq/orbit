@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 const {
   loadPayload,
@@ -71,15 +74,14 @@ describe('validate-pr-governance', () => {
   });
 
   it('overlays a provided body file on top of event payload data', () => {
-    const fixturePath = require('node:path').join(
-      require('node:os').tmpdir(),
-      `orbit-pr-body-${Date.now()}.md`
-    );
-    require('node:fs').writeFileSync(
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-pr-body-'));
+    const fixturePath = path.join(tempDir, 'body.md');
+    fs.writeFileSync(
       fixturePath,
       ['## Summary', '## Issues', '## Ship Decision', '- Head SHA: `abc1234`', '## Test plan'].join(
         '\n'
-      )
+      ),
+      { mode: 0o600 }
     );
 
     const payload = loadPayload({
@@ -91,5 +93,7 @@ describe('validate-pr-governance', () => {
 
     expect(payload.pull_request.body).toContain('## Summary');
     expect(payload.pull_request.head.sha).toBe('abc1234');
+
+    fs.rmSync(tempDir, { recursive: true, force: true });
   });
 });
