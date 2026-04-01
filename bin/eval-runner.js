@@ -112,6 +112,93 @@ function installRuntimeArtifact(tool) {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 }
+
+function initGitRepo(repoDir) {
+  fs.mkdirSync(repoDir, { recursive: true });
+  execFileSync('git', ['init'], {
+    cwd: repoDir,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  execFileSync('git', ['config', 'user.name', 'Orbit Test'], {
+    cwd: repoDir,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  execFileSync('git', ['config', 'user.email', 'orbit-tests@example.com'], {
+    cwd: repoDir,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  fs.writeFileSync(path.join(repoDir, 'README.md'), '# test\n');
+  execFileSync('git', ['add', 'README.md'], {
+    cwd: repoDir,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  execFileSync('git', ['commit', '-m', 'init'], {
+    cwd: repoDir,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+}
+
+function resolveHooksDir(repoDir) {
+  const hooksPath = execFileSync('git', ['rev-parse', '--git-path', 'hooks'], {
+    cwd: repoDir,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim();
+  return path.isAbsolute(hooksPath) ? hooksPath : path.join(repoDir, hooksPath);
+}
+
+function checkLinkedHooks(repoDir) {
+  return ['pre-commit', 'pre-push', 'post-commit'].every((hook) => {
+    const hookPath = path.join(resolveHooksDir(repoDir), hook);
+    return fs.existsSync(hookPath) && fs.lstatSync(hookPath).isSymbolicLink();
+  });
+}
+
+function runInstallOrSetup({ kind, worktree = false }) {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), `orbit-eval-${kind}-`));
+  try {
+    const repoDir = path.join(tmpDir, 'repo');
+    initGitRepo(repoDir);
+
+    let targetDir = repoDir;
+    if (worktree) {
+      const worktreeDir = path.join(tmpDir, 'worktree');
+      execFileSync('git', ['worktree', 'add', worktreeDir, '-b', 'feat/eval-hooks'], {
+        cwd: repoDir,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+      targetDir = worktreeDir;
+    }
+
+    if (kind === 'install') {
+      execFileSync(
+        'bash',
+        [path.join(ROOT, 'install.sh'), '--local', '--skip-verify', '--tool', 'claude'],
+        {
+          cwd: targetDir,
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'pipe'],
+        }
+      );
+    } else {
+      execFileSync('bash', [path.join(ROOT, 'bin', 'setup.sh'), '--tool', 'claude'], {
+        cwd: targetDir,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+    }
+
+    return checkLinkedHooks(targetDir);
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
 function checkRuntimeCommandOutput(relPath, args, expectations) {
   try {
     const output = runNode(relPath, args);
@@ -407,7 +494,6 @@ const promptRoutingCapabilityResults = [
 // ── Metric 7: Runtime Enforcement ──────────────────────────────────────────
 // Distinguish executable enforcement from documentation/structural coverage.
 
-const installTestText = readFile('tests/install.test.sh') || '';
 const runtimeEnforcementResults = [
   {
     check: 'progress runtime exists',
@@ -435,24 +521,54 @@ const runtimeEnforcementResults = [
   },
   {
     check: 'install tests cover normal-repo hook installation',
-    pass: installTestText.includes('Local install wires git hooks in a normal repo'),
-    reason: installTestText.includes('Local install wires git hooks in a normal repo')
-      ? 'ok'
-      : 'tests/install.test.sh missing normal-repo hook coverage',
+    ...(() => {
+      try {
+        const pass = runInstallOrSetup({ kind: 'install' });
+        return {
+          pass,
+          reason: pass ? 'ok' : 'install.sh did not link expected git hooks in a normal repo',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `install.sh normal-repo hook check failed: ${error.message}`,
+        };
+      }
+    })(),
   },
   {
     check: 'install tests cover linked-worktree hook installation',
-    pass: installTestText.includes('Local install wires git hooks in a linked worktree'),
-    reason: installTestText.includes('Local install wires git hooks in a linked worktree')
-      ? 'ok'
-      : 'tests/install.test.sh missing linked-worktree hook coverage',
+    ...(() => {
+      try {
+        const pass = runInstallOrSetup({ kind: 'install', worktree: true });
+        return {
+          pass,
+          reason: pass ? 'ok' : 'install.sh did not link expected git hooks in a linked worktree',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `install.sh linked-worktree hook check failed: ${error.message}`,
+        };
+      }
+    })(),
   },
   {
     check: 'install tests cover setup-path hook activation',
-    pass: installTestText.includes('Setup path also ensures git hooks are active'),
-    reason: installTestText.includes('Setup path also ensures git hooks are active')
-      ? 'ok'
-      : 'tests/install.test.sh missing setup-path hook coverage',
+    ...(() => {
+      try {
+        const pass = runInstallOrSetup({ kind: 'setup' });
+        return {
+          pass,
+          reason: pass ? 'ok' : 'setup.sh did not leave expected git hooks active',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `setup.sh hook check failed: ${error.message}`,
+        };
+      }
+    })(),
   },
   {
     check: 'progress runtime executes review gate from live runtime evidence',
