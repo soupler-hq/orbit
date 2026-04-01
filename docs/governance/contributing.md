@@ -79,7 +79,9 @@ Use the repo-standard PR body sections:
 - `Test plan`
 - `Merge notes` when relevant
 
-If the branch evolves after the PR is opened, update the PR body before the next review request. The PR body is part of the control plane and must stay aligned with the actual branch scope, verification steps, and issue linkage.
+Branch names should follow `<type>/<slug>` such as `feat/143-pr-governance-enforcement` or `fix/145-context-minimal-dedup`.
+
+If the branch evolves after the PR is opened, update the PR body before the next review request. The PR body is part of the control plane and must stay aligned with the actual branch scope, verification steps, and issue linkage. Keep the `Head SHA` marker aligned with the current branch head so CI can detect stale PR bodies before re-review.
 
 ---
 

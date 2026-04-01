@@ -13,13 +13,29 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
+
+  pr-governance:
+    name: pr-governance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: 📥 Load live PR body
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr view "$PR_NUMBER" --json body --jq .body > /tmp/orbit-pr-body.md
+      - name: 🧭 PR governance gate
+        run: node bin/validate-pr-governance.js --event-file "$GITHUB_EVENT_PATH" --body-file /tmp/orbit-pr-body.md
       - name: 🔒 Verify package-lock.json is up to date
         run: npm ci --dry-run
 
   lint:
     name: lint
     runs-on: ubuntu-latest
-    needs: lock-check
+    needs: [lock-check, pr-governance]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6

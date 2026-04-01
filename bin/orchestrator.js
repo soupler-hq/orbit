@@ -192,7 +192,7 @@ class OrbitOrchestrator {
 
         // 2. Git Worktree Handoff (Task 2.2)
         const taskName = `task_${waveId}_${index}`;
-        const branchName = `orbit/${taskName}`;
+        const branchName = `feat/orbit-task-${waveId}-${index}`;
         const executionPath = this.setupWorktree(taskName, branchName);
 
         // 3. Context Creation

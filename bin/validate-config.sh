@@ -36,6 +36,9 @@ if [[ "$CURRENT_EVENT" == "pull_request" ]]; then
 elif [[ "$CURRENT_BRANCH" == "develop" || "$CURRENT_BRANCH" == "main" ]]; then
   fail "Running on protected branch '$CURRENT_BRANCH' outside pull_request context. Changes must go through a feature branch and PR."
   echo "     Convention: fix/issue-N-description or feat/description → PR → merge"
+elif [[ ! "$CURRENT_BRANCH" =~ ^(feat|fix|docs|chore|refactor|test|release|hotfix)/([0-9]+-)?[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+  fail "Branch '$CURRENT_BRANCH' does not follow Orbit branch naming convention."
+  echo "     Expected: <type>/<slug> such as feat/143-pr-governance-enforcement or fix/145-context-minimal-dedup"
 else
   pass "Branch '$CURRENT_BRANCH' is a feature branch (not a protected branch)"
 fi
