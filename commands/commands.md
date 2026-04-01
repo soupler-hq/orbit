@@ -41,7 +41,9 @@ Used by `/orbit:quick`, `/orbit:plan`, `/orbit:build`, and similar command entry
   Complexity: {COMPLEXITY}
   Agent:      {AGENT}
   Mode:       {MODE}
-  Issue:      #{NNN}  (if applicable)
+  Working target: {Issue #{NNN}|untracked task}
+  Branch:     {branch name}
+  PR:         {#NNN|not opened yet}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -345,7 +347,9 @@ If the user gives a plain prompt that implies a tracked implementation task, Orb
   Complexity: QUICK
   Agent:      {selected agent}
   Mode:       {COLLABORATIVE|AUTONOMOUS}
-  Issue:      #{NNN}  (omit if no issue)
+  Working target: {Issue #{NNN}|untracked task}
+  Branch:     {branch name}
+  PR:         {#NNN|not opened yet}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 

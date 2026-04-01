@@ -6,16 +6,18 @@
 
 'use strict';
 
-function formatClassification({ domain, complexity, agent, mode, issue }) {
+function formatClassification({ domain, complexity, agent, mode, issue, branch, pr }) {
   const lines = [
     '━━━ Orbit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
     `  Domain:     ${domain}`,
     `  Complexity: ${complexity}`,
     `  Agent:      ${agent}`,
     `  Mode:       ${mode}`,
+    `  Working target: ${issue ? `Issue ${issue}` : 'untracked task'}`,
+    `  Branch:     ${branch || 'unknown'}`,
+    `  PR:         ${pr || 'not opened yet'}`,
     '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
   ];
-  if (issue) lines.splice(5, 0, `  Issue:      ${issue}`);
   return lines.join('\n');
 }
 
@@ -64,6 +66,29 @@ function formatWorkflowGate({ state, prGate, nextTransition, nextCommand, blocke
   return lines.join('\n');
 }
 
+function formatOperationalRule(rule) {
+  const guidance = rule.guidance || {};
+  const lines = [
+    '━━━ Operational Rule ━━━━━━━━━━━━━━━━━━',
+    `  Rule:     ${rule.id}`,
+    `  Tool:     ${scopeDisplay(rule.scope?.tool)}`,
+    `  Scope:    ${scopeDisplay(rule.scope?.operation)}`,
+  ];
+  if (guidance.preferred_route) {
+    lines.push(`  Route:    ${guidance.preferred_route}`);
+  }
+  if (guidance.why) {
+    lines.push(`  Why:      ${guidance.why}`);
+  }
+  lines.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  return lines.join('\n');
+}
+
+function scopeDisplay(value) {
+  if (Array.isArray(value)) return value.join(', ');
+  return value || '-';
+}
+
 function formatNextCommand({ primary, why, alternatives = [] }) {
   const altLines = alternatives.map((alt) => `- ${alt}`);
   return [
@@ -81,6 +106,7 @@ function formatNextCommand({ primary, why, alternatives = [] }) {
 module.exports = {
   formatClassification,
   formatNextCommand,
+  formatOperationalRule,
   formatProgressStatus,
   formatWorkflowGate,
   formatWaveComplete,

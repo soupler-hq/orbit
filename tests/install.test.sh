@@ -97,7 +97,9 @@ assert_dir  "skills/ installed"               "$PROJECT1/.claude/skills"
 assert_dir  "hooks/ installed"                "$PROJECT1/.claude/orbit/hooks"
 assert_file ".orbit/state/STATE.md created"   "$PROJECT1/.orbit/state/STATE.md"
 assert_file ".orbit/state/DECISIONS-LOG.md created" "$PROJECT1/.orbit/state/DECISIONS-LOG.md"
+assert_file ".orbit/state/OPERATIONAL-RULES.json created" "$PROJECT1/.orbit/state/OPERATIONAL-RULES.json"
 assert_file "DECISIONS-LOG template installed" "$PROJECT1/.claude/state/DECISIONS-LOG.template.md"
+assert_file "OPERATIONAL-RULES template installed" "$PROJECT1/.claude/state/OPERATIONAL-RULES.template.json"
 assert_contains "Claude contract marks implicit prompt routing supported" "$PROJECT1/.claude/adapter.contract.json" '"implicit_prompt_routing": true'
 assert_contains "Claude contract reflects post_tool_use disabled" "$PROJECT1/.claude/adapter.contract.json" '"post_tool_use": false'
 
@@ -113,6 +115,7 @@ assert_file "adapter.contract.json installed" "$PROJECT2/.codex/adapter.contract
 assert_file "policy.md installed"           "$PROJECT2/.codex/policy.md"
 assert_file "STATE.template.md installed"   "$PROJECT2/.codex/state/STATE.template.md"
 assert_file "DECISIONS-LOG.template.md installed" "$PROJECT2/.codex/state/DECISIONS-LOG.template.md"
+assert_file "OPERATIONAL-RULES.template.json installed" "$PROJECT2/.codex/state/OPERATIONAL-RULES.template.json"
 assert_dir  "agents/ installed"             "$PROJECT2/.codex/agents"
 assert_dir  "skills/ installed"             "$PROJECT2/.codex/skills"
 assert_contains "policy.md mentions INSTRUCTIONS" "$PROJECT2/.codex/policy.md" "INSTRUCTIONS.md"
@@ -151,6 +154,7 @@ mkdir -p "$PROJECT3B"
 assert_file "Node wrapper CLAUDE.md installed"   "$PROJECT3B/.claude/CLAUDE.md"
 assert_file "Node wrapper STATE.md created"       "$PROJECT3B/.orbit/state/STATE.md"
 assert_file "Node wrapper DECISIONS-LOG.md created" "$PROJECT3B/.orbit/state/DECISIONS-LOG.md"
+assert_file "Node wrapper OPERATIONAL-RULES.json created" "$PROJECT3B/.orbit/state/OPERATIONAL-RULES.json"
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Idempotency: running install twice produces identical result"

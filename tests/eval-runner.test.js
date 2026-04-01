@@ -55,6 +55,12 @@ describe('eval-runner issue #85 coverage', () => {
       expect(checks.get('template contract: DECISIONS-LOG.md includes made_at:')).toBe(true);
       expect(checks.get('template contract: DECISIONS-LOG.md includes version:')).toBe(true);
       expect(checks.get('template contract: DECISIONS-LOG.md includes rationale:')).toBe(true);
+      expect(checks.get('template contract: OPERATIONAL-RULES.json exists')).toBe(true);
+      expect(checks.get('template contract: OPERATIONAL-RULES.json includes "scope"')).toBe(true);
+      expect(checks.get('template contract: OPERATIONAL-RULES.json includes "guidance"')).toBe(true);
+      expect(checks.get('template contract: OPERATIONAL-RULES.json includes "preferred_route"')).toBe(
+        true
+      );
     },
     30000
   );

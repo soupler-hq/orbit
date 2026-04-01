@@ -10,9 +10,15 @@ const {
 const {
   formatClassification,
   formatNextCommand,
+  formatOperationalRule,
   formatProgressStatus,
   formatWorkflowGate,
 } = require('./status');
+const {
+  findOperationalRule,
+  loadOperationalRules,
+  OPERATIONAL_RULES_PATH,
+} = require('./operational-rules');
 
 function parseArgs(argv) {
   const args = {};
@@ -55,11 +61,53 @@ function buildTaskBoundaryWorkflow(args, evidence) {
   };
 }
 
+function buildOperationalRuleWorkflow(args, profile) {
+  if (profile.consultOperationalRules === false) {
+    return { rule: null, workflow: null };
+  }
+
+  const rulesConfig = loadOperationalRules(args.rulesFile || OPERATIONAL_RULES_PATH);
+  const rule = findOperationalRule(rulesConfig, {
+    environment: args.environment || '',
+    tool: args.tool || '',
+    operation: args.operation || '',
+    route: args.route || '',
+    runtimeCommand: profile.command,
+  });
+
+  if (!rule) {
+    return { rule: null, workflow: null };
+  }
+
+  const preferredRoute = rule.guidance?.preferred_route || '';
+  if (!preferredRoute || !args.route || args.route === preferredRoute) {
+    return { rule, workflow: null };
+  }
+
+  return {
+    rule,
+    workflow: {
+      state: 'operational_rule_required',
+      prGate: 'blocked',
+      nextTransition: 'approved_route',
+      nextCommand: profile.command,
+      blockers: [
+        `${rule.id} requires route ${preferredRoute} for ${args.tool || 'this tool'} ${args.operation || 'operation'} in ${args.environment || 'this environment'}.`,
+      ],
+    },
+  };
+}
+
 function buildRuntimeCommandOutput(args, profile) {
   const evidence = buildEvidence(args);
+  const operational = buildOperationalRuleWorkflow(args, profile);
   const boundaryWorkflow =
     profile.enforceIssueBoundary === true ? buildTaskBoundaryWorkflow(args, evidence) : null;
-  const workflow = boundaryWorkflow || profile.workflowOverride || evaluateWorkflowState(evidence);
+  const workflow =
+    operational.workflow ||
+    boundaryWorkflow ||
+    profile.workflowOverride ||
+    evaluateWorkflowState(evidence);
   const primary =
     workflow.nextCommand && workflow.nextCommand !== profile.command
       ? workflow.nextCommand
@@ -68,6 +116,11 @@ function buildRuntimeCommandOutput(args, profile) {
     workflow.blockers[0] ||
     profile.defaultWhy ||
     `Orbit classified this as ${profile.command} and emitted the next workflow step.`;
+  const prLabel =
+    args.pr ||
+    args.prNumber ||
+    evidence.prNumber ||
+    (evidence.prStatus === 'not_open' ? 'not opened yet' : null);
 
   const sections = [
     formatClassification({
@@ -76,6 +129,8 @@ function buildRuntimeCommandOutput(args, profile) {
       agent: profile.agent,
       mode: profile.mode || 'AUTONOMOUS',
       issue: profile.classificationIssue || evidence.issue || args.issue || null,
+      branch: evidence.branch || args.branch || null,
+      pr: prLabel,
     }),
     formatProgressStatus({
       command: profile.command,
@@ -85,6 +140,10 @@ function buildRuntimeCommandOutput(args, profile) {
       details: args.details || args.task || args.description || evidence.branch || profile.details,
     }),
   ];
+
+  if (operational.rule) {
+    sections.push(formatOperationalRule(operational.rule));
+  }
 
   if (profile.includeWorkflowGate !== false) {
     sections.push(formatWorkflowGate(workflow));
@@ -102,6 +161,7 @@ function buildRuntimeCommandOutput(args, profile) {
 }
 
 module.exports = {
+  buildOperationalRuleWorkflow,
   buildTaskBoundaryWorkflow,
   buildRuntimeCommandOutput,
   parseArgs,

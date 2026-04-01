@@ -295,6 +295,7 @@ const commandsText = readFile('commands/commands.md') || '';
 const configText = readFile('orbit.config.json');
 const config = configText ? JSON.parse(configText) : { runtimes: {} };
 const decisionsLogTemplateText = readFile('templates/DECISIONS-LOG.md') || '';
+const operationalRulesTemplateText = readFile('templates/OPERATIONAL-RULES.json') || '';
 
 // Build lookup sets from registry
 const registryAgentNames = new Set(registry.agents.map((a) => a.name));
@@ -624,6 +625,20 @@ for (const field of [
     reason: decisionsLogTemplateText.includes(field)
       ? 'ok'
       : `templates/DECISIONS-LOG.md missing ${field}`,
+  });
+}
+integrityResults.push({
+  check: 'template contract: OPERATIONAL-RULES.json exists',
+  pass: Boolean(operationalRulesTemplateText),
+  reason: operationalRulesTemplateText ? 'ok' : 'templates/OPERATIONAL-RULES.json missing',
+});
+for (const field of ['"version"', '"rules"', '"scope"', '"guidance"', '"preferred_route"']) {
+  integrityResults.push({
+    check: `template contract: OPERATIONAL-RULES.json includes ${field}`,
+    pass: operationalRulesTemplateText.includes(field),
+    reason: operationalRulesTemplateText.includes(field)
+      ? 'ok'
+      : `templates/OPERATIONAL-RULES.json missing ${field}`,
   });
 }
 

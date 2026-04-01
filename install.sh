@@ -190,8 +190,10 @@ CMDEOF
   # ── State Template ────────────────────────────────────────────────────────
   cp "$FRAMEWORK_DIR/templates/STATE.md" "$CLAUDE_DIR/state/STATE.template.md"
   cp "$FRAMEWORK_DIR/templates/DECISIONS-LOG.md" "$CLAUDE_DIR/state/DECISIONS-LOG.template.md"
+  cp "$FRAMEWORK_DIR/templates/OPERATIONAL-RULES.json" "$CLAUDE_DIR/state/OPERATIONAL-RULES.template.json"
   qecho "  ✓ state/STATE.template.md"
   qecho "  ✓ state/DECISIONS-LOG.template.md"
+  qecho "  ✓ state/OPERATIONAL-RULES.template.json"
 
   # ── Hook Scripts ──────────────────────────────────────────────────────────
   qecho ""
@@ -235,6 +237,7 @@ install_for_codex() {
   write_runtime_adapter_contract "codex" "$codex_dir"
   cp "$FRAMEWORK_DIR/templates/STATE.md"  "$codex_dir/state/STATE.template.md"
   cp "$FRAMEWORK_DIR/templates/DECISIONS-LOG.md" "$codex_dir/state/DECISIONS-LOG.template.md"
+  cp "$FRAMEWORK_DIR/templates/OPERATIONAL-RULES.json" "$codex_dir/state/OPERATIONAL-RULES.template.json"
   qecho "  ✓ operator surface + registry + config + state templates"
 
   for f in "$FRAMEWORK_DIR"/agents/*.md; do
@@ -293,6 +296,7 @@ install_for_antigravity() {
   write_runtime_adapter_contract "antigravity" "$ag_dir"
   cp "$FRAMEWORK_DIR/templates/STATE.md"  "$ag_dir/state/STATE.template.md"
   cp "$FRAMEWORK_DIR/templates/DECISIONS-LOG.md" "$ag_dir/state/DECISIONS-LOG.template.md"
+  cp "$FRAMEWORK_DIR/templates/OPERATIONAL-RULES.json" "$ag_dir/state/OPERATIONAL-RULES.template.json"
   qecho "  ✓ control plane docs + registry + config + state templates"
 
   for f in "$FRAMEWORK_DIR"/agents/*.md; do
@@ -384,6 +388,13 @@ init_project_state() {
     qecho "  ✓ .orbit/state/DECISIONS-LOG.md (from template)"
   else
     qecho "  ✓ .orbit/state/DECISIONS-LOG.md (already exists — preserved)"
+  fi
+
+  if [[ ! -f "$state_dir/OPERATIONAL-RULES.json" ]]; then
+    cp "$FRAMEWORK_DIR/templates/OPERATIONAL-RULES.json" "$state_dir/OPERATIONAL-RULES.json"
+    qecho "  ✓ .orbit/state/OPERATIONAL-RULES.json (from template)"
+  else
+    qecho "  ✓ .orbit/state/OPERATIONAL-RULES.json (already exists — preserved)"
   fi
 
   # Copy hook scripts to project-local .orbit/hooks/

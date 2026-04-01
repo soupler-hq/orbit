@@ -9,11 +9,15 @@ describe('status formatter', () => {
       agent: 'engineer',
       mode: 'AUTONOMOUS',
       issue: '#126',
+      branch: 'feat/126-example',
+      pr: '#201',
     });
 
     expect(output).toContain('━━━ Orbit');
     expect(output).toContain('Domain:     ENGINEERING');
-    expect(output).toContain('Issue:      #126');
+    expect(output).toContain('Working target: Issue #126');
+    expect(output).toContain('Branch:     feat/126-example');
+    expect(output).toContain('PR:         #201');
   });
 
   it('renders a current execution block', () => {

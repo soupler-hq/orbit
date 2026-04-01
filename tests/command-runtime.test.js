@@ -5,6 +5,7 @@ import { renderReview } from '../bin/review.js';
 import { renderVerify } from '../bin/verify.js';
 import { renderNext } from '../bin/next.js';
 import { renderRiper } from '../bin/riper.js';
+import { findOperationalRule, loadOperationalRules } from '../bin/operational-rules.js';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -47,7 +48,105 @@ describe('runtime command status parity', () => {
     expect(output).toContain('Next:     branch_aligned');
     expect(output).toContain('**Primary**: /orbit:quick #148');
     expect(output).toContain('Requested issue #148 does not match active branch feat/150-executable-next-runtime (#150)');
-    expect(output).toContain('Issue:      #148');
+    expect(output).toContain('Working target: Issue #148');
+    expect(output).toContain('Branch:     feat/150-executable-next-runtime');
+    expect(output).toContain('PR:         not opened yet');
+  });
+
+  it('quick runtime consults operational rules and blocks the wrong route before execution', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-op-rules-'));
+    const rulesFile = path.join(tmpDir, 'OPERATIONAL-RULES.json');
+    fs.writeFileSync(
+      rulesFile,
+      JSON.stringify(
+        {
+          version: 1,
+          rules: [
+            {
+              id: 'gh-approved-route',
+              status: 'active',
+              summary: 'Use the approved route first for GitHub CLI network and mutation commands.',
+              scope: {
+                environment: ['codex-sandbox'],
+                tool: ['gh'],
+                operation: ['network_mutation'],
+              },
+              guidance: {
+                preferred_route: 'approved',
+                why: 'Sandboxed gh network and mutation calls are unstable in this environment.',
+              },
+            },
+          ],
+        },
+        null,
+        2
+      )
+    );
+
+    const output = renderQuick({
+      issue: '#172',
+      branch: 'feat/172-operational-rules',
+      implementationStatus: 'in_progress',
+      tool: 'gh',
+      operation: 'network_mutation',
+      environment: 'codex-sandbox',
+      route: 'sandbox',
+      rulesFile,
+    });
+
+    expect(output).toContain('Operational Rule');
+    expect(output).toContain('Rule:     gh-approved-route');
+    expect(output).toContain('State:    operational_rule_required');
+    expect(output).toContain('Next:     approved_route');
+    expect(output).toContain('requires route approved');
+  });
+
+  it('operational rules match by environment, tool, and operation specificity', () => {
+    const rules = loadOperationalRules(
+      (() => {
+        const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-op-rule-load-'));
+        const file = path.join(tmpDir, 'OPERATIONAL-RULES.json');
+        fs.writeFileSync(
+          file,
+          JSON.stringify(
+            {
+              version: 1,
+              rules: [
+                {
+                  id: 'generic-gh',
+                  status: 'active',
+                  scope: { tool: ['gh'] },
+                  guidance: { preferred_route: 'approved' },
+                },
+                {
+                  id: 'specific-gh-sandbox',
+                  status: 'active',
+                  scope: {
+                    environment: ['codex-sandbox'],
+                    tool: ['gh'],
+                    operation: ['network_mutation'],
+                  },
+                  guidance: { preferred_route: 'approved' },
+                },
+              ],
+            },
+            null,
+            2
+          )
+        );
+        return file;
+      })()
+    );
+
+    const match = findOperationalRule(rules, {
+      environment: 'codex-sandbox',
+      tool: 'gh',
+      operation: 'network_mutation',
+      route: '',
+      runtimeCommand: '/orbit:quick',
+    });
+
+    expect(match.id).toBe('specific-gh-sandbox');
   });
 
   it('plan runtime emits the standard status blocks', () => {
@@ -96,7 +195,8 @@ describe('runtime command status parity', () => {
 
     expect(output).toContain('**Primary**: /orbit:quick #150 feat(workflow): implement `/orbit:next` as an executable runtime command');
     expect(output).toContain('State:    issue_ready');
-    expect(output).toContain('Issue:      #150');
+    expect(output).toContain('Working target: Issue #150');
+    expect(output).toContain('Branch:     develop');
   });
 
   it('next runtime honors active phase metadata even when the section is not marked CURRENT', () => {
@@ -124,7 +224,8 @@ describe('runtime command status parity', () => {
     });
 
     expect(output).toContain('**Primary**: /orbit:quick #151 feat(governance): enforce documentation updates for behavior changes');
-    expect(output).toContain('Issue:      #151');
+    expect(output).toContain('Working target: Issue #151');
+    expect(output).toContain('Branch:     develop');
   });
 
   it('next runtime uses a planning-aligned workflow gate when the active phase backlog is empty', () => {
