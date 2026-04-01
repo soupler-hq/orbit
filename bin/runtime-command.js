@@ -29,7 +29,7 @@ function parseArgs(argv) {
 
 function buildRuntimeCommandOutput(args, profile) {
   const evidence = buildEvidence(args);
-  const workflow = evaluateWorkflowState(evidence);
+  const workflow = profile.workflowOverride || evaluateWorkflowState(evidence);
   const primary =
     workflow.nextCommand && workflow.nextCommand !== profile.command
       ? workflow.nextCommand
@@ -45,7 +45,7 @@ function buildRuntimeCommandOutput(args, profile) {
       complexity: profile.complexity,
       agent: profile.agent,
       mode: profile.mode || 'AUTONOMOUS',
-      issue: evidence.issue || args.issue || null,
+      issue: profile.classificationIssue || evidence.issue || args.issue || null,
     }),
     formatProgressStatus({
       command: profile.command,
