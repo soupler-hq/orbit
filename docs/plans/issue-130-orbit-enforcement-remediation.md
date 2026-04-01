@@ -3,7 +3,7 @@ id: issue-130-orbit-enforcement-remediation
 doc_type: plan
 status: Active
 version: v1
-last_updated: 2026-03-31
+last_updated: 2026-04-01
 scope: issue-130
 phase: Foundations
 rank: 010
@@ -22,7 +22,44 @@ blocks:
 - Scope: v2.9.0 remediation foundation
 - Type: Cross-cutting execution hardening
 - Umbrella issue: #130
-- Last updated: 2026-03-31
+- Active enforcement epic: #142
+- Current in-flight branch: `test/132-enforcement-e2e`
+- Current PR: #141 against `develop`
+- Last updated: 2026-04-01
+
+## Current Reality
+
+The enforcement program has moved beyond the original four-issue stack.
+
+What is now true:
+
+- #134 established hook installation and worktree-safe lifecycle wiring
+- #138 tightened plain-prompt routing so Orbit only promises it on runtimes that actually support it
+- #139 introduced workflow-state runtime gates and then was refined through multiple review loops
+- #132 is now the active enforcement branch and carries executable command-path coverage, runtime-enforcement eval checks, and the strict PR-body refresh rule
+- the broader documented-vs-enforced scan was formalized into epic #142 with child issues #143-#151
+
+This means the plan should now be read in two layers:
+
+1. the original enforcement foundation under #130
+2. the expanded closure work under #142 that captures the remaining documented-vs-enforced gaps
+
+## Current Recommended Sequence
+
+Orbit should continue from the current branch/PR boundary first, then move through the highest-impact gap-closure stack:
+
+1. finish and merge #132 / PR #141
+2. #143 — PR freshness and branch governance in CI
+3. #144 — review and ship evidence before progression
+4. #145 — automatic state freshness across command paths
+5. #146 — status block parity across documented commands
+6. #149 — adapter-backed plain-prompt routing enforcement
+7. #150 — executable `/orbit:next`
+8. #148 — `/orbit:eval` contract alignment
+9. #147 — recovery-loop enforcement
+10. #151 — documentation-update enforcement
+
+This order is intentionally governance-first and state-first so Orbit becomes harder to misuse before it grows further.
 
 ## Why This Exists
 
@@ -116,10 +153,20 @@ This wave should codify the final behavior so future documentation changes canno
 ## Related Issues
 
 - [#130](https://github.com/soupler-hq/orbit/issues/130) — epic(runtime): enforcement-first orbit execution remediation
+- [#142](https://github.com/soupler-hq/orbit/issues/142) — epic(enforcement): close documented-vs-enforced workflow gaps
 - [#134](https://github.com/soupler-hq/orbit/issues/134) — fix(runtime): install lifecycle hooks by default and support worktrees
 - [#133](https://github.com/soupler-hq/orbit/issues/133) — feat(runtime): implement implicit Orbit workflow routing for plain prompts
 - [#131](https://github.com/soupler-hq/orbit/issues/131) — feat(workflow): enforce closed-loop branch-test-review-pr state machine
 - [#132](https://github.com/soupler-hq/orbit/issues/132) — test(enforcement): add end-to-end coverage for setup, routing, and review gates
+- [#143](https://github.com/soupler-hq/orbit/issues/143) — feat(governance): enforce PR freshness and branch governance in CI
+- [#144](https://github.com/soupler-hq/orbit/issues/144) — feat(workflow): require review and ship evidence before progression
+- [#145](https://github.com/soupler-hq/orbit/issues/145) — feat(state): enforce automatic state freshness across command paths
+- [#146](https://github.com/soupler-hq/orbit/issues/146) — feat(runtime): enforce status block parity across documented commands
+- [#149](https://github.com/soupler-hq/orbit/issues/149) — feat(adapters): enforce plain-prompt routing through supported runtimes only
+- [#150](https://github.com/soupler-hq/orbit/issues/150) — feat(workflow): implement `/orbit:next` as an executable runtime command
+- [#148](https://github.com/soupler-hq/orbit/issues/148) — feat(eval): align `/orbit:eval` with executable artifact contracts
+- [#147](https://github.com/soupler-hq/orbit/issues/147) — feat(recovery): implement executable recovery-loop behavior for documented workflows
+- [#151](https://github.com/soupler-hq/orbit/issues/151) — feat(governance): enforce documentation updates for behavior changes
 - [#78](https://github.com/soupler-hq/orbit/issues/78) — chore(structure): clean repo root + add GENERATED headers + restructure templates
 
 ## Root Cause Analysis
