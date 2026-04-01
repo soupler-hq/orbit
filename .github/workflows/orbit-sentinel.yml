@@ -44,8 +44,15 @@ jobs:
           echo "PR body did not refresh to head SHA $short_sha after retries."
           cat /tmp/orbit-pr-body.md
           exit 1
+      - name: 📄 Load changed files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr diff "$PR_NUMBER" --name-only > /tmp/orbit-pr-files.txt
       - name: 🧭 PR governance gate
         run: node bin/validate-pr-governance.js --event-file "$GITHUB_EVENT_PATH" --body-file /tmp/orbit-pr-body.md
+      - name: 📚 Docs-update governance gate
+        run: node bin/validate-doc-updates.js --body-file /tmp/orbit-pr-body.md --changed-files-file /tmp/orbit-pr-files.txt
       - name: 🔒 Verify package-lock.json is up to date
         run: npm ci --dry-run
 

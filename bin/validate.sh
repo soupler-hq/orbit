@@ -46,6 +46,7 @@ required_files=(
   "bin/review.js"
   "bin/runtime-command.js"
   "bin/ship.js"
+  "bin/validate-doc-updates.js"
   "bin/validate-pr-governance.js"
   "bin/verify.js"
   "bin/workflow-state.js"
