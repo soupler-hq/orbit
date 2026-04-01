@@ -468,13 +468,24 @@ If the user gives a plain prompt that implies a tracked implementation task, Orb
    </task>
    ```
 4. Execute with relevant skill loaded
-5. Verify, commit, update STATE.md
+5. Verify, commit, update STATE.md, and write the checkpoint manifest to `.orbit/state/checkpoints/latest.json`
 6. If the task is review-ready, push branch, refresh the PR body if the branch scope changed, update the `Head SHA` marker, and then run `/orbit:review`
 7. Before requesting review or ship progression, refresh the PR body evidence:
    - `## Test plan` lists the commands actually run
    - `Orbit Self-Review` records the review command, dispatched agents, ship decision, and findings handled
 
-**After completion, emit:**
+**After completion, emit the checkpoint block and next step:**
+
+```
+━━━ Orbit Checkpoint ━━━━━━━━━━━━━━━━━━
+  Checkpoint: {implementation_complete|review_required|review_clean|pr_ready|pr_open}
+  Artifact:   .orbit/state/checkpoints/latest.json
+  Verification: {success|failed}
+  Next:       {/orbit:review|/orbit:ship|/orbit:progress}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+And then:
 
 ```
 ---

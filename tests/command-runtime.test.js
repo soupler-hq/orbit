@@ -38,6 +38,35 @@ describe('runtime command status parity', () => {
     expect(output).toContain('**Primary**: /orbit:ship');
   });
 
+  it('quick runtime writes a checkpoint manifest and emits the checkpoint block', () => {
+    const checkpointDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-runtime-checkpoint-'));
+    const output = renderQuick({
+      ...trackedArgs,
+      writeCheckpoint: true,
+      checkpointDir,
+      headSha: 'abc1234',
+      changedFiles:
+        'bin/runtime-command.js,tests/command-runtime.test.js,docs/quality/evaluation-framework.md,orbit.registry.json',
+      verificationChecks: 'vitest:true,validate:true',
+    });
+
+    expect(output).toContain('Orbit Checkpoint');
+    expect(output).toContain('Checkpoint: pr_ready');
+    expect(output).toContain('Artifact:');
+
+    const latest = JSON.parse(fs.readFileSync(path.join(checkpointDir, 'latest.json'), 'utf8'));
+    expect(latest.metadata.issue).toBe('#146');
+    expect(latest.metadata.pr).toBe(null);
+    expect(latest.impact.scope).toEqual({
+      logic: true,
+      tests: true,
+      docs: true,
+      config: true,
+    });
+    expect(latest.orchestration.current_state).toBe('pr_ready');
+    expect(latest.orchestration.recommended_next_step).toBe('/orbit:ship');
+  });
+
   it('quick runtime blocks when the requested issue does not match the active feature branch', () => {
     const output = renderQuick({
       issue: '#148',

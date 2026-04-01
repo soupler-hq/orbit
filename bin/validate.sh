@@ -45,6 +45,7 @@ required_files=(
   "bin/riper.js"
   "bin/runtime-adapter.js"
   "bin/operational-rules.js"
+  "bin/checkpoint-manifest.js"
   "bin/review-evidence.js"
   "bin/review.js"
   "bin/runtime-command.js"

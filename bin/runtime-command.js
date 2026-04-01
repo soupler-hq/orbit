@@ -8,12 +8,14 @@ const {
   isFeatureBranch,
 } = require('./workflow-state');
 const {
+  formatCheckpointSummary,
   formatClassification,
   formatNextCommand,
   formatOperationalRule,
   formatProgressStatus,
   formatWorkflowGate,
 } = require('./status');
+const { buildCheckpointManifest, writeCheckpointManifest } = require('./checkpoint-manifest');
 const {
   findOperationalRule,
   loadOperationalRules,
@@ -147,6 +149,24 @@ function buildRuntimeCommandOutput(args, profile) {
 
   if (profile.includeWorkflowGate !== false) {
     sections.push(formatWorkflowGate(workflow));
+  }
+
+  const shouldWriteCheckpoint =
+    args['write-checkpoint'] === true ||
+    String(args['write-checkpoint'] || args.writeCheckpoint || '').toLowerCase() === 'true';
+
+  if (shouldWriteCheckpoint) {
+    const manifest = buildCheckpointManifest({
+      args,
+      profile,
+      evidence,
+      workflow,
+    });
+    const { latestPath } = writeCheckpointManifest({
+      checkpointDir: args['checkpoint-dir'] || args.checkpointDir,
+      manifest,
+    });
+    sections.push(formatCheckpointSummary(manifest, latestPath));
   }
 
   sections.push(
