@@ -83,3 +83,9 @@ Pending execution-blocking ambiguity that must be resolved before autonomous wor
 [OPEN] id: clarify-001 | requested_by: engineer | issue: #000 | command: /orbit:quick | question: {the specific question} | reason: {why execution must pause} | requested_at: 2026-04-01T00:00:00Z
 [RESOLVED] id: clarify-001 | resolution: {answer} | resolved_by: operator | resolved_at: 2026-04-01T00:05:00Z
 ```
+
+## Runtime Events
+Execution-level safety events emitted by autonomous workflows:
+```text
+[LOOP_DETECTED] wave: wave-001 | agent: engineer | pattern: bash_command:abc123def456 | repeats: 3 | threshold: 3 | issue: #72 | task: task_wave-001_2 | detected_at: 2026-04-01T00:10:00Z | action: task_terminated
+```
