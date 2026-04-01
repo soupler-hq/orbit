@@ -8,6 +8,7 @@ const {
   isFeatureBranch,
 } = require('./workflow-state');
 const {
+  formatAutoChainStatus,
   formatCheckpointSummary,
   formatClassification,
   formatNextCommand,
@@ -100,6 +101,46 @@ function buildOperationalRuleWorkflow(args, profile) {
   };
 }
 
+function buildQuickAutoChain(evidence, workflow) {
+  if (!evidence.issue || !evidence.branch || !isFeatureBranch(evidence.branch)) {
+    return null;
+  }
+
+  let verification = 'waiting_on_implementation';
+  if (evidence.testsStatus === 'passed') verification = 'passed';
+  else if (evidence.testsStatus === 'failed') verification = 'failed';
+  else if (evidence.implementationStatus === 'done') verification = 'required';
+  else if (evidence.implementationStatus === 'in_progress') verification = 'in_progress';
+
+  let review = 'waiting_on_verification';
+  let prAction = 'blocked';
+  let finalWorkflow = workflow;
+
+  if (evidence.testsStatus === 'passed') {
+    if (evidence.reviewStatus === 'approved') {
+      review = 'clean';
+      prAction = evidence.prStatus === 'open' ? 'update_existing_pr' : 'create_or_update_ready';
+      finalWorkflow = evaluateWorkflowState(evidence);
+    } else if (evidence.reviewStatus === 'pending') {
+      review = 'dispatched_pending';
+      finalWorkflow = evaluateWorkflowState({ ...evidence, reviewStatus: 'pending' });
+    } else if (evidence.reviewStatus === 'changes_requested') {
+      review = 'changes_requested';
+      finalWorkflow = evaluateWorkflowState(evidence);
+    } else {
+      review = 'auto_dispatch_review';
+      finalWorkflow = evaluateWorkflowState({ ...evidence, reviewStatus: 'pending' });
+    }
+  }
+
+  return {
+    verification,
+    review,
+    prAction,
+    finalWorkflow,
+  };
+}
+
 function buildRuntimeCommandOutput(args, profile) {
   const evidence = buildEvidence(args);
   const operational = buildOperationalRuleWorkflow(args, profile);
@@ -110,12 +151,14 @@ function buildRuntimeCommandOutput(args, profile) {
     boundaryWorkflow ||
     profile.workflowOverride ||
     evaluateWorkflowState(evidence);
+  const autoChain = profile.autoChain === true ? buildQuickAutoChain(evidence, workflow) : null;
+  const effectiveWorkflow = autoChain?.finalWorkflow || workflow;
   const primary =
-    workflow.nextCommand && workflow.nextCommand !== profile.command
-      ? workflow.nextCommand
+    effectiveWorkflow.nextCommand && effectiveWorkflow.nextCommand !== profile.command
+      ? effectiveWorkflow.nextCommand
       : profile.defaultPrimary;
   const why =
-    workflow.blockers[0] ||
+    effectiveWorkflow.blockers[0] ||
     profile.defaultWhy ||
     `Orbit classified this as ${profile.command} and emitted the next workflow step.`;
   const prLabel =
@@ -148,7 +191,18 @@ function buildRuntimeCommandOutput(args, profile) {
   }
 
   if (profile.includeWorkflowGate !== false) {
-    sections.push(formatWorkflowGate(workflow));
+    sections.push(formatWorkflowGate(effectiveWorkflow));
+  }
+
+  if (autoChain) {
+    sections.push(
+      formatAutoChainStatus({
+        verification: autoChain.verification,
+        review: autoChain.review,
+        prAction: autoChain.prAction,
+        finalState: effectiveWorkflow.state,
+      })
+    );
   }
 
   const shouldWriteCheckpoint =
@@ -160,7 +214,7 @@ function buildRuntimeCommandOutput(args, profile) {
       args,
       profile,
       evidence,
-      workflow,
+      workflow: effectiveWorkflow,
     });
     const { latestPath } = writeCheckpointManifest({
       checkpointDir: args['checkpoint-dir'] || args.checkpointDir,
@@ -182,6 +236,7 @@ function buildRuntimeCommandOutput(args, profile) {
 
 module.exports = {
   buildOperationalRuleWorkflow,
+  buildQuickAutoChain,
   buildTaskBoundaryWorkflow,
   buildRuntimeCommandOutput,
   parseArgs,

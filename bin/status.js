@@ -95,6 +95,17 @@ function formatCheckpointSummary(manifest, artifactPath) {
   ].join('\n');
 }
 
+function formatAutoChainStatus({ verification, review, prAction, finalState }) {
+  return [
+    '━━━ Orbit Auto-Chain ━━━━━━━━━━━━━━━━━',
+    `  Verification: ${verification}`,
+    `  Review:       ${review}`,
+    `  PR Action:    ${prAction}`,
+    `  Final State:  ${finalState}`,
+    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+  ].join('\n');
+}
+
 function scopeDisplay(value) {
   if (Array.isArray(value)) return value.join(', ');
   return value || '-';
@@ -115,6 +126,7 @@ function formatNextCommand({ primary, why, alternatives = [] }) {
 }
 
 module.exports = {
+  formatAutoChainStatus,
   formatClassification,
   formatCheckpointSummary,
   formatNextCommand,
