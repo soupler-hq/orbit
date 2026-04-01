@@ -98,6 +98,21 @@ echo "✅ Pre-task validation passed"
 exit 0
 ```
 
+### pre-tool-use.sh — Pause on pending clarification
+```bash
+#!/usr/bin/env bash
+# Blocks further tool execution when Orbit has an unresolved clarification request.
+
+STATE_FILE=".orbit/state/STATE.md"
+
+if node bin/clarification-gate.js --state-file "$STATE_FILE" --pending-count | grep -qv '^0$'; then
+  echo "[CLARIFICATION] Pending clarification request detected. Run /orbit:clarify before continuing."
+  exit 2
+fi
+```
+
+Use this hook when `orbit.config.json` sets `clarification_gate: true`.
+
 ### post-commit.sh — Notify on every commit
 ```bash
 #!/usr/bin/env bash

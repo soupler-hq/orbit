@@ -76,3 +76,10 @@ Questions that need a decision before they block implementation:
 ```text
 - {question} - owner: {person}, deadline: {date}
 ```
+
+## Clarification Requests
+Pending execution-blocking ambiguity that must be resolved before autonomous work continues:
+```text
+[OPEN] id: clarify-001 | requested_by: engineer | issue: #000 | command: /orbit:quick | question: {the specific question} | reason: {why execution must pause} | requested_at: 2026-04-01T00:00:00Z
+[RESOLVED] id: clarify-001 | resolution: {answer} | resolved_by: operator | resolved_at: 2026-04-01T00:05:00Z
+```

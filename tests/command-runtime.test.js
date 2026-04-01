@@ -5,6 +5,7 @@ import { renderReview } from '../bin/review.js';
 import { renderVerify } from '../bin/verify.js';
 import { renderNext } from '../bin/next.js';
 import { renderRiper } from '../bin/riper.js';
+import { renderClarify } from '../bin/clarify.js';
 import { findOperationalRule, loadOperationalRules } from '../bin/operational-rules.js';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -167,6 +168,31 @@ describe('runtime command status parity', () => {
 
   it('riper runtime emits the standard status blocks', () => {
     expectParity(renderRiper(trackedArgs), '/orbit:riper');
+  });
+
+  it('clarify runtime emits the standard status blocks and shows the pending queue', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-clarify-state-'));
+    const stateFile = path.join(tmpDir, 'STATE.md');
+    fs.writeFileSync(
+      stateFile,
+      [
+        '# Orbit State',
+        '## Clarification Requests',
+        '[OPEN] id: clarify-001 | requested_by: engineer | issue: #73 | command: /orbit:quick | question: Which staging dataset should be used? | reason: Missing required input | requested_at: 2026-04-01T00:00:00Z',
+      ].join('\n')
+    );
+
+    const output = renderClarify({
+      issue: '#73',
+      branch: 'feat/73-clarification-gate',
+      stateFile,
+    });
+
+    expectParity(output, '/orbit:clarify');
+    expect(output).toContain('Clarification Queue');
+    expect(output).toContain('Pending:   1');
+    expect(output).toContain('Question: Which staging dataset should be used?');
+    expect(output).toContain('State:    clarification_required');
   });
 
   it('next runtime resolves the next issue from STATE.md when no tracked branch is active', () => {
