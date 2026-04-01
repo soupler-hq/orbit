@@ -32,6 +32,7 @@ Each entry should be evaluated for:
 | E07 | Audit prompt injection risks in the workflow docs | REVIEW | security-engineer | `/orbit:audit` | Security plus prompt-safety |
 | E08 | Resume a compacted session and continue phase work | OPERATIONS | strategist or engineer | `/orbit:resume` | State recovery test |
 | E09 | Write the PRD, user stories, and acceptance criteria for this feature | PRODUCT | product-manager | `/orbit:plan` | Product requirement lifecycle should route to product-manager instead of strategist |
+| E10 | Turn this PRD into a functional spec with use cases, edge cases, and a process map for Wave 2 checkout work | PRODUCT | business-analyst | `/orbit:plan` | Graduation test for engineer-ready specification work |
 
 ## Expected Signals
 

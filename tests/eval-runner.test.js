@@ -33,6 +33,11 @@ describe('eval-runner issue #85 coverage', () => {
       expect(checks.get('agent contract: product-manager is registered')).toBe(true);
       expect(checks.get('agent contract: product-manager includes ## ANTI-PATTERNS')).toBe(true);
       expect(checks.get('agent contract: product-manager skill refs are valid')).toBe(true);
+      expect(checks.get('agent contract: business-analyst is registered')).toBe(true);
+      expect(checks.get('agent contract: business-analyst includes ## ANTI-PATTERNS')).toBe(
+        true
+      );
+      expect(checks.get('agent contract: business-analyst skill refs are valid')).toBe(true);
       expect(checks.get('agent contract: data-engineer includes ## ANTI-PATTERNS')).toBe(true);
       expect(checks.get('agent contract: pedagogue skill refs are valid')).toBe(true);
       expect(
