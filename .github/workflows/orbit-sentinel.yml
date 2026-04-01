@@ -23,6 +23,8 @@ jobs:
         with:
           node-version: '22'
       - name: 🧭 PR governance gate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node bin/validate-pr-governance.js
       - name: 🔒 Verify package-lock.json is up to date
         run: npm ci --dry-run

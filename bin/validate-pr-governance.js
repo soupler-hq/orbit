@@ -2,6 +2,7 @@
 'use strict';
 
 const fs = require('fs');
+const https = require('https');
 const path = require('path');
 
 const ALLOWED_BRANCH_RE =
@@ -45,6 +46,56 @@ function loadPayload(args) {
       },
     },
   };
+}
+
+function fetchLivePullRequestBody(payload) {
+  const prNumber = payload.pull_request?.number;
+  const repo = process.env.GITHUB_REPOSITORY;
+  const token = process.env.GITHUB_TOKEN;
+
+  if (!prNumber || !repo || !token) {
+    return Promise.resolve(null);
+  }
+
+  return new Promise((resolve, reject) => {
+    const request = https.request(
+      {
+        hostname: 'api.github.com',
+        path: `/repos/${repo}/pulls/${prNumber}`,
+        method: 'GET',
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${token}`,
+          'User-Agent': 'orbit-pr-governance-check',
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+      },
+      (response) => {
+        let body = '';
+        response.on('data', (chunk) => {
+          body += chunk;
+        });
+        response.on('end', () => {
+          if (response.statusCode < 200 || response.statusCode >= 300) {
+            reject(
+              new Error(`GitHub API returned ${response.statusCode || 'unknown'} while loading PR`)
+            );
+            return;
+          }
+
+          try {
+            const parsed = JSON.parse(body);
+            resolve(parsed.body || null);
+          } catch (error) {
+            reject(error);
+          }
+        });
+      }
+    );
+
+    request.on('error', reject);
+    request.end();
+  });
 }
 
 function isReleaseBridge(headRef, baseRef) {
@@ -108,9 +159,19 @@ function validateGovernance(payload) {
   };
 }
 
-function main() {
+async function main() {
   const args = parseArgs(process.argv.slice(2));
   const payload = loadPayload(args);
+  try {
+    const liveBody = await fetchLivePullRequestBody(payload);
+    if (liveBody) {
+      payload.pull_request.body = liveBody;
+    }
+  } catch (error) {
+    console.warn(
+      `WARN: Could not load live PR body from GitHub API. Falling back to event payload. ${error.message}`
+    );
+  }
   const result = validateGovernance(payload);
 
   if (result.skipped) {
@@ -131,12 +192,16 @@ function main() {
 }
 
 if (require.main === module) {
-  main();
+  main().catch((error) => {
+    console.error(`ERROR: ${error.message}`);
+    process.exit(1);
+  });
 }
 
 module.exports = {
   ALLOWED_BRANCH_RE,
   REQUIRED_HEADINGS,
+  fetchLivePullRequestBody,
   isReleaseBridge,
   validateBranchName,
   validateBody,

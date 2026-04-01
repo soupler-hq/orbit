@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 const {
+  fetchLivePullRequestBody,
   validateBranchName,
   validateBody,
   validateGovernance,
@@ -67,5 +68,15 @@ describe('validate-pr-governance', () => {
     });
 
     expect(result.ok).toBe(true);
+  });
+
+  it('does not attempt a live fetch without required CI metadata', async () => {
+    const liveBody = await fetchLivePullRequestBody({
+      pull_request: {
+        number: 154,
+      },
+    });
+
+    expect(liveBody).toBeNull();
   });
 });
