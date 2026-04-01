@@ -3,7 +3,7 @@ id: issue-125-provenance-driven-context-synthesis
 doc_type: plan
 status: Active
 version: v1
-last_updated: 2026-03-31
+last_updated: 2026-04-01
 scope: issue-125
 phase: Recovery
 rank: 020
@@ -26,6 +26,31 @@ This plan formalizes that model and turns it into an implementable feature set.
 ## Core Principle
 
 Use the repository as the evidence layer, `context.db` as the fast materialized cache, and `STATE.md` as the human-readable materialized view. Neither file is the canonical source of truth. They are projections.
+
+## Current Reality
+
+This plan is still the right architecture direction, but recent work exposed a practical prerequisite:
+
+- Orbit can improve hooks, prompts, and workflow docs faster than it updates resumable state
+- `.orbit/state/STATE.md`, `.orbit/state/pre-compact-snapshot.md`, and `context.db` can drift behind active branch and PR work
+- resumability is not trustworthy enough unless state freshness is enforced as part of normal workflow completion
+
+That means PDCS should be implemented with enforcement hardening in mind, not as a separate abstract recovery project.
+
+## Current Dependency
+
+PDCS now depends on the enforcement/state-reliability program becoming real first.
+
+In practice, that means these issues are prerequisites or close companions:
+
+- #132 — executable end-to-end enforcement coverage
+- #142 — documented-vs-enforced closure epic
+- #145 — automatic state freshness across command paths
+- #146 — status block parity across documented commands
+- #149 — adapter-backed plain-prompt enforcement
+- #150 — executable `/orbit:next`
+
+Without those, the system can still drift between what Orbit says it knows and what its materialized views actually contain.
 
 ## Design Goals
 
@@ -194,6 +219,10 @@ Recovery should trigger when one or more of the following are true:
 - `context.db` last materialized commit does not match `HEAD`
 - required facts are absent from the cache
 
+Additional practical trigger:
+
+- the active branch / PR / issue stack reflected in recent workflow work is not represented in `STATE.md`, the pre-compact snapshot, or the materialized context cache
+
 The engine should classify drift as:
 
 - `fresh`
@@ -226,6 +255,7 @@ Conflict resolution should prefer:
 - Define provenance and confidence fields
 - Add drift metadata to materialized views
 - Add tests for missing and stale state
+- Include explicit facts for active branch, active PR, current issue/epic, and last durable task boundary
 
 ### Wave 2: Recovery orchestration
 
@@ -233,6 +263,7 @@ Conflict resolution should prefer:
 - Add git-based and docs-based recovery paths
 - Add confidence scoring and conflict resolution
 - Add explicit error modes for low-confidence recovery
+- Verify that `/orbit:resume` can recover the current enforcement stack even if local session memory is missing
 
 ### Wave 3: Source extractors
 
@@ -272,6 +303,7 @@ This keeps generated and planning artifacts out of the repo root without relying
 - Human edits are detected and handled conservatively
 - `context.db` is always the fast read path when available
 - `STATE.md` remains readable, consistent, and reviewable
+- active branch / PR / current issue stack survive into resumable context without relying on chat history
 - Documentation explains where artifacts belong and which files are canonical
 - Repo structure aligns with the cleanup goals in issue #78
 
