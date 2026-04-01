@@ -23,6 +23,11 @@ const REVIEW_EVIDENCE_BODY = [
   '```',
 ].join('\n');
 
+const BLOCKED_REVIEW_EVIDENCE_BODY = REVIEW_EVIDENCE_BODY.replace(
+  '**Ship decision**: APPROVED',
+  '**Ship decision**: BLOCKED'
+);
+
 function makeExecutable(filePath, content) {
   fs.writeFileSync(filePath, content, { mode: 0o755 });
 }
@@ -278,6 +283,32 @@ describe('runtime capability generation', () => {
 
       expect(result.status).toBe(1);
       expect(result.stderr).toContain('Review evidence missing');
+      expect(result.stderr).toContain('/orbit:review');
+    } finally {
+      runtime.cleanup();
+    }
+  });
+
+  it('blocks PR-open progression when the self-review verdict is blocked', () => {
+    const runtime = buildFakeRuntime({
+      branch: 'feat/144-review-ship-evidence',
+      prData: {
+        state: 'OPEN',
+        reviewDecision: 'APPROVED',
+        statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+        body: BLOCKED_REVIEW_EVIDENCE_BODY,
+      },
+    });
+
+    try {
+      const result = spawnSync('node', [path.join(ROOT, 'bin', 'ship.js')], {
+        cwd: ROOT,
+        encoding: 'utf8',
+        env: runtime.env,
+      });
+
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain('Orbit self-review is blocked');
       expect(result.stderr).toContain('/orbit:review');
     } finally {
       runtime.cleanup();

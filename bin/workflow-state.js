@@ -98,6 +98,11 @@ function normalizeEvidence(evidence = {}) {
       ['unknown', 'missing', 'present'],
       'unknown'
     ),
+    shipDecisionStatus: normalizeStatus(
+      evidence.shipDecisionStatus,
+      ['unknown', 'approved', 'conditional', 'blocked'],
+      'unknown'
+    ),
     prStatus: normalizeStatus(
       evidence.prStatus,
       ['unknown', 'not_open', 'open', 'merged'],
@@ -142,12 +147,20 @@ function evaluateWorkflowState(rawEvidence = {}) {
     return buildSummary('review_required', evidence, blockers);
   }
 
+  if (evidence.shipDecisionStatus === 'blocked') {
+    blockers.push(
+      'Orbit self-review is blocked; resolve the recorded findings before PR or ship progression.'
+    );
+    return buildSummary('review_required', evidence, blockers);
+  }
+
   if (
     evidence.prStatus === 'open' &&
     evidence.reviewStatus === 'approved' &&
     evidence.testsStatus === 'passed' &&
     evidence.reviewEvidenceStatus === 'present' &&
-    evidence.testEvidenceStatus === 'present'
+    evidence.testEvidenceStatus === 'present' &&
+    evidence.shipDecisionStatus !== 'blocked'
   ) {
     return buildSummary('pr_open', evidence, blockers);
   }

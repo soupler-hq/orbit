@@ -19,6 +19,11 @@ const REVIEW_EVIDENCE_BODY = [
   '```',
 ].join('\n');
 
+const BLOCKED_REVIEW_EVIDENCE_BODY = REVIEW_EVIDENCE_BODY.replace(
+  '**Ship decision**: APPROVED',
+  '**Ship decision**: BLOCKED'
+);
+
 describe('runtime enforcement entrypoints', () => {
   it('progress runtime emits execution, workflow gate, and next command', () => {
     const output = progress.renderProgress({
@@ -190,5 +195,48 @@ describe('runtime enforcement entrypoints', () => {
 
     expect(evidence.reviewEvidenceStatus).toBe('present');
     expect(evidence.testEvidenceStatus).toBe('present');
+    expect(evidence.shipDecisionStatus).toBe('approved');
+  });
+
+  it('ship runtime blocks when self-review decision is blocked', () => {
+    const result = ship.renderShipDecision({
+      json: JSON.stringify({
+        issue: '#144',
+        branch: 'feat/144-review-ship-evidence',
+        implementationStatus: 'done',
+        testsStatus: 'passed',
+        reviewStatus: 'approved',
+        prStatus: 'open',
+        reviewEvidenceStatus: 'present',
+        testEvidenceStatus: 'present',
+        shipDecisionStatus: 'blocked',
+      }),
+    });
+
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('Orbit self-review is blocked');
+    expect(result.output).toContain('/orbit:review');
+  });
+
+  it('progress runtime reads blocked self-review status from a live PR body', () => {
+    const evidence = progress.buildEvidence(
+      {},
+      {
+        gitReader: (args) => {
+          if (args[0] === 'rev-parse') return 'feat/144-review-ship-evidence';
+          if (args[0] === 'status') return '';
+          return '';
+        },
+        githubReader: () => ({
+          state: 'OPEN',
+          reviewDecision: 'APPROVED',
+          statusCheckRollup: [{ status: 'COMPLETED', conclusion: 'SUCCESS' }],
+          body: BLOCKED_REVIEW_EVIDENCE_BODY,
+        }),
+      }
+    );
+
+    expect(evidence.reviewEvidenceStatus).toBe('present');
+    expect(evidence.shipDecisionStatus).toBe('blocked');
   });
 });

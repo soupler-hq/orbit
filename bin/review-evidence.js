@@ -2,6 +2,11 @@
 'use strict';
 
 const ALLOWED_SHIP_DECISIONS = ['APPROVED', 'APPROVED WITH CONDITIONS', 'BLOCKED'];
+const SHIP_DECISION_STATUS = {
+  APPROVED: 'approved',
+  'APPROVED WITH CONDITIONS': 'conditional',
+  BLOCKED: 'blocked',
+};
 
 function extractSection(body, heading) {
   const lines = String(body || '').split(/\r?\n/);
@@ -100,9 +105,11 @@ function validateTestEvidence(body) {
 }
 
 function inferEvidenceStatus(body) {
+  const reviewEvidence = parseReviewEvidence(body);
   return {
     reviewEvidenceStatus: validateReviewEvidence(body).length === 0 ? 'present' : 'missing',
     testEvidenceStatus: validateTestEvidence(body).length === 0 ? 'present' : 'missing',
+    shipDecisionStatus: SHIP_DECISION_STATUS[reviewEvidence.shipDecision] || 'unknown',
   };
 }
 
@@ -112,6 +119,7 @@ module.exports = {
   extractTestCommands,
   inferEvidenceStatus,
   parseReviewEvidence,
+  SHIP_DECISION_STATUS,
   validateReviewEvidence,
   validateTestEvidence,
 };

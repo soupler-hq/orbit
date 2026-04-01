@@ -103,6 +103,7 @@ function buildEvidence(args = {}, deps = {}) {
     : {
         reviewEvidenceStatus: args.reviewEvidenceStatus || 'unknown',
         testEvidenceStatus: args.testEvidenceStatus || 'unknown',
+        shipDecisionStatus: args.shipDecisionStatus || 'unknown',
       };
 
   return {
@@ -114,6 +115,7 @@ function buildEvidence(args = {}, deps = {}) {
     prStatus: args.prStatus || inferPrStatus(prData),
     reviewEvidenceStatus: args.reviewEvidenceStatus || evidenceStatus.reviewEvidenceStatus,
     testEvidenceStatus: args.testEvidenceStatus || evidenceStatus.testEvidenceStatus,
+    shipDecisionStatus: args.shipDecisionStatus || evidenceStatus.shipDecisionStatus,
   };
 }
 

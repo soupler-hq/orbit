@@ -164,4 +164,22 @@ describe('workflow state engine', () => {
     expect(summary.state).toBe('review_required');
     expect(summary.blockers[0]).toContain('Review evidence missing');
   });
+
+  it('blocks progression when self-review ship decision is blocked', () => {
+    const summary = workflowState.evaluateWorkflowState({
+      issue: '#144',
+      branch: 'feat/144-review-ship-evidence',
+      implementationStatus: 'done',
+      testsStatus: 'passed',
+      testEvidenceStatus: 'present',
+      reviewStatus: 'approved',
+      reviewEvidenceStatus: 'present',
+      shipDecisionStatus: 'blocked',
+      prStatus: 'open',
+    });
+
+    expect(summary.state).toBe('review_required');
+    expect(summary.blockers[0]).toContain('Orbit self-review is blocked');
+    expect(summary.prGate).toBe('blocked');
+  });
 });
