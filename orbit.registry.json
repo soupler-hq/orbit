@@ -838,6 +838,22 @@
       "outputs": [
         "answer from STATE.md or context.db with source citation"
       ]
+    },
+    {
+      "name": "clarify",
+      "command": "/orbit:clarify",
+      "mode": "collaborative",
+      "agents": [
+        "strategist"
+      ],
+      "inputs": [
+        "pending clarification requests",
+        "operator answer"
+      ],
+      "outputs": [
+        "clarification queue",
+        "clarification resolution"
+      ]
     }
   ]
 }

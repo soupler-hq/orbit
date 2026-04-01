@@ -25,6 +25,23 @@ The telemetry layer is documentation-backed in `commands/commands.md` and enforc
 
 For vague or plain prompt routing checks, use the verification checklist in [docs/architecture/runtime-adapters.md](../architecture/runtime-adapters.md#verification-checklist) before treating the behavior as a runtime bug.
 
+## Clarification Gate
+
+When autonomous execution hits ambiguity that makes continued tool use unsafe, Orbit should pause instead of guessing.
+
+Use the clarification gate for situations such as:
+- missing required input that changes implementation behavior
+- conflicting operator requirements
+- destructive action pending without explicit approval
+- unresolved environment or deployment target selection
+
+The clarification gate contract is:
+- the active agent emits a `CLARIFICATION_REQUESTED` entry under `## Clarification Requests` in `.orbit/state/STATE.md`
+- `hooks/scripts/pre-tool-use.sh` blocks further tool execution while open clarification requests exist
+- `/orbit:clarify` shows the pending queue and can resolve requests so execution can continue
+
+This keeps clarification as a lightweight state-and-hook primitive rather than a separate middleware system.
+
 ## Operational Rule Memory
 
 When a repeated operational failure pattern is observed, promote it into `.orbit/state/OPERATIONAL-RULES.json` instead of relying on conversational memory alone.

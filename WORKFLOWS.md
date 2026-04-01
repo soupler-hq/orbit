@@ -32,6 +32,7 @@
 - `/orbit:cost` [audit] — inputs: session usage → outputs: token and cost estimate
 - `/orbit:promote` [collaborative] — inputs: local patterns, agents, skills → outputs: core repository PR, registry update
 - `/orbit:ask` [collaborative] — inputs: question about project state → outputs: answer from STATE.md or context.db with source citation
+- `/orbit:clarify` [collaborative] — inputs: pending clarification requests, operator answer → outputs: clarification queue, clarification resolution
 <!-- GENERATED:END workflows_list -->
 
 ## Registry Discipline

@@ -159,6 +159,7 @@ Repeat PHASE per phase until milestone complete
 - {{IMPLICIT_ROUTING_BULLET}}
 - Use plain prompts as direct Q&A only when the user is clearly asking for explanation, feedback, or lightweight guidance rather than requesting tracked work.
 - If no issue exists for framework work, create or identify the issue before implementation and carry that issue number through branch, commit, PR, and STATE updates.
+- If ambiguity blocks safe execution, emit a `CLARIFICATION_REQUESTED` event in `.orbit/state/STATE.md`, stop autonomous tool use, and resume only after `/orbit:clarify` resolves the request.
 
 ---
 

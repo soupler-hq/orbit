@@ -41,6 +41,10 @@ describe('eval-runner issue #85 coverage', () => {
       expect(checks.get('workflow contract: /orbit:ask defines inputs')).toBe(true);
       expect(checks.get('workflow contract: /orbit:ask references agents')).toBe(true);
       expect(checks.get('workflow contract: /orbit:ask agent refs exist')).toBe(true);
+      expect(checks.get('workflow contract: /orbit:clarify defines inputs')).toBe(true);
+      expect(checks.get('workflow contract: /orbit:clarify references agents')).toBe(true);
+      expect(checks.get('workflow contract: /orbit:clarify agent refs exist')).toBe(true);
+      expect(checks.get('workflow contract: /orbit:clarify doc exists')).toBe(true);
       expect(checks.get('workflow contract: /orbit:eval defines outputs')).toBe(true);
       expect(checks.get('workflow contract: /orbit:eval references agents')).toBe(true);
       expect(checks.get('workflow contract: /orbit:eval agent refs exist')).toBe(true);
@@ -51,6 +55,12 @@ describe('eval-runner issue #85 coverage', () => {
       expect(checks.get('config contract: loop_detection.window_size exists')).toBe(true);
       expect(checks.get('config contract: loop_detection.threshold exists')).toBe(true);
       expect(checks.get('config contract: clarification_gate boolean exists')).toBe(true);
+      expect(checks.get('hook contract: pre-tool-use references clarification gate helper')).toBe(
+        true
+      );
+      expect(checks.get('template contract: STATE.md includes clarification requests section')).toBe(
+        true
+      );
       expect(checks.get('template contract: DECISIONS-LOG.md includes decision:')).toBe(true);
       expect(checks.get('template contract: DECISIONS-LOG.md includes made_at:')).toBe(true);
       expect(checks.get('template contract: DECISIONS-LOG.md includes version:')).toBe(true);

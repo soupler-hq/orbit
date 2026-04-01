@@ -294,8 +294,10 @@ const adapterText = readFile('docs/architecture/runtime-adapters.md') || '';
 const commandsText = readFile('commands/commands.md') || '';
 const configText = readFile('orbit.config.json');
 const config = configText ? JSON.parse(configText) : { runtimes: {} };
+const stateTemplateText = readFile('templates/STATE.md') || '';
 const decisionsLogTemplateText = readFile('templates/DECISIONS-LOG.md') || '';
 const operationalRulesTemplateText = readFile('templates/OPERATIONAL-RULES.json') || '';
+const preToolUseHookText = readFile('hooks/scripts/pre-tool-use.sh') || '';
 
 // Build lookup sets from registry
 const registryAgentNames = new Set(registry.agents.map((a) => a.name));
@@ -321,6 +323,7 @@ const REQUIRED_AGENT_SECTIONS = [
 const REQUIRED_V29_SKILLS = ['skills/instructor.md', 'skills/workflow-audit.md'];
 const REQUIRED_V29_WORKFLOWS = [
   { command: '/orbit:ask', doc: 'commands/orbit/ask.md' },
+  { command: '/orbit:clarify', doc: 'commands/orbit/clarify.md' },
   { command: '/orbit:eval', doc: 'commands/orbit/eval.md' },
   { command: '/orbit:riper', doc: 'commands/orbit/riper.md' },
 ];
@@ -601,6 +604,24 @@ integrityResults.push({
     typeof config.clarification_gate === 'boolean'
       ? 'ok'
       : 'orbit.config.json missing clarification_gate boolean',
+});
+integrityResults.push({
+  check: 'hook contract: pre-tool-use references clarification gate helper',
+  pass:
+    preToolUseHookText.includes('bin/clarification-gate.js') &&
+    preToolUseHookText.includes('/orbit:clarify'),
+  reason:
+    preToolUseHookText.includes('bin/clarification-gate.js') &&
+    preToolUseHookText.includes('/orbit:clarify')
+      ? 'ok'
+      : 'hooks/scripts/pre-tool-use.sh missing clarification gate enforcement',
+});
+integrityResults.push({
+  check: 'template contract: STATE.md includes clarification requests section',
+  pass: stateTemplateText.includes('## Clarification Requests'),
+  reason: stateTemplateText.includes('## Clarification Requests')
+    ? 'ok'
+    : 'templates/STATE.md missing clarification requests section',
 });
 integrityResults.push({
   check: 'template contract: DECISIONS-LOG.md exists',
@@ -1144,6 +1165,15 @@ const OBS_CHECKS = [
     ...checkRuntimeCommandOutput(
       'bin/riper.js',
       ['--issue', '#147', '--branch', 'feat/147-executable-recovery-loop'],
+      ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
+    ),
+  },
+  {
+    id: 'OBS013',
+    check: 'orbit:clarify runtime emits the standard status blocks',
+    ...checkRuntimeCommandOutput(
+      'bin/clarify.js',
+      ['--issue', '#73', '--branch', 'feat/73-clarification-gate'],
       ['━━━ Orbit', 'Current Execution', 'Workflow Gate', '## Recommended Next Command']
     ),
   },

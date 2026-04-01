@@ -11,6 +11,7 @@ STATE.md is Orbit's memory. It must stay current without being asked. Update it 
 | New issue created                             | Add to appropriate wave/milestone in Todos                       |
 | Blocker encountered                           | Add to Todos with `BLOCKED:` prefix and reason                   |
 | Blocker resolved                              | Remove from Todos, add resolution to Decisions Log               |
+| Clarification required                        | Add `CLARIFICATION_REQUESTED` entry under Clarification Requests |
 | Milestone shipped                             | Update Active Milestone, Current Version, add to Decisions Log   |
 | Session produces significant context          | Update Project Context if active phase/milestone changed         |
 
@@ -306,6 +307,35 @@ Implementation order for the repo-local runtime:
 2. Otherwise, inspect `.orbit/state/STATE.md` and recommend the next open issue in the active `(CURRENT)` phase section.
 3. If no tracked backlog remains, recommend `/orbit:plan`.
 4. If no project state exists yet, recommend `/orbit:new-project`.
+
+If open clarification requests exist in `.orbit/state/STATE.md`, `/orbit:next` should not advance autonomous work until `/orbit:clarify` resolves them.
+
+---
+
+# Orbit Command: /orbit:clarify
+
+> Surface and resolve pending clarification requests that are blocking autonomous execution
+
+## PROCESS
+
+1. Read `.orbit/state/STATE.md`.
+2. Parse the `## Clarification Requests` section.
+3. Show all `[OPEN]` `CLARIFICATION_REQUESTED` entries in a structured queue.
+4. If called with a resolution, mark the matching entry `[RESOLVED]`.
+5. If any open requests remain, keep workflow state blocked.
+6. If no open requests remain, recommend `/orbit:next`.
+
+**Clarification event schema in `STATE.md`:**
+
+```text
+[OPEN] id: clarify-001 | requested_by: engineer | issue: #73 | command: /orbit:quick | question: Which staging dataset should be used? | reason: Missing required input | requested_at: 2026-04-01T00:00:00Z
+[RESOLVED] id: clarify-001 | resolution: Use staging-fixture-a. | resolved_by: operator | resolved_at: 2026-04-01T00:05:00Z
+```
+
+**Rule:**
+
+- If ambiguity blocks safe execution, the active agent must emit a `CLARIFICATION_REQUESTED` event and stop tool execution until it is resolved.
+- `hooks/scripts/pre-tool-use.sh` is responsible for enforcing the pause when clarification gating is enabled.
 
 ---
 
