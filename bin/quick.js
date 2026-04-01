@@ -13,6 +13,7 @@ function renderQuick(args = {}) {
     defaultPrimary: '/orbit:review',
     defaultWhy: 'Tracked implementation work should flow to review once the branch is ready.',
     details: 'tracked implementation',
+    enforceIssueBoundary: true,
   });
 }
 

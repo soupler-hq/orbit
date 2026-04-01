@@ -2,7 +2,11 @@
 'use strict';
 
 const { buildEvidence } = require('./progress');
-const { evaluateWorkflowState } = require('./workflow-state');
+const {
+  evaluateWorkflowState,
+  inferIssueFromBranch,
+  isFeatureBranch,
+} = require('./workflow-state');
 const {
   formatClassification,
   formatNextCommand,
@@ -27,9 +31,35 @@ function parseArgs(argv) {
   return args;
 }
 
+function buildTaskBoundaryWorkflow(args, evidence) {
+  const requestedIssue = args.issue || null;
+  const activeBranch = evidence.branch || null;
+  const branchIssue = inferIssueFromBranch(activeBranch);
+
+  if (!requestedIssue || !activeBranch || !isFeatureBranch(activeBranch) || !branchIssue) {
+    return null;
+  }
+
+  if (requestedIssue === branchIssue) {
+    return null;
+  }
+
+  return {
+    state: 'context_switch_required',
+    prGate: 'blocked',
+    nextTransition: 'branch_aligned',
+    nextCommand: `/orbit:quick ${requestedIssue}`,
+    blockers: [
+      `Requested issue ${requestedIssue} does not match active branch ${activeBranch} (${branchIssue}); switch to a ${requestedIssue}-aligned feature branch before continuing.`,
+    ],
+  };
+}
+
 function buildRuntimeCommandOutput(args, profile) {
   const evidence = buildEvidence(args);
-  const workflow = profile.workflowOverride || evaluateWorkflowState(evidence);
+  const boundaryWorkflow =
+    profile.enforceIssueBoundary === true ? buildTaskBoundaryWorkflow(args, evidence) : null;
+  const workflow = boundaryWorkflow || profile.workflowOverride || evaluateWorkflowState(evidence);
   const primary =
     workflow.nextCommand && workflow.nextCommand !== profile.command
       ? workflow.nextCommand
@@ -72,6 +102,7 @@ function buildRuntimeCommandOutput(args, profile) {
 }
 
 module.exports = {
+  buildTaskBoundaryWorkflow,
   buildRuntimeCommandOutput,
   parseArgs,
 };
