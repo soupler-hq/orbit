@@ -190,6 +190,10 @@ Expected workflow mapping examples:
 - `go ahead` after active issue context → `/orbit:quick <active issue>`
 - `review this` on an active branch → `/orbit:review`
 
+Priority rule:
+- explicit next-task prompts must override an active PR review lane once the current branch is already `review_clean`, `pr_ready`, or `pr_open`
+- supported runtimes should classify `pick next task` into backlog selection, not repeat the current PR review cycle
+
 ### 5. Confirm unsupported-runtime fallback
 
 If the runtime contract says plain-prompt routing is unsupported:

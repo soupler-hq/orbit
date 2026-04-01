@@ -9,6 +9,7 @@ const { evaluateWorkflowState } = require('./workflow-state');
 
 const ROOT = path.resolve(__dirname, '..');
 const DEFAULT_STATE_PATH = path.join(ROOT, '.orbit', 'state', 'STATE.md');
+const HANDOFF_COMPLETE_STATES = new Set(['review_clean', 'pr_ready', 'pr_open']);
 
 function sanitizeTitleForCommand(title) {
   return String(title || '')
@@ -93,12 +94,38 @@ function readStateSummary(statePath = DEFAULT_STATE_PATH) {
   return parseStateBacklog(fs.readFileSync(statePath, 'utf8'));
 }
 
+function findNextOpenIssue(stateSummary, activeIssue = null) {
+  if (!stateSummary) return null;
+  return stateSummary.openIssues.find((entry) => entry.issue !== activeIssue) || null;
+}
+
 function resolveNextAction(args = {}, deps = {}) {
   const evidence = buildEvidence(args, deps.runtimeDeps);
   const workflow = evaluateWorkflowState(evidence);
   const branch = evidence.branch || '';
   const isTrackedBranch =
     workflow.evidence.issue && branch && !['develop', 'main', 'master', 'HEAD'].includes(branch);
+  const stateSummary = readStateSummary(args.stateFile || args['state-file'] || DEFAULT_STATE_PATH);
+  const nextIssue = findNextOpenIssue(stateSummary, workflow.evidence.issue);
+
+  if (isTrackedBranch && HANDOFF_COMPLETE_STATES.has(workflow.state) && nextIssue) {
+    const title = sanitizeTitleForCommand(nextIssue.title);
+    return {
+      issue: nextIssue.issue,
+      workflow: {
+        state: 'issue_ready',
+        prGate: 'blocked',
+        nextTransition: 'branch_ready',
+        nextCommand: `/orbit:quick ${nextIssue.issue} ${title}`,
+        blockers: [
+          `Active branch ${branch} is already in ${workflow.state}; move to the next unblocked issue instead of staying in the PR review lane.`,
+        ],
+      },
+      primary: `/orbit:quick ${nextIssue.issue} ${title}`,
+      why: `Current branch ${branch} is already in ${workflow.state}, so ${nextIssue.issue} is the next unblocked tracked issue from STATE.md.`,
+      details: `${nextIssue.section} backlog`,
+    };
+  }
 
   if (isTrackedBranch) {
     return {
@@ -111,7 +138,6 @@ function resolveNextAction(args = {}, deps = {}) {
     };
   }
 
-  const stateSummary = readStateSummary(args.stateFile || args['state-file'] || DEFAULT_STATE_PATH);
   if (!stateSummary) {
     return {
       workflow: {
@@ -127,7 +153,6 @@ function resolveNextAction(args = {}, deps = {}) {
     };
   }
 
-  const nextIssue = stateSummary.openIssues[0] || null;
   if (nextIssue) {
     const title = sanitizeTitleForCommand(nextIssue.title);
     return {

@@ -165,6 +165,10 @@ Load `skills/brainstorming.md`. Then:
 
 Logic: same decision table as `/orbit:resume` inference block — first matching rule wins.
 
+Special priority rule:
+- when the user asks for the next task and the current branch is already in `review_clean`, `pr_ready`, or `pr_open`, `/orbit:next` must prefer the next unblocked issue from `STATE.md` over staying in the active PR review lane
+- in short: handoff-complete PR state must not override explicit next-task intent
+
 ---
 
 # Orbit Command: /orbit:plan [N]
