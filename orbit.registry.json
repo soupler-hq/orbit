@@ -12,11 +12,7 @@
     {
       "name": "claude",
       "support": "native",
-      "entrypoints": [
-        "CLAUDE.md",
-        "hooks/",
-        "/orbit:"
-      ],
+      "entrypoints": ["CLAUDE.md", "hooks/", "/orbit:"],
       "adapter": null
     },
     {
@@ -34,11 +30,7 @@
     {
       "name": "antigravity",
       "support": "experimental",
-      "entrypoints": [
-        "INSTRUCTIONS.md",
-        "WORKFLOWS.md",
-        "orbit.registry.json"
-      ],
+      "entrypoints": ["INSTRUCTIONS.md", "WORKFLOWS.md", "orbit.registry.json"],
       "adapter": "docs/architecture/runtime-adapters.md#antigravity",
       "install_fn": null,
       "note": "No stable hook/lifecycle API published. Tracked in issue #17."
@@ -48,82 +40,35 @@
     {
       "name": "architect",
       "file": "agents/architect.md",
-      "domains": [
-        "ENGINEERING",
-        "SYNTHESIS"
-      ],
-      "triggers": [
-        "system design",
-        "tech selection",
-        "architecture review"
-      ],
+      "domains": ["ENGINEERING", "SYNTHESIS"],
+      "triggers": ["system design", "tech selection", "architecture review"],
       "skills": [
         "skills/architecture.md",
         "skills/security-and-identity.md",
         "skills/scalability.md"
       ],
-      "outputs": [
-        "ARCH.md",
-        "ADR-*.md",
-        "INTERFACES.md",
-        "DATA-MODEL.md",
-        "NON-FUNCTIONAL.md"
-      ]
+      "outputs": ["ARCH.md", "ADR-*.md", "INTERFACES.md", "DATA-MODEL.md", "NON-FUNCTIONAL.md"]
     },
     {
       "name": "engineer",
       "file": "agents/engineer.md",
-      "domains": [
-        "ENGINEERING"
-      ],
-      "triggers": [
-        "implement",
-        "build",
-        "debug",
-        "refactor"
-      ],
-      "skills": [
-        "skills/tdd.md",
-        "skills/debugging.md",
-        "skills/reflection.md"
-      ],
-      "outputs": [
-        "source files",
-        "tests",
-        "SUMMARY.md",
-        "atomic commit"
-      ]
+      "domains": ["ENGINEERING"],
+      "triggers": ["implement", "build", "debug", "refactor"],
+      "skills": ["skills/tdd.md", "skills/debugging.md", "skills/reflection.md"],
+      "outputs": ["source files", "tests", "SUMMARY.md", "atomic commit"]
     },
     {
       "name": "strategist",
       "file": "agents/strategist.md",
-      "domains": [
-        "PRODUCT",
-        "SYNTHESIS"
-      ],
-      "triggers": [
-        "plan",
-        "roadmap",
-        "milestones"
-      ],
-      "skills": [
-        "skills/planning.md",
-        "skills/brainstorming.md"
-      ],
-      "outputs": [
-        "PROJECT.md",
-        "ROADMAP.md",
-        "PHASE-*.md",
-        "OKR.md",
-        "STATE.md"
-      ]
+      "domains": ["PRODUCT", "SYNTHESIS"],
+      "triggers": ["plan", "roadmap", "milestones"],
+      "skills": ["skills/planning.md", "skills/brainstorming.md"],
+      "outputs": ["PROJECT.md", "ROADMAP.md", "PHASE-*.md", "OKR.md", "STATE.md"]
     },
     {
       "name": "product-manager",
       "file": "agents/product-manager.md",
-      "domains": [
-        "PRODUCT"
-      ],
+      "domains": ["PRODUCT"],
       "triggers": [
         "prd",
         "requirements",
@@ -134,11 +79,7 @@
         "backlog",
         "product requirements"
       ],
-      "skills": [
-        "skills/planning.md",
-        "skills/brainstorming.md",
-        "skills/riper.md"
-      ],
+      "skills": ["skills/planning.md", "skills/brainstorming.md", "skills/riper.md"],
       "outputs": [
         "PRD.md",
         "USER-STORIES.md",
@@ -150,10 +91,7 @@
     {
       "name": "business-analyst",
       "file": "agents/business-analyst.md",
-      "domains": [
-        "PRODUCT",
-        "SYNTHESIS"
-      ],
+      "domains": ["PRODUCT", "SYNTHESIS"],
       "triggers": [
         "functional spec",
         "user story breakdown",
@@ -163,11 +101,7 @@
         "use case",
         "acceptance criteria definition"
       ],
-      "skills": [
-        "skills/planning.md",
-        "skills/brainstorming.md",
-        "skills/riper.md"
-      ],
+      "skills": ["skills/planning.md", "skills/brainstorming.md", "skills/riper.md"],
       "outputs": [
         "FUNCTIONAL-SPEC.md",
         "USE-CASES.md",
@@ -179,10 +113,7 @@
     {
       "name": "qa-engineer",
       "file": "agents/qa-engineer.md",
-      "domains": [
-        "REVIEW",
-        "ENGINEERING"
-      ],
+      "domains": ["REVIEW", "ENGINEERING"],
       "triggers": [
         "test strategy",
         "test plan",
@@ -193,11 +124,7 @@
         "quality assurance",
         "qa"
       ],
-      "skills": [
-        "skills/tdd.md",
-        "skills/review.md",
-        "skills/observability.md"
-      ],
+      "skills": ["skills/tdd.md", "skills/review.md", "skills/observability.md"],
       "outputs": [
         "TEST-PLAN.md",
         "AUTOMATION-SPEC.md",
@@ -209,245 +136,120 @@
     {
       "name": "reviewer",
       "file": "agents/reviewer.md",
-      "domains": [
-        "REVIEW"
-      ],
-      "triggers": [
-        "review",
-        "audit",
-        "quality gate",
-        "ship gate"
-      ],
-      "skills": [
-        "skills/review.md",
-        "skills/reflection.md"
-      ],
-      "outputs": [
-        "review report with severity ranking"
-      ]
+      "domains": ["REVIEW"],
+      "triggers": ["review", "audit", "quality gate", "ship gate"],
+      "skills": ["skills/review.md", "skills/reflection.md"],
+      "outputs": ["review report with severity ranking"]
     },
     {
       "name": "devops",
       "file": "agents/devops.md",
-      "domains": [
-        "OPERATIONS"
-      ],
-      "triggers": [
-        "deploy",
-        "monitor",
-        "ci/cd",
-        "infra"
-      ],
-      "skills": [
-        "skills/deployment.md",
-        "skills/observability.md"
-      ],
-      "outputs": [
-        "deployment config",
-        "runbooks",
-        "monitoring config"
-      ]
+      "domains": ["OPERATIONS"],
+      "triggers": ["deploy", "monitor", "ci/cd", "infra"],
+      "skills": ["skills/deployment.md", "skills/observability.md"],
+      "outputs": ["deployment config", "runbooks", "monitoring config"]
     },
     {
       "name": "researcher",
       "file": "agents/researcher.md",
-      "domains": [
-        "RESEARCH"
-      ],
-      "triggers": [
-        "research",
-        "compare",
-        "feasibility",
-        "unknown domain"
-      ],
-      "skills": [
-        "skills/brainstorming.md"
-      ],
-      "outputs": [
-        "research report",
-        "trade-off matrix",
-        "recommendation"
-      ]
+      "domains": ["RESEARCH"],
+      "triggers": ["research", "compare", "feasibility", "unknown domain"],
+      "skills": ["skills/brainstorming.md"],
+      "outputs": ["research report", "trade-off matrix", "recommendation"]
     },
     {
       "name": "designer",
       "file": "agents/designer.md",
-      "domains": [
-        "DESIGN"
-      ],
-      "triggers": [
-        "ux",
-        "flows",
-        "ia",
-        "component spec"
-      ],
-      "skills": [
-        "skills/brainstorming.md"
-      ],
-      "outputs": [
-        "UX-FLOWS.md",
-        "UI-SPEC.md",
-        "IA.md"
-      ]
+      "domains": ["DESIGN"],
+      "triggers": ["ux", "flows", "ia", "component spec"],
+      "skills": ["skills/brainstorming.md"],
+      "outputs": ["UX-FLOWS.md", "UI-SPEC.md", "IA.md"]
     },
     {
       "name": "launch-planner",
       "file": "agents/launch-planner.md",
-      "domains": [
-        "PRODUCT",
-        "OPERATIONS"
-      ],
+      "domains": ["PRODUCT", "OPERATIONS"],
       "triggers": [
         "launch plan",
         "go-to-market checklist",
         "announcement timing",
         "release launch"
       ],
-      "skills": [
-        "skills/planning.md",
-        "skills/brainstorming.md"
-      ],
-      "outputs": [
-        "LAUNCH-PLAN.md",
-        "GTM-CHECKLIST.md",
-        "launch execution timeline"
-      ]
+      "skills": ["skills/planning.md", "skills/brainstorming.md"],
+      "outputs": ["LAUNCH-PLAN.md", "GTM-CHECKLIST.md", "launch execution timeline"]
     },
     {
       "name": "technical-writer",
       "file": "agents/technical-writer.md",
-      "domains": [
-        "PRODUCT",
-        "SYNTHESIS"
-      ],
+      "domains": ["PRODUCT", "ENGINEERING"],
       "triggers": [
+        "api docs",
+        "user guide",
+        "integration guide",
+        "onboarding documentation",
+        "changelog entry",
+        "readme",
         "release notes",
         "announcement draft",
-        "docs copy",
-        "launch messaging"
+        "launch messaging",
+        "release communication",
+        "write documentation",
+        "document this"
       ],
-      "skills": [
-        "skills/review.md",
-        "skills/brainstorming.md"
-      ],
+      "skills": ["skills/riper.md", "skills/context-management.md"],
       "outputs": [
         "ANNOUNCEMENT-DRAFT.md",
-        "release notes",
-        "launch copy"
+        "API-DOCS.md",
+        "USER-GUIDE.md",
+        "INTEGRATION-GUIDE.md",
+        "ONBOARDING.md",
+        "CHANGELOG entries"
       ]
     },
     {
       "name": "security-engineer",
       "file": "agents/security-engineer.md",
-      "domains": [
-        "REVIEW",
-        "ENGINEERING"
-      ],
-      "triggers": [
-        "security review",
-        "threat model",
-        "audit",
-        "auth changes"
-      ],
-      "skills": [
-        "skills/security-and-identity.md",
-        "skills/review.md"
-      ],
-      "outputs": [
-        "security audit",
-        "threat model",
-        "dependency scan results"
-      ]
+      "domains": ["REVIEW", "ENGINEERING"],
+      "triggers": ["security review", "threat model", "audit", "auth changes"],
+      "skills": ["skills/security-and-identity.md", "skills/review.md"],
+      "outputs": ["security audit", "threat model", "dependency scan results"]
     },
     {
       "name": "data-engineer",
       "file": "agents/data-engineer.md",
-      "domains": [
-        "ENGINEERING",
-        "OPERATIONS"
-      ],
-      "triggers": [
-        "etl",
-        "warehouse",
-        "dbt",
-        "kafka",
-        "stream processing"
-      ],
+      "domains": ["ENGINEERING", "OPERATIONS"],
+      "triggers": ["etl", "warehouse", "dbt", "kafka", "stream processing"],
       "skills": [
         "skills/architecture.md",
         "skills/observability.md",
         "skills/tdd.md",
         "skills/scalability.md"
       ],
-      "outputs": [
-        "PIPELINE.md",
-        "DATA-QUALITY.md",
-        "RUNBOOK.md"
-      ]
+      "outputs": ["PIPELINE.md", "DATA-QUALITY.md", "RUNBOOK.md"]
     },
     {
       "name": "safety-evaluator",
       "file": "agents/safety-evaluator.md",
-      "domains": [
-        "REVIEW",
-        "RESEARCH"
-      ],
-      "triggers": [
-        "pre-tool-use",
-        "risky command",
-        "security audit"
-      ],
-      "skills": [
-        "skills/prompt-safety.md"
-      ],
-      "outputs": [
-        "risk score",
-        "verdict",
-        "rationale"
-      ]
+      "domains": ["REVIEW", "RESEARCH"],
+      "triggers": ["pre-tool-use", "risky command", "security audit"],
+      "skills": ["skills/prompt-safety.md"],
+      "outputs": ["risk score", "verdict", "rationale"]
     },
     {
       "name": "forge",
       "file": "agents/forge.md",
-      "domains": [
-        "SYNTHESIS"
-      ],
-      "triggers": [
-        "no matching agent",
-        "forge new agent"
-      ],
-      "skills": [
-        "skills/ai-systems.md",
-        "skills/brainstorming.md"
-      ],
-      "outputs": [
-        "new agent spec",
-        "registry update"
-      ]
+      "domains": ["SYNTHESIS"],
+      "triggers": ["no matching agent", "forge new agent"],
+      "skills": ["skills/ai-systems.md", "skills/brainstorming.md"],
+      "outputs": ["new agent spec", "registry update"]
     },
     {
       "name": "pedagogue",
       "file": "agents/pedagogue.md",
-      "domains": [
-        "SYNTHESIS",
-        "RESEARCH"
-      ],
-      "triggers": [
-        "explain",
-        "teach",
-        "masterclass",
-        "how it works",
-        "why do we need"
-      ],
-      "skills": [
-        "skills/instructor.md",
-        "skills/brainstorming.md"
-      ],
-      "outputs": [
-        "educational report",
-        "walkthrough",
-        "analogy map"
-      ]
+      "domains": ["SYNTHESIS", "RESEARCH"],
+      "triggers": ["explain", "teach", "masterclass", "how it works", "why do we need"],
+      "skills": ["skills/instructor.md", "skills/brainstorming.md"],
+      "outputs": ["educational report", "walkthrough", "analogy map"]
     }
   ],
   "skills": [
@@ -455,189 +257,127 @@
       "name": "tdd",
       "file": "skills/tdd.md",
       "purpose": "code change discipline",
-      "loaded_by": [
-        "engineer",
-        "reviewer",
-        "security-engineer",
-        "data-engineer"
-      ]
+      "loaded_by": ["engineer", "reviewer", "security-engineer", "data-engineer"]
     },
     {
       "name": "architecture",
       "file": "skills/architecture.md",
       "purpose": "system design",
-      "loaded_by": [
-        "architect",
-        "data-engineer"
-      ]
+      "loaded_by": ["architect", "data-engineer"]
     },
     {
       "name": "planning",
       "file": "skills/planning.md",
       "purpose": "phase planning",
-      "loaded_by": [
-        "strategist"
-      ]
+      "loaded_by": ["strategist"]
     },
     {
       "name": "brainstorming",
       "file": "skills/brainstorming.md",
       "purpose": "spec extraction",
-      "loaded_by": [
-        "strategist",
-        "researcher",
-        "designer"
-      ]
+      "loaded_by": ["strategist", "researcher", "designer"]
     },
     {
       "name": "debugging",
       "file": "skills/debugging.md",
       "purpose": "root cause analysis",
-      "loaded_by": [
-        "engineer"
-      ]
+      "loaded_by": ["engineer"]
     },
     {
       "name": "review",
       "file": "skills/review.md",
       "purpose": "quality review",
-      "loaded_by": [
-        "reviewer",
-        "security-engineer"
-      ]
+      "loaded_by": ["reviewer", "security-engineer"]
     },
     {
       "name": "deployment",
       "file": "skills/deployment.md",
       "purpose": "ship safety",
-      "loaded_by": [
-        "devops"
-      ]
+      "loaded_by": ["devops"]
     },
     {
       "name": "observability",
       "file": "skills/observability.md",
       "purpose": "logs metrics tracing",
-      "loaded_by": [
-        "devops",
-        "data-engineer"
-      ]
+      "loaded_by": ["devops", "data-engineer"]
     },
     {
       "name": "security-and-identity",
       "file": "skills/security-and-identity.md",
       "purpose": "auth, identity, tenancy, and validation",
-      "loaded_by": [
-        "architect",
-        "security-engineer"
-      ]
+      "loaded_by": ["architect", "security-engineer"]
     },
     {
       "name": "prompt-safety",
       "file": "skills/prompt-safety.md",
       "purpose": "prompt injection defense",
-      "loaded_by": [
-        "architect",
-        "security-engineer",
-        "safety-evaluator"
-      ]
+      "loaded_by": ["architect", "security-engineer", "safety-evaluator"]
     },
     {
       "name": "context-management",
       "file": "skills/context-management.md",
       "purpose": "session and token control",
-      "loaded_by": [
-        "all"
-      ]
+      "loaded_by": ["all"]
     },
     {
       "name": "riper",
       "file": "skills/riper.md",
       "purpose": "structured reasoning",
-      "loaded_by": [
-        "all"
-      ]
+      "loaded_by": ["all"]
     },
     {
       "name": "git-worktree",
       "file": "skills/git-worktree.md",
       "purpose": "parallel development",
-      "loaded_by": [
-        "engineer",
-        "strategist"
-      ]
+      "loaded_by": ["engineer", "strategist"]
     },
     {
       "name": "scalability",
       "file": "skills/scalability.md",
       "purpose": "capacity planning",
-      "loaded_by": [
-        "architect",
-        "data-engineer"
-      ]
+      "loaded_by": ["architect", "data-engineer"]
     },
     {
       "name": "ai-systems",
       "file": "skills/ai-systems.md",
       "purpose": "agent systems and routing",
-      "loaded_by": [
-        "forge",
-        "architect"
-      ]
+      "loaded_by": ["forge", "architect"]
     },
     {
       "name": "ecommerce",
       "file": "examples/skills/ecommerce.md",
       "purpose": "commerce systems",
-      "loaded_by": [
-        "architect",
-        "engineer"
-      ]
+      "loaded_by": ["architect", "engineer"]
     },
     {
       "name": "reflection",
       "file": "skills/reflection.md",
       "purpose": "autonomous self-correction (RALPH loop)",
-      "loaded_by": [
-        "reviewer",
-        "engineer"
-      ]
+      "loaded_by": ["reviewer", "engineer"]
     },
     {
       "name": "instructor",
       "file": "skills/instructor.md",
       "purpose": "educational delivery and concept explanation",
-      "loaded_by": [
-        "pedagogue",
-        "architect",
-        "engineer"
-      ]
+      "loaded_by": ["pedagogue", "architect", "engineer"]
     },
     {
       "name": "nexus",
       "file": "skills/nexus.md",
       "purpose": "multi-repo workspace coordination",
-      "loaded_by": [
-        "architect",
-        "strategist"
-      ]
+      "loaded_by": ["architect", "strategist"]
     },
     {
       "name": "sota-architecture",
       "file": "skills/sota-architecture.md",
       "purpose": "kernel vs userland management and bloat prevention",
-      "loaded_by": [
-        "architect",
-        "forge"
-      ]
+      "loaded_by": ["architect", "forge"]
     },
     {
       "name": "workflow-audit",
       "file": "skills/workflow-audit.md",
       "purpose": "CI/CD pipeline architecture review \u2014 release step ordering, trigger hygiene, idempotency",
-      "loaded_by": [
-        "devops"
-      ]
+      "loaded_by": ["devops"]
     }
   ],
   "workflows": [
@@ -645,85 +385,48 @@
       "name": "discover",
       "command": "/orbit:discover",
       "mode": "collaborative",
-      "agents": [
-        "researcher",
-        "designer"
-      ],
-      "inputs": [
-        "problem statement",
-        "target user hypothesis"
-      ],
-      "outputs": [
-        "DISCOVERY.md"
-      ]
+      "agents": ["researcher", "designer"],
+      "inputs": ["problem statement", "target user hypothesis"],
+      "outputs": ["DISCOVERY.md"]
     },
     {
       "name": "new-project",
       "command": "/orbit:new-project",
       "mode": "collaborative",
-      "inputs": [
-        "scope",
-        "users",
-        "constraints",
-        "existing systems"
-      ],
-      "outputs": [
-        "PROJECT.md",
-        "REQUIREMENTS.md",
-        "ROADMAP.md",
-        "STATE.md"
-      ]
+      "inputs": ["scope", "users", "constraints", "existing systems"],
+      "outputs": ["PROJECT.md", "REQUIREMENTS.md", "ROADMAP.md", "STATE.md"]
     },
     {
       "name": "plan",
       "command": "/orbit:plan",
       "mode": "collaborative",
-      "inputs": [
-        "STATE.md",
-        "ROADMAP.md",
-        "REQUIREMENTS.md"
-      ],
-      "outputs": [
-        "PHASE-{N}-PLAN.md"
-      ]
+      "inputs": ["STATE.md", "ROADMAP.md", "REQUIREMENTS.md"],
+      "outputs": ["PHASE-{N}-PLAN.md"]
     },
     {
       "name": "build",
       "command": "/orbit:build",
       "mode": "autonomous",
-      "inputs": [
-        "PHASE-{N}-PLAN.md",
-        "ARCH.md",
-        "STATE.md"
-      ],
-      "outputs": [
-        "task outputs",
-        "SUMMARY.md",
-        "PHASE-{N}-VERIFICATION.md"
-      ]
+      "inputs": ["PHASE-{N}-PLAN.md", "ARCH.md", "STATE.md"],
+      "outputs": ["task outputs", "SUMMARY.md", "PHASE-{N}-VERIFICATION.md"]
     },
     {
       "name": "verify",
       "command": "/orbit:verify",
       "mode": "audit",
-      "inputs": [
-        "PHASE-{N}-PLAN.md",
-        "build outputs"
-      ],
-      "outputs": [
-        "PHASE-{N}-UAT.md"
-      ]
+      "inputs": ["PHASE-{N}-PLAN.md", "build outputs"],
+      "outputs": ["PHASE-{N}-UAT.md"]
     },
     {
       "name": "ship",
       "command": "/orbit:ship",
       "mode": "audit",
-      "inputs": [
-        "PHASE-{N}-UAT.md",
-        "review output"
-      ],
+      "agents": ["reviewer", "technical-writer"],
+      "inputs": ["PHASE-{N}-UAT.md", "review output", "CHANGELOG.md", "README.md"],
       "outputs": [
         "release summary",
+        "CHANGELOG.md update",
+        "documentation updates",
         "STATE.md update"
       ]
     },
@@ -731,297 +434,160 @@
       "name": "launch",
       "command": "/orbit:launch",
       "mode": "collaborative",
-      "agents": [
-        "launch-planner",
-        "technical-writer"
-      ],
-      "inputs": [
-        "release artifacts",
-        "target audience",
-        "launch channels"
-      ],
-      "outputs": [
-        "LAUNCH-PLAN.md",
-        "GTM-CHECKLIST.md",
-        "ANNOUNCEMENT-DRAFT.md"
-      ]
+      "agents": ["launch-planner", "technical-writer"],
+      "inputs": ["release artifacts", "target audience", "launch channels"],
+      "outputs": ["LAUNCH-PLAN.md", "GTM-CHECKLIST.md", "ANNOUNCEMENT-DRAFT.md"]
     },
     {
       "name": "quick",
       "command": "/orbit:quick",
       "mode": "collaborative",
-      "inputs": [
-        "task description"
-      ],
-      "outputs": [
-        "focused task result",
-        "verification",
-        "state update"
-      ]
+      "inputs": ["task description"],
+      "outputs": ["focused task result", "verification", "state update"]
     },
     {
       "name": "forge",
       "command": "/orbit:forge",
       "mode": "collaborative",
-      "inputs": [
-        "task description"
-      ],
-      "outputs": [
-        "new agent file",
-        "registry update"
-      ]
+      "inputs": ["task description"],
+      "outputs": ["new agent file", "registry update"]
     },
     {
       "name": "review",
       "command": "/orbit:review",
       "mode": "audit",
-      "inputs": [
-        "changed files",
-        "ARCH.md",
-        "REQUIREMENTS.md"
-      ],
-      "outputs": [
-        "review report"
-      ]
+      "inputs": ["changed files", "ARCH.md", "REQUIREMENTS.md"],
+      "outputs": ["review report"]
     },
     {
       "name": "audit",
       "command": "/orbit:audit",
       "mode": "audit",
-      "inputs": [
-        "changed files",
-        "dependency graph"
-      ],
-      "outputs": [
-        "security audit report"
-      ]
+      "inputs": ["changed files", "dependency graph"],
+      "outputs": ["security audit report"]
     },
     {
       "name": "eval",
       "command": "/orbit:eval",
       "mode": "audit",
-      "agents": [
-        "reviewer"
-      ],
-      "inputs": [
-        "README.md",
-        "registry",
-        "runtime adapters",
-        "workflow docs"
-      ],
-      "outputs": [
-        "EVAL-REPORT.md",
-        "eval-report.json"
-      ]
+      "agents": ["reviewer"],
+      "inputs": ["README.md", "registry", "runtime adapters", "workflow docs"],
+      "outputs": ["EVAL-REPORT.md", "eval-report.json"]
     },
     {
       "name": "resume",
       "command": "/orbit:resume",
       "mode": "collaborative",
-      "inputs": [
-        "STATE.md",
-        "pre-compact snapshot",
-        "git log"
-      ],
-      "outputs": [
-        "reconstructed context"
-      ]
+      "inputs": ["STATE.md", "pre-compact snapshot", "git log"],
+      "outputs": ["reconstructed context"]
     },
     {
       "name": "next",
       "command": "/orbit:next",
       "mode": "collaborative",
-      "inputs": [
-        "STATE.md",
-        "ROADMAP.md"
-      ],
-      "outputs": [
-        "next action"
-      ]
+      "inputs": ["STATE.md", "ROADMAP.md"],
+      "outputs": ["next action"]
     },
     {
       "name": "progress",
       "command": "/orbit:progress",
       "mode": "audit",
-      "inputs": [
-        "STATE.md",
-        "ROADMAP.md"
-      ],
-      "outputs": [
-        "project status summary"
-      ]
+      "inputs": ["STATE.md", "ROADMAP.md"],
+      "outputs": ["project status summary"]
     },
     {
       "name": "map-codebase",
       "command": "/orbit:map-codebase",
       "mode": "audit",
-      "inputs": [
-        "repo tree",
-        "source files",
-        "STATE.md"
-      ],
-      "outputs": [
-        "CODEBASE-MAP.md"
-      ]
+      "inputs": ["repo tree", "source files", "STATE.md"],
+      "outputs": ["CODEBASE-MAP.md"]
     },
     {
       "name": "monitor",
       "command": "/orbit:monitor",
       "mode": "audit",
-      "inputs": [
-        "health endpoints",
-        "metrics",
-        "alerts"
-      ],
-      "outputs": [
-        "HEALTH-REPORT.md"
-      ]
+      "inputs": ["health endpoints", "metrics", "alerts"],
+      "outputs": ["HEALTH-REPORT.md"]
     },
     {
       "name": "debug",
       "command": "/orbit:debug",
       "mode": "collaborative",
-      "inputs": [
-        "bug description",
-        "failing test or reproduction"
-      ],
-      "outputs": [
-        "root cause analysis",
-        "fix",
-        "regression test"
-      ]
+      "inputs": ["bug description", "failing test or reproduction"],
+      "outputs": ["root cause analysis", "fix", "regression test"]
     },
     {
       "name": "deploy",
       "command": "/orbit:deploy",
       "mode": "audit",
-      "inputs": [
-        "environment",
-        "release artifacts"
-      ],
-      "outputs": [
-        "deployment summary"
-      ]
+      "inputs": ["environment", "release artifacts"],
+      "outputs": ["deployment summary"]
     },
     {
       "name": "rollback",
       "command": "/orbit:rollback",
       "mode": "audit",
-      "inputs": [
-        "failed deployment",
-        "release metadata"
-      ],
-      "outputs": [
-        "rollback summary"
-      ]
+      "inputs": ["failed deployment", "release metadata"],
+      "outputs": ["rollback summary"]
     },
     {
       "name": "milestone",
       "command": "/orbit:milestone",
       "mode": "audit",
-      "inputs": [
-        "shipped phases",
-        "state",
-        "release tags"
-      ],
-      "outputs": [
-        "milestone archive"
-      ]
+      "inputs": ["shipped phases", "state", "release tags"],
+      "outputs": ["milestone archive"]
     },
     {
       "name": "help",
       "command": "/orbit:help",
       "mode": "collaborative",
-      "inputs": [
-        "none"
-      ],
-      "outputs": [
-        "command reference"
-      ]
+      "inputs": ["none"],
+      "outputs": ["command reference"]
     },
     {
       "name": "riper",
       "command": "/orbit:riper",
       "mode": "collaborative",
-      "agents": [
-        "researcher",
-        "strategist",
-        "engineer",
-        "reviewer"
-      ],
-      "inputs": [
-        "task description",
-        "context"
-      ],
-      "outputs": [
-        "RIPER analysis"
-      ]
+      "agents": ["researcher", "strategist", "engineer", "reviewer"],
+      "inputs": ["task description", "context"],
+      "outputs": ["RIPER analysis"]
     },
     {
       "name": "worktree",
       "command": "/orbit:worktree",
       "mode": "collaborative",
-      "inputs": [
-        "parallel task plan"
-      ],
-      "outputs": [
-        "worktree setup guidance"
-      ]
+      "inputs": ["parallel task plan"],
+      "outputs": ["worktree setup guidance"]
     },
     {
       "name": "cost",
       "command": "/orbit:cost",
       "mode": "audit",
-      "inputs": [
-        "session usage"
-      ],
-      "outputs": [
-        "token and cost estimate"
-      ]
+      "inputs": ["session usage"],
+      "outputs": ["token and cost estimate"]
     },
     {
       "name": "promote",
       "command": "/orbit:promote",
       "mode": "collaborative",
-      "inputs": [
-        "local patterns",
-        "agents",
-        "skills"
-      ],
-      "outputs": [
-        "core repository PR",
-        "registry update"
-      ]
+      "inputs": ["local patterns", "agents", "skills"],
+      "outputs": ["core repository PR", "registry update"]
     },
     {
       "name": "ask",
       "command": "/orbit:ask",
       "mode": "collaborative",
-      "agents": [
-        "strategist"
-      ],
-      "inputs": [
-        "question about project state"
-      ],
-      "outputs": [
-        "answer from STATE.md or context.db with source citation"
-      ]
+      "agents": ["strategist"],
+      "inputs": ["question about project state"],
+      "outputs": ["answer from STATE.md or context.db with source citation"]
     },
     {
       "name": "clarify",
       "command": "/orbit:clarify",
       "mode": "collaborative",
-      "agents": [
-        "strategist"
-      ],
-      "inputs": [
-        "pending clarification requests",
-        "operator answer"
-      ],
-      "outputs": [
-        "clarification queue",
-        "clarification resolution"
-      ]
+      "agents": ["strategist"],
+      "inputs": ["pending clarification requests", "operator answer"],
+      "outputs": ["clarification queue", "clarification resolution"]
     }
   ]
 }

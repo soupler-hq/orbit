@@ -309,6 +309,7 @@ const REQUIRED_V29_AGENT_CONTRACTS = [
   'product-manager',
   'business-analyst',
   'qa-engineer',
+  'technical-writer',
   'designer',
   'security-engineer',
   'data-engineer',
@@ -332,6 +333,7 @@ const REQUIRED_V29_WORKFLOWS = [
   { command: '/orbit:eval', doc: 'commands/orbit/eval.md' },
   { command: '/orbit:riper', doc: 'commands/orbit/riper.md' },
 ];
+const WAVE_15_DOC_STUB_PATH = 'docs/issues/issue-67-wave-1-agent-doc-stubs.md';
 
 // ── Metric 1: Routing Accuracy ─────────────────────────────────────────────
 // For each eval case: expected agent exists in registry AND agent file exists.
@@ -518,6 +520,48 @@ for (const skillFile of REQUIRED_V29_SKILLS) {
       : `${skillFile} missing ## VERIFICATION WORKFLOW`,
   });
 }
+
+const shipWorkflow = registry.workflows.find((entry) => entry.command === '/orbit:ship');
+const wave15DocStubText = readFile(WAVE_15_DOC_STUB_PATH) || '';
+
+integrityResults.push(
+  {
+    check: 'workflow contract: /orbit:ship references agents',
+    pass: Array.isArray(shipWorkflow?.agents) && shipWorkflow.agents.length > 0,
+    reason:
+      Array.isArray(shipWorkflow?.agents) && shipWorkflow.agents.length > 0
+        ? 'ok'
+        : '/orbit:ship must declare agent refs',
+  },
+  {
+    check: 'workflow contract: /orbit:ship includes technical-writer',
+    pass: Array.isArray(shipWorkflow?.agents) && shipWorkflow.agents.includes('technical-writer'),
+    reason:
+      Array.isArray(shipWorkflow?.agents) && shipWorkflow.agents.includes('technical-writer')
+        ? 'ok'
+        : '/orbit:ship must include technical-writer',
+  },
+  {
+    check: 'wave 1.5 technical-writer doc stubs exist',
+    pass: fileExists(WAVE_15_DOC_STUB_PATH),
+    reason: fileExists(WAVE_15_DOC_STUB_PATH) ? 'ok' : `missing ${WAVE_15_DOC_STUB_PATH}`,
+  },
+  {
+    check: 'wave 1.5 technical-writer doc stubs cover wave 1 agents',
+    pass:
+      wave15DocStubText.includes('Issue #64') &&
+      wave15DocStubText.includes('Issue #65') &&
+      wave15DocStubText.includes('Issue #66') &&
+      wave15DocStubText.includes('Issue #67'),
+    reason:
+      wave15DocStubText.includes('Issue #64') &&
+      wave15DocStubText.includes('Issue #65') &&
+      wave15DocStubText.includes('Issue #66') &&
+      wave15DocStubText.includes('Issue #67')
+        ? 'ok'
+        : 'wave 1.5 doc stubs must cover Issues #64-#67',
+  }
+);
 
 for (const { command, doc } of REQUIRED_V29_WORKFLOWS) {
   const workflow = registry.workflows.find((entry) => entry.command === command);
