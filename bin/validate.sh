@@ -40,6 +40,7 @@ required_files=(
   "bin/generate-plan-index.js"
   "bin/next.js"
   "bin/plan.js"
+  "bin/prompt-dispatch.js"
   "bin/progress.js"
   "bin/quick.js"
   "bin/riper.js"

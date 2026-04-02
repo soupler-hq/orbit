@@ -429,6 +429,11 @@ If open clarification requests exist in `.orbit/state/STATE.md`, `/orbit:next` s
 
 Explicit slash commands always override inferred routing. Runtimes without plain-prompt interception should require the documented explicit Orbit command path.
 
+Strict dispatch rule:
+- if the top-level prompt already contains an explicit Orbit command such as `orbit:quick #145`, `/orbit:review`, or `orbit:next`, Orbit must route through that exact command first
+- once an explicit Orbit command is detected, freeform/manual handling is not allowed for that turn
+- vague-prompt inference only applies when no explicit Orbit command is present
+
 ---
 
 # Orbit Command: /orbit:quick <task description>

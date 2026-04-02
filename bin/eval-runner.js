@@ -814,6 +814,34 @@ const promptRoutingCapabilityResults = [
       ? 'ok'
       : 'install.sh missing Codex plain-prompt routing policy',
   },
+  {
+    check: 'prompt dispatch helper exists for strict top-level Orbit command enforcement',
+    pass: fileExists('bin/prompt-dispatch.js'),
+    reason: fileExists('bin/prompt-dispatch.js') ? 'ok' : 'missing bin/prompt-dispatch.js',
+  },
+  {
+    check: 'prompt dispatch helper makes explicit Orbit commands override inference',
+    ...(() => {
+      try {
+        const result = JSON.parse(
+          runNode('bin/prompt-dispatch.js', ['--prompt', 'orbit:quick #145'])
+        );
+        const pass =
+          result.type === 'explicit_command' &&
+          result.command === '/orbit:quick' &&
+          result.remainder === '#145';
+        return {
+          pass,
+          reason: pass ? 'ok' : 'explicit Orbit command did not dispatch to /orbit:quick',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `prompt-dispatch explicit-command check failed: ${error.message}`,
+        };
+      }
+    })(),
+  },
 ];
 
 // ── Metric 7: Runtime Enforcement ──────────────────────────────────────────
