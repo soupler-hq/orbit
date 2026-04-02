@@ -532,10 +532,98 @@ const userOnboardingSkill = registry.skills.find(
 const complianceChecklistSkill = registry.skills.find(
   (skill) => skill.file === 'skills/compliance-checklist.md'
 );
+const launchPlannerAgent = registry.agents.find((agent) => agent.name === 'launch-planner');
 const shipWorkflow = registry.workflows.find((entry) => entry.command === '/orbit:ship');
 const wave15DocStubText = readFile(WAVE_15_DOC_STUB_PATH) || '';
+const launchPlannerText = readFile('agents/launch-planner.md');
 
 integrityResults.push(
+  {
+    check: 'agent contract: launch-planner is registered',
+    pass: Boolean(launchPlannerAgent),
+    reason: launchPlannerAgent ? 'ok' : 'launch-planner must be registered',
+  },
+  {
+    check: 'agent contract: launch-planner domains are PRODUCT and RESEARCH',
+    pass:
+      Array.isArray(launchPlannerAgent?.domains) &&
+      launchPlannerAgent.domains.length === 2 &&
+      launchPlannerAgent.domains[0] === 'PRODUCT' &&
+      launchPlannerAgent.domains[1] === 'RESEARCH',
+    reason:
+      Array.isArray(launchPlannerAgent?.domains) &&
+      launchPlannerAgent.domains.length === 2 &&
+      launchPlannerAgent.domains[0] === 'PRODUCT' &&
+      launchPlannerAgent.domains[1] === 'RESEARCH'
+        ? 'ok'
+        : 'launch-planner domains must be PRODUCT and RESEARCH',
+  },
+  {
+    check: 'agent contract: launch-planner includes GTM template triggers',
+    pass:
+      Array.isArray(launchPlannerAgent?.triggers) &&
+      ['launch plan', 'go-to-market', 'gtm', 'positioning', 'launch checklist', 'product launch', 'release strategy'].every(
+        (trigger) => launchPlannerAgent.triggers.includes(trigger)
+      ),
+    reason:
+      Array.isArray(launchPlannerAgent?.triggers) &&
+      ['launch plan', 'go-to-market', 'gtm', 'positioning', 'launch checklist', 'product launch', 'release strategy'].every(
+        (trigger) => launchPlannerAgent.triggers.includes(trigger)
+      )
+        ? 'ok'
+        : 'launch-planner must include the Issue #68 GTM triggers',
+  },
+  {
+    check: 'agent contract: launch-planner uses planning, brainstorming, and riper',
+    pass:
+      Array.isArray(launchPlannerAgent?.skills) &&
+      ['skills/planning.md', 'skills/brainstorming.md', 'skills/riper.md'].every((skill) =>
+        launchPlannerAgent.skills.includes(skill)
+      ),
+    reason:
+      Array.isArray(launchPlannerAgent?.skills) &&
+      ['skills/planning.md', 'skills/brainstorming.md', 'skills/riper.md'].every((skill) =>
+        launchPlannerAgent.skills.includes(skill)
+      )
+        ? 'ok'
+        : 'launch-planner must load planning, brainstorming, and riper',
+  },
+  {
+    check: 'agent contract: launch-planner outputs GTM template artifacts',
+    pass:
+      Array.isArray(launchPlannerAgent?.outputs) &&
+      [
+        'LAUNCH-PLAN.md',
+        'GTM-CHECKLIST.md',
+        'POSITIONING-CANVAS.md',
+        'LAUNCH-ANNOUNCEMENT.md',
+      ].every((output) => launchPlannerAgent.outputs.includes(output)),
+    reason:
+      Array.isArray(launchPlannerAgent?.outputs) &&
+      [
+        'LAUNCH-PLAN.md',
+        'GTM-CHECKLIST.md',
+        'POSITIONING-CANVAS.md',
+        'LAUNCH-ANNOUNCEMENT.md',
+      ].every((output) => launchPlannerAgent.outputs.includes(output))
+        ? 'ok'
+        : 'launch-planner outputs must include the Issue #68 GTM artifacts',
+  },
+  {
+    check: 'agent contract: launch-planner prominently documents scope constraints',
+    pass:
+      launchPlannerText.includes('does NOT perform market analysis') &&
+      launchPlannerText.includes('does NOT generate pricing recommendations') &&
+      launchPlannerText.includes('does NOT replace a human PMM') &&
+      launchPlannerText.includes('templates with prompts for human completion'),
+    reason:
+      launchPlannerText.includes('does NOT perform market analysis') &&
+      launchPlannerText.includes('does NOT generate pricing recommendations') &&
+      launchPlannerText.includes('does NOT replace a human PMM') &&
+      launchPlannerText.includes('templates with prompts for human completion')
+        ? 'ok'
+        : 'launch-planner must prominently document the Issue #68 scope constraints',
+  },
   {
     check: 'skill contract: skills/user-onboarding.md loaded_by technical-writer',
     pass:

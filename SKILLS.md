@@ -49,7 +49,7 @@
 - `devops` loads: skills/deployment.md, skills/observability.md.
 - `researcher` loads: skills/brainstorming.md.
 - `designer` loads: skills/brainstorming.md.
-- `launch-planner` loads: skills/planning.md, skills/brainstorming.md, skills/user-onboarding.md, skills/compliance-checklist.md.
+- `launch-planner` loads: skills/planning.md, skills/brainstorming.md, skills/riper.md.
 - `technical-writer` loads: skills/riper.md, skills/context-management.md, skills/user-onboarding.md.
 - `security-engineer` loads: skills/security-and-identity.md, skills/review.md, skills/compliance-checklist.md.
 - `data-engineer` loads: skills/architecture.md, skills/observability.md, skills/tdd.md, skills/scalability.md.

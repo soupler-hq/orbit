@@ -33,6 +33,20 @@ describe('eval-runner issue #85 coverage', () => {
     expect(checks.get('agent contract: qa-engineer is registered')).toBe(true);
     expect(checks.get('agent contract: qa-engineer includes ## ANTI-PATTERNS')).toBe(true);
     expect(checks.get('agent contract: qa-engineer skill refs are valid')).toBe(true);
+    expect(checks.get('agent contract: launch-planner is registered')).toBe(true);
+    expect(checks.get('agent contract: launch-planner domains are PRODUCT and RESEARCH')).toBe(
+      true
+    );
+    expect(checks.get('agent contract: launch-planner includes GTM template triggers')).toBe(true);
+    expect(
+      checks.get('agent contract: launch-planner uses planning, brainstorming, and riper')
+    ).toBe(true);
+    expect(checks.get('agent contract: launch-planner outputs GTM template artifacts')).toBe(
+      true
+    );
+    expect(
+      checks.get('agent contract: launch-planner prominently documents scope constraints')
+    ).toBe(true);
     expect(checks.get('agent contract: technical-writer is registered')).toBe(true);
     expect(checks.get('agent contract: technical-writer includes ## ANTI-PATTERNS')).toBe(true);
     expect(checks.get('agent contract: technical-writer skill refs are valid')).toBe(true);

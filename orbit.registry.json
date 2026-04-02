@@ -168,20 +168,23 @@
     {
       "name": "launch-planner",
       "file": "agents/launch-planner.md",
-      "domains": ["PRODUCT", "OPERATIONS"],
+      "domains": ["PRODUCT", "RESEARCH"],
       "triggers": [
         "launch plan",
-        "go-to-market checklist",
-        "announcement timing",
-        "release launch"
+        "go-to-market",
+        "gtm",
+        "positioning",
+        "launch checklist",
+        "product launch",
+        "release strategy"
       ],
-      "skills": [
-        "skills/planning.md",
-        "skills/brainstorming.md",
-        "skills/user-onboarding.md",
-        "skills/compliance-checklist.md"
-      ],
-      "outputs": ["LAUNCH-PLAN.md", "GTM-CHECKLIST.md", "launch execution timeline"]
+      "skills": ["skills/planning.md", "skills/brainstorming.md", "skills/riper.md"],
+      "outputs": [
+        "LAUNCH-PLAN.md",
+        "GTM-CHECKLIST.md",
+        "POSITIONING-CANVAS.md",
+        "LAUNCH-ANNOUNCEMENT.md"
+      ]
     },
     {
       "name": "technical-writer",
