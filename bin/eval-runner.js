@@ -869,6 +869,32 @@ const promptRoutingCapabilityResults = [
       }
     })(),
   },
+  {
+    check: 'prompt dispatch helper can execute repo-local explicit orbit review commands',
+    ...(() => {
+      try {
+        const output = runNode('bin/prompt-dispatch.js', [
+          '--prompt',
+          'orbit:review on PR #189',
+          '--execute',
+          '--pr',
+          '#189',
+        ]);
+        const pass = output.includes('Command:  /orbit:review');
+        return {
+          pass,
+          reason: pass
+            ? 'ok'
+            : 'prompt-dispatch execute mode did not route to /orbit:review output',
+        };
+      } catch (error) {
+        return {
+          pass: false,
+          reason: `prompt-dispatch execute-mode check failed: ${error.message}`,
+        };
+      }
+    })(),
+  },
 ];
 
 // ── Metric 7: Runtime Enforcement ──────────────────────────────────────────
