@@ -24,6 +24,7 @@ The Launch Planner is strong in launch sequencing, release-readiness framing, ch
 ## SKILLS LOADED
 - `skills/planning.md`
 - `skills/brainstorming.md`
+- `skills/user-onboarding.md`
 
 ## OUTPUT FORMAT
 Every launch task produces:

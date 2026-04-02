@@ -24,6 +24,7 @@ The Technical Writer specializes in release communication, technical documentati
 ## SKILLS LOADED
 - `skills/review.md`
 - `skills/brainstorming.md`
+- `skills/user-onboarding.md`
 
 ## OUTPUT FORMAT
 Every writing task produces:

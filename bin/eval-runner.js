@@ -324,7 +324,11 @@ const REQUIRED_AGENT_SECTIONS = [
   'OUTPUT FORMAT',
   'ANTI-PATTERNS',
 ];
-const REQUIRED_V29_SKILLS = ['skills/instructor.md', 'skills/workflow-audit.md'];
+const REQUIRED_V29_SKILLS = [
+  'skills/instructor.md',
+  'skills/workflow-audit.md',
+  'skills/user-onboarding.md',
+];
 const REQUIRED_V29_WORKFLOWS = [
   { command: '/orbit:ask', doc: 'commands/orbit/ask.md' },
   { command: '/orbit:clarify', doc: 'commands/orbit/clarify.md' },
@@ -518,6 +522,32 @@ for (const skillFile of REQUIRED_V29_SKILLS) {
       : `${skillFile} missing ## VERIFICATION WORKFLOW`,
   });
 }
+
+const userOnboardingSkill = registry.skills.find((skill) => skill.file === 'skills/user-onboarding.md');
+integrityResults.push(
+  {
+    check: 'skill contract: skills/user-onboarding.md loaded_by technical-writer',
+    pass:
+      Array.isArray(userOnboardingSkill?.loaded_by) &&
+      userOnboardingSkill.loaded_by.includes('technical-writer'),
+    reason:
+      Array.isArray(userOnboardingSkill?.loaded_by) &&
+      userOnboardingSkill.loaded_by.includes('technical-writer')
+        ? 'ok'
+        : 'skills/user-onboarding.md must be loaded by technical-writer',
+  },
+  {
+    check: 'skill contract: skills/user-onboarding.md loaded_by launch-planner',
+    pass:
+      Array.isArray(userOnboardingSkill?.loaded_by) &&
+      userOnboardingSkill.loaded_by.includes('launch-planner'),
+    reason:
+      Array.isArray(userOnboardingSkill?.loaded_by) &&
+      userOnboardingSkill.loaded_by.includes('launch-planner')
+        ? 'ok'
+        : 'skills/user-onboarding.md must be loaded by launch-planner',
+  }
+);
 
 for (const { command, doc } of REQUIRED_V29_WORKFLOWS) {
   const workflow = registry.workflows.find((entry) => entry.command === command);

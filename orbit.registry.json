@@ -638,6 +638,15 @@
       "loaded_by": [
         "devops"
       ]
+    },
+    {
+      "name": "user-onboarding",
+      "file": "skills/user-onboarding.md",
+      "purpose": "onboarding journeys, adoption milestones, and first-success guidance",
+      "loaded_by": [
+        "technical-writer",
+        "launch-planner"
+      ]
     }
   ],
   "workflows": [
