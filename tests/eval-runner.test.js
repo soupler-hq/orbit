@@ -44,15 +44,27 @@ describe('eval-runner issue #85 coverage', () => {
     expect(
       checks.get('skill contract: skills/workflow-audit.md includes VERIFICATION WORKFLOW')
     ).toBe(true);
-    expect(checks.get('skill contract: skills/user-onboarding.md includes VERIFICATION WORKFLOW')).toBe(
-      true
-    );
+    expect(
+      checks.get('skill contract: skills/user-onboarding.md includes VERIFICATION WORKFLOW')
+    ).toBe(true);
     expect(checks.get('skill contract: skills/user-onboarding.md loaded_by technical-writer')).toBe(
       true
     );
     expect(checks.get('skill contract: skills/user-onboarding.md loaded_by launch-planner')).toBe(
       true
     );
+    expect(
+      checks.get('skill contract: skills/compliance-checklist.md includes VERIFICATION WORKFLOW')
+    ).toBe(true);
+    expect(checks.get('skill contract: skills/compliance-checklist.md includes disclaimer')).toBe(
+      true
+    );
+    expect(
+      checks.get('skill contract: skills/compliance-checklist.md loaded_by security-engineer')
+    ).toBe(true);
+    expect(
+      checks.get('skill contract: skills/compliance-checklist.md loaded_by launch-planner')
+    ).toBe(true);
     expect(checks.get('workflow contract: /orbit:ask defines inputs')).toBe(true);
     expect(checks.get('workflow contract: /orbit:ask references agents')).toBe(true);
     expect(checks.get('workflow contract: /orbit:ask agent refs exist')).toBe(true);
