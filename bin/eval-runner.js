@@ -525,7 +525,9 @@ for (const skillFile of REQUIRED_V29_SKILLS) {
   });
 }
 
-const userOnboardingSkill = registry.skills.find((skill) => skill.file === 'skills/user-onboarding.md');
+const userOnboardingSkill = registry.skills.find(
+  (skill) => skill.file === 'skills/user-onboarding.md'
+);
 const shipWorkflow = registry.workflows.find((entry) => entry.command === '/orbit:ship');
 const wave15DocStubText = readFile(WAVE_15_DOC_STUB_PATH) || '';
 
