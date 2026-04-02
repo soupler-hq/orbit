@@ -637,6 +637,27 @@ describe('runtime command status parity', () => {
     expect(result.output).toBe('executed next-task routing');
   });
 
+  it('prompt dispatch executes inferred continuation prompts through orbit:quick for the active issue', () => {
+    const result = dispatchPrompt(
+      'go ahead',
+      {
+        issue: '#181',
+        workflowState: 'implementation_done',
+      },
+      {
+        runQuick: (args) => ({
+          output: `continued quick for ${args.issue}`,
+        }),
+      }
+    );
+
+    expect(result.executed).toBe(true);
+    expect(result.error).toBe(null);
+    expect(result.dispatch.command).toBe('/orbit:quick #181');
+    expect(result.args.issue).toBe('#181');
+    expect(result.output).toBe('continued quick for #181');
+  });
+
   it('prompt dispatch hard-fails unsupported explicit Orbit commands instead of falling back to manual handling', () => {
     const result = dispatchPrompt('orbit:ship', {
       issue: '#181',

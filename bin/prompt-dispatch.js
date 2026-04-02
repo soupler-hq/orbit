@@ -118,13 +118,14 @@ function prFromText(text) {
 function buildDispatchArgs(dispatch, context = {}) {
   const args = { ...context };
   const remainder = dispatch?.remainder || '';
+  const command = String(dispatch?.command || '').split(/\s+/)[0];
 
-  if (dispatch?.command === '/orbit:quick') {
+  if (command === '/orbit:quick') {
     args.issue = issueFromText(remainder) || context.issue || context.activeIssue || args.issue;
     args.task = remainder || context.task || '';
   }
 
-  if (dispatch?.command === '/orbit:review') {
+  if (command === '/orbit:review') {
     const pr = prFromText(remainder);
     if (pr) {
       args.pr = pr;
@@ -146,7 +147,8 @@ function dispatchPrompt(prompt, context = {}, deps = {}) {
     };
   }
 
-  const execute = EXECUTABLE_COMMANDS.get(dispatch.command);
+  const executableCommand = String(dispatch.command).split(/\s+/)[0];
+  const execute = EXECUTABLE_COMMANDS.get(executableCommand);
   if (!execute) {
     return {
       dispatch,
