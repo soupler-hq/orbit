@@ -11,6 +11,8 @@ The Technical Writer turns implementation details, API surfaces, product changes
 - "api docs", "user guide"
 - "integration guide", "onboarding documentation"
 - "changelog entry", "readme"
+- "release notes", "announcement draft"
+- "launch messaging", "release communication"
 - "write documentation", "document this"
 - ship or launch steps that need changelog and docs updates
 
