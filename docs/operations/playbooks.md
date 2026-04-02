@@ -314,6 +314,8 @@ When in doubt: if you would write a commit message for it, route the prompt thro
 
 Always run `orbit:resume` at the start of each new session. STATE.md is the source of truth — any session that skips resume is working blind.
 
+If no `.orbit/state/snapshot.json` exists yet, `orbit:resume` should still rehydrate directly from `.orbit/state/STATE.md` instead of pretending the project is fresh.
+
 If STATE.md was updated externally while you were in a session (e.g., another session merged a PR and updated STATE.md), run `orbit:resume` again mid-session to reload.
 
 ```

@@ -295,6 +295,7 @@ const commandsText = readFile('commands/commands.md') || '';
 const configText = readFile('orbit.config.json');
 const config = configText ? JSON.parse(configText) : { runtimes: {} };
 const stateTemplateText = readFile('templates/STATE.md') || '';
+const repoStateText = readFile('.orbit/state/STATE.md') || '';
 const decisionsLogTemplateText = readFile('templates/DECISIONS-LOG.md') || '';
 const operationalRulesTemplateText = readFile('templates/OPERATIONAL-RULES.json') || '';
 const preToolUseHookText = readFile('hooks/scripts/pre-tool-use.sh') || '';
@@ -648,6 +649,32 @@ integrityResults.push({
   reason: stateTemplateText.includes('[LOOP_DETECTED]')
     ? 'ok'
     : 'templates/STATE.md missing LOOP_DETECTED event example',
+});
+integrityResults.push({
+  check: 'repo state seeds a tracked v2.9.0 release STATE.md',
+  pass:
+    repoStateText.includes('**Active Milestone**: v2.9.0 — Idea to Market') &&
+    repoStateText.includes('**Directive**: This release is executed by Orbit'),
+  reason:
+    repoStateText.includes('**Active Milestone**: v2.9.0 — Idea to Market') &&
+    repoStateText.includes('**Directive**: This release is executed by Orbit')
+      ? 'ok'
+      : '.orbit/state/STATE.md missing v2.9.0 release milestone or directive metadata',
+});
+integrityResults.push({
+  check: 'repo state lists all 20 v2.9.0 tracked issues with wave labels',
+  ...(() => {
+    const issueRefs = repoStateText.match(/^- \[[ x]\] #\d+/gm) || [];
+    const waveLabels = ['Wave 0', 'Wave 1', 'Wave 1.5', 'Wave 2', 'Wave 3', 'Wave 4'];
+    const waveCount = waveLabels.filter((label) => repoStateText.includes(`#### ${label}`)).length;
+    const pass = issueRefs.length === 20 && waveCount === waveLabels.length;
+    return {
+      pass,
+      reason: pass
+        ? 'ok'
+        : `.orbit/state/STATE.md expected 20 tracked issues and 6 wave headings, found ${issueRefs.length} issues / ${waveCount} wave headings`,
+    };
+  })(),
 });
 integrityResults.push({
   check: 'template contract: DECISIONS-LOG.md exists',
