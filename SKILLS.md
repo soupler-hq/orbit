@@ -42,14 +42,14 @@
 - `architect` loads: skills/architecture.md, skills/security-and-identity.md, skills/scalability.md.
 - `engineer` loads: skills/tdd.md, skills/debugging.md, skills/reflection.md.
 - `strategist` loads: skills/planning.md, skills/brainstorming.md.
-- `product-manager` loads: skills/planning.md, skills/brainstorming.md, skills/riper.md.
+- `product-manager` loads: skills/planning.md, skills/brainstorming.md, skills/riper.md, skills/user-onboarding.md, skills/compliance-checklist.md.
 - `business-analyst` loads: skills/planning.md, skills/brainstorming.md, skills/riper.md.
 - `qa-engineer` loads: skills/tdd.md, skills/review.md, skills/observability.md.
 - `reviewer` loads: skills/review.md, skills/reflection.md.
 - `devops` loads: skills/deployment.md, skills/observability.md.
 - `researcher` loads: skills/brainstorming.md.
 - `designer` loads: skills/brainstorming.md.
-- `launch-planner` loads: skills/planning.md, skills/brainstorming.md, skills/user-onboarding.md, skills/compliance-checklist.md.
+- `launch-planner` loads: skills/planning.md, skills/brainstorming.md, skills/riper.md.
 - `technical-writer` loads: skills/riper.md, skills/context-management.md, skills/user-onboarding.md.
 - `security-engineer` loads: skills/security-and-identity.md, skills/review.md, skills/compliance-checklist.md.
 - `data-engineer` loads: skills/architecture.md, skills/observability.md, skills/tdd.md, skills/scalability.md.
