@@ -6,6 +6,7 @@ import { renderVerify } from '../bin/verify.js';
 import { renderNext } from '../bin/next.js';
 import { renderRiper } from '../bin/riper.js';
 import { renderClarify } from '../bin/clarify.js';
+import { classifyPromptDispatch } from '../bin/prompt-dispatch.js';
 import { findOperationalRule, loadOperationalRules } from '../bin/operational-rules.js';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -527,6 +528,47 @@ describe('runtime command status parity', () => {
     expect(output).toContain('Working target: Issue #62');
     expect(output).toContain('already in pr_open');
     expect(output).not.toContain('**Primary**: /orbit:progress');
+  });
+
+  it('prompt dispatch makes explicit orbit:quick commands override freeform handling', () => {
+    expect(
+      classifyPromptDispatch('orbit:quick #145', {
+        issue: '#181',
+        workflowState: 'pr_open',
+      })
+    ).toEqual({
+      type: 'explicit_command',
+      command: '/orbit:quick',
+      raw: 'orbit:quick #145',
+      remainder: '#145',
+      reason: 'Explicit Orbit command detected; inferred routing and freeform handling are disabled.',
+    });
+  });
+
+  it('prompt dispatch makes explicit orbit:review commands override active implementation context', () => {
+    expect(
+      classifyPromptDispatch('orbit:review on PR #189', {
+        issue: '#145',
+        workflowState: 'implementation_done',
+      })
+    ).toEqual({
+      type: 'explicit_command',
+      command: '/orbit:review',
+      raw: 'orbit:review on PR #189',
+      remainder: 'on PR #189',
+      reason: 'Explicit Orbit command detected; inferred routing and freeform handling are disabled.',
+    });
+  });
+
+  it('prompt dispatch routes pick next task to orbit:next instead of staying in the active PR lane', () => {
+    const result = classifyPromptDispatch('pick next task', {
+      issue: '#181',
+      workflowState: 'pr_open',
+    });
+
+    expect(result.type).toBe('inferred_workflow');
+    expect(result.command).toBe('/orbit:next');
+    expect(result.reason).toContain('Next-task prompt detected');
   });
 
   it('early-stage runtime output uses the concrete issue and avoids premature PR blockers', () => {

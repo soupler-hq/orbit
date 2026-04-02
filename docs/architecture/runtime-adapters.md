@@ -191,6 +191,7 @@ Expected workflow mapping examples:
 - `review this` on an active branch → `/orbit:review`
 
 Priority rule:
+- explicit Orbit commands such as `orbit:quick #145` or `orbit:review on PR #189` must be classified as exact-command dispatch before any vague-prompt inference runs
 - explicit next-task prompts must override an active PR review lane once the current branch is already `review_clean`, `pr_ready`, or `pr_open`
 - supported runtimes should classify `pick next task` into backlog selection, not repeat the current PR review cycle
 
