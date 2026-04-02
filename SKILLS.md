@@ -29,6 +29,7 @@
 - `skills/sota-architecture.md` — kernel vs userland management and bloat prevention.
 - `skills/workflow-audit.md` — CI/CD pipeline architecture review — release step ordering, trigger hygiene, idempotency.
 - `skills/user-onboarding.md` — onboarding journeys, adoption milestones, and first-success guidance.
+- `skills/compliance-checklist.md` — human-review compliance readiness checklists.
 <!-- GENERATED:END skills_list -->
 
 ## Registry Discipline
@@ -48,9 +49,9 @@
 - `devops` loads: skills/deployment.md, skills/observability.md.
 - `researcher` loads: skills/brainstorming.md.
 - `designer` loads: skills/brainstorming.md.
-- `launch-planner` loads: skills/planning.md, skills/brainstorming.md.
-- `technical-writer` loads: skills/riper.md, skills/context-management.md.
-- `security-engineer` loads: skills/security-and-identity.md, skills/review.md.
+- `launch-planner` loads: skills/planning.md, skills/brainstorming.md, skills/user-onboarding.md, skills/compliance-checklist.md.
+- `technical-writer` loads: skills/riper.md, skills/context-management.md, skills/user-onboarding.md.
+- `security-engineer` loads: skills/security-and-identity.md, skills/review.md, skills/compliance-checklist.md.
 - `data-engineer` loads: skills/architecture.md, skills/observability.md, skills/tdd.md, skills/scalability.md.
 - `safety-evaluator` loads: skills/prompt-safety.md.
 - `forge` loads: skills/ai-systems.md, skills/brainstorming.md.

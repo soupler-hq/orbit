@@ -329,6 +329,7 @@ const REQUIRED_V29_SKILLS = [
   'skills/instructor.md',
   'skills/workflow-audit.md',
   'skills/user-onboarding.md',
+  'skills/compliance-checklist.md',
 ];
 const REQUIRED_V29_WORKFLOWS = [
   { command: '/orbit:ask', doc: 'commands/orbit/ask.md' },
@@ -528,6 +529,9 @@ for (const skillFile of REQUIRED_V29_SKILLS) {
 const userOnboardingSkill = registry.skills.find(
   (skill) => skill.file === 'skills/user-onboarding.md'
 );
+const complianceChecklistSkill = registry.skills.find(
+  (skill) => skill.file === 'skills/compliance-checklist.md'
+);
 const shipWorkflow = registry.workflows.find((entry) => entry.command === '/orbit:ship');
 const wave15DocStubText = readFile(WAVE_15_DOC_STUB_PATH) || '';
 
@@ -553,6 +557,39 @@ integrityResults.push(
       userOnboardingSkill.loaded_by.includes('launch-planner')
         ? 'ok'
         : 'skills/user-onboarding.md must be loaded by launch-planner',
+  },
+  {
+    check: 'skill contract: skills/compliance-checklist.md includes disclaimer',
+    pass: readFile('skills/compliance-checklist.md').includes(
+      'This checklist is a starting point for human legal review. It is not a legal opinion and does not constitute compliance certification.'
+    ),
+    reason: readFile('skills/compliance-checklist.md').includes(
+      'This checklist is a starting point for human legal review. It is not a legal opinion and does not constitute compliance certification.'
+    )
+      ? 'ok'
+      : 'skills/compliance-checklist.md must include the required disclaimer',
+  },
+  {
+    check: 'skill contract: skills/compliance-checklist.md loaded_by security-engineer',
+    pass:
+      Array.isArray(complianceChecklistSkill?.loaded_by) &&
+      complianceChecklistSkill.loaded_by.includes('security-engineer'),
+    reason:
+      Array.isArray(complianceChecklistSkill?.loaded_by) &&
+      complianceChecklistSkill.loaded_by.includes('security-engineer')
+        ? 'ok'
+        : 'skills/compliance-checklist.md must be loaded by security-engineer',
+  },
+  {
+    check: 'skill contract: skills/compliance-checklist.md loaded_by launch-planner',
+    pass:
+      Array.isArray(complianceChecklistSkill?.loaded_by) &&
+      complianceChecklistSkill.loaded_by.includes('launch-planner'),
+    reason:
+      Array.isArray(complianceChecklistSkill?.loaded_by) &&
+      complianceChecklistSkill.loaded_by.includes('launch-planner')
+        ? 'ok'
+        : 'skills/compliance-checklist.md must be loaded by launch-planner',
   },
   {
     check: 'workflow contract: /orbit:ship references agents',

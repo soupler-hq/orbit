@@ -175,7 +175,12 @@
         "announcement timing",
         "release launch"
       ],
-      "skills": ["skills/planning.md", "skills/brainstorming.md"],
+      "skills": [
+        "skills/planning.md",
+        "skills/brainstorming.md",
+        "skills/user-onboarding.md",
+        "skills/compliance-checklist.md"
+      ],
       "outputs": ["LAUNCH-PLAN.md", "GTM-CHECKLIST.md", "launch execution timeline"]
     },
     {
@@ -196,7 +201,7 @@
         "write documentation",
         "document this"
       ],
-      "skills": ["skills/riper.md", "skills/context-management.md"],
+      "skills": ["skills/riper.md", "skills/context-management.md", "skills/user-onboarding.md"],
       "outputs": [
         "ANNOUNCEMENT-DRAFT.md",
         "API-DOCS.md",
@@ -211,7 +216,11 @@
       "file": "agents/security-engineer.md",
       "domains": ["REVIEW", "ENGINEERING"],
       "triggers": ["security review", "threat model", "audit", "auth changes"],
-      "skills": ["skills/security-and-identity.md", "skills/review.md"],
+      "skills": [
+        "skills/security-and-identity.md",
+        "skills/review.md",
+        "skills/compliance-checklist.md"
+      ],
       "outputs": ["security audit", "threat model", "dependency scan results"]
     },
     {
@@ -384,6 +393,12 @@
       "file": "skills/user-onboarding.md",
       "purpose": "onboarding journeys, adoption milestones, and first-success guidance",
       "loaded_by": ["technical-writer", "launch-planner"]
+    },
+    {
+      "name": "compliance-checklist",
+      "file": "skills/compliance-checklist.md",
+      "purpose": "human-review compliance readiness checklists",
+      "loaded_by": ["security-engineer", "launch-planner"]
     }
   ],
   "workflows": [
