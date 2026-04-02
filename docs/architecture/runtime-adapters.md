@@ -27,6 +27,7 @@ CLAUDE.md / INSTRUCTIONS.md / …  ← generated at install time for the target 
 Runtimes are configured in `orbit.config.json` → `runtimes`. Adding a new runtime requires only a JSON config entry — no new markdown files.
 
 To regenerate the framework's own `CLAUDE.md` after editing the template:
+
 ```bash
 npm run generate
 ```
@@ -60,19 +61,20 @@ Support level: `stable`
 
 Codex does not read `CLAUDE.md`. Instead, Orbit maps the control plane to Codex's operator surface:
 
-| Orbit concept | Claude mapping | Codex mapping |
-| :--- | :--- | :--- |
-| Session orchestrator | `CLAUDE.md` | `INSTRUCTIONS.md` + `policy.md` |
-| Agent registry | `orbit.registry.json` | `orbit.registry.json` (same) |
-| Workflow definitions | `WORKFLOWS.md` | `WORKFLOWS.md` (same) |
-| Slash commands | `/orbit:` via `commands/` | Follow matching `WORKFLOWS.md` section |
-| Plain prompt routing | Native via `CLAUDE.md` | Supported via generated `INSTRUCTIONS.md` + `policy.md` |
-| Lifecycle hooks | `settings.json` hooks | Not mapped (Codex has no hook API) |
-| State persistence | `.orbit/state/STATE.md` | `.codex/state/STATE.md` |
+| Orbit concept        | Claude mapping            | Codex mapping                                           |
+| :------------------- | :------------------------ | :------------------------------------------------------ |
+| Session orchestrator | `CLAUDE.md`               | `INSTRUCTIONS.md` + `policy.md`                         |
+| Agent registry       | `orbit.registry.json`     | `orbit.registry.json` (same)                            |
+| Workflow definitions | `WORKFLOWS.md`            | `WORKFLOWS.md` (same)                                   |
+| Slash commands       | `/orbit:` via `commands/` | Follow matching `WORKFLOWS.md` section                  |
+| Plain prompt routing | Native via `CLAUDE.md`    | Supported via generated `INSTRUCTIONS.md` + `policy.md` |
+| Lifecycle hooks      | `settings.json` hooks     | Not mapped (Codex has no hook API)                      |
+| State persistence    | `.orbit/state/STATE.md`   | `.codex/state/STATE.md`                                 |
 
 **Install:** `bash install.sh --tool codex`
 
 This installs to `.codex/` (local) or `~/.codex/` (global) with:
+
 - `INSTRUCTIONS.md` — operator surface (equivalent to `CLAUDE.md`)
 - `policy.md` — injected system context pointing to the Orbit control plane
 - `adapter.contract.json` — executable capability contract for routing and hook support
@@ -98,18 +100,21 @@ Support level: `experimental`
 Antigravity can follow the Orbit control plane if it can read markdown instructions and execute repo-local workflows, but no stable hook or lifecycle API has been published. Orbit now installs a best-effort adapter package, but plain-prompt routing still remains unsupported.
 
 **Current constraints:**
+
 - Best-effort `install_for_antigravity()` exists in `install.sh`, but the runtime contract still prefers explicit Orbit commands
 - Hook injection mechanism is unspecified in Antigravity's public docs
 - State persistence pathway is untested
 - Plain-prompt Orbit workflow routing is not currently supported as a reliable runtime capability
 
 **Manual setup (best-effort):**
+
 1. Point Antigravity at `CLAUDE.md` as its operator context.
 2. Provide `orbit.registry.json` and `WORKFLOWS.md` as reference documents.
 3. Write session state manually to `.orbit/state/STATE.md`.
 4. Skip hook-based safety checks until Antigravity publishes a lifecycle API.
 
 Every installed adapter must also ship `adapter.contract.json`, which is the machine-readable source of truth for:
+
 - instruction/operator surfaces
 - plain-prompt routing support
 - explicit-command fallback requirements
@@ -191,7 +196,9 @@ Expected workflow mapping examples:
 - `review this` on an active branch → `/orbit:review`
 
 Priority rule:
+
 - explicit Orbit commands such as `orbit:quick #145` or `orbit:review on PR #189` must be classified as exact-command dispatch before any vague-prompt inference runs
+- on supported runtimes, those explicit commands must then execute through the repo-local Orbit dispatcher path; do not downgrade them into freeform/manual handling for that turn
 - explicit next-task prompts must override an active PR review lane once the current branch is already `review_clean`, `pr_ready`, or `pr_open`
 - supported runtimes should classify `pick next task` into backlog selection, not repeat the current PR review cycle
 

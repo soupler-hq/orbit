@@ -169,6 +169,7 @@ Special priority rule:
 
 - when the user asks for the next task and the current branch is already in `review_clean`, `pr_ready`, or `pr_open`, `/orbit:next` must prefer the next unblocked issue from `STATE.md` over staying in the active PR review lane
 - in short: handoff-complete PR state must not override explicit next-task intent
+- when the user issues an explicit Orbit command such as `orbit:quick #145` or `orbit:review on PR #189`, Orbit must execute that repo-local command path directly for the turn instead of classifying it and then falling back to freeform/manual handling
 
 ---
 
