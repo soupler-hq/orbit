@@ -49,7 +49,7 @@
 - `researcher` loads: skills/brainstorming.md.
 - `designer` loads: skills/brainstorming.md.
 - `launch-planner` loads: skills/planning.md, skills/brainstorming.md.
-- `technical-writer` loads: skills/review.md, skills/brainstorming.md.
+- `technical-writer` loads: skills/riper.md, skills/context-management.md.
 - `security-engineer` loads: skills/security-and-identity.md, skills/review.md.
 - `data-engineer` loads: skills/architecture.md, skills/observability.md, skills/tdd.md, skills/scalability.md.
 - `safety-evaluator` loads: skills/prompt-safety.md.

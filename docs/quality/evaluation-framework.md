@@ -26,6 +26,7 @@ Given a user request, does the framework select the right agent or wave?
 - Product requirement definition routes to `product-manager`
 - Engineer-ready functional specification work routes to `business-analyst`
 - Test strategy and release-gate planning route to `qa-engineer`
+- API/user/integration/onboarding documentation and changelog framing route to `technical-writer`
 - Security-sensitive work routes to `security-engineer`
 - Unknown domains route to `researcher` or `forge`
 
