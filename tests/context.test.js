@@ -70,13 +70,20 @@ const describeIfSqlite = Database ? describe : describe.skip;
 
 describeIfSqlite('context.js — schema and load levels', () => {
   let db, tmpDir;
+  const originalCheckpointPath = process.env.ORBIT_CHECKPOINT_PATH;
 
   beforeEach(() => {
     ({ db, tmpDir } = makeTmpDb());
+    delete process.env.ORBIT_CHECKPOINT_PATH;
   });
 
   afterEach(() => {
     db.close();
+    if (originalCheckpointPath === undefined) {
+      delete process.env.ORBIT_CHECKPOINT_PATH;
+    } else {
+      process.env.ORBIT_CHECKPOINT_PATH = originalCheckpointPath;
+    }
     fs.rmSync(tmpDir, { recursive: true });
   });
 
@@ -193,6 +200,103 @@ describeIfSqlite('context.js — schema and load levels', () => {
       expect(output).toContain('- Issue: #145');
       expect(output).not.toContain('#129');
       expect(output).not.toContain('#165');
+    } finally {
+      require('child_process').execFileSync = originalExecFileSync;
+    }
+  });
+
+  it('--load minimal: prefers the matching checkpoint manifest over stale state facts', () => {
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('milestone', 'v2.9.0 — Idea to Market');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('phase', 'Enforcement Hardening');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('version', 'v2.8.1');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('branch', 'feat/181-quick-review-pr-autochain');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('active_issue', '#129');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('active_pr', '#165');
+    db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run(
+      '#181',
+      'auto-chain /orbit:quick -> /orbit:review -> PR for tracked work',
+      'in_progress'
+    );
+
+    const checkpointPath = path.join(tmpDir, 'latest.json');
+    fs.writeFileSync(
+      checkpointPath,
+      JSON.stringify(
+        {
+          checkpoint: 'remediation_required',
+          metadata: {
+            issue: '#181',
+            branch: 'feat/181-quick-review-pr-autochain',
+            pr: '#187',
+          },
+          orchestration: {
+            current_state: 'remediation_required',
+            review_findings: 'MEDIUM: persist findings through resume',
+          },
+        },
+        null,
+        2
+      )
+    );
+    process.env.ORBIT_CHECKPOINT_PATH = checkpointPath;
+
+    const originalExecFileSync = require('child_process').execFileSync;
+    require('child_process').execFileSync = () => 'feat/181-quick-review-pr-autochain\n';
+
+    try {
+      const output = loadMinimal(db);
+
+      expect(output).toContain('- Issue: #181 — auto-chain /orbit:quick -> /orbit:review -> PR for tracked work');
+      expect(output).toContain('- PR: #187');
+      expect(output).toContain('- Workflow: remediation_required');
+      expect(output).toContain('- Review findings: MEDIUM: persist findings through resume');
+      expect(output).not.toContain('#165');
+    } finally {
+      require('child_process').execFileSync = originalExecFileSync;
+    }
+  });
+
+  it('--load minimal: ignores checkpoint data from a stale branch', () => {
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('milestone', 'v2.9.0 — Idea to Market');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('phase', 'Enforcement Hardening');
+    db.prepare('INSERT INTO state (key, value) VALUES (?, ?)').run('version', 'v2.8.1');
+    db.prepare('INSERT INTO tasks (issue_ref, title, status) VALUES (?, ?, ?)').run(
+      '#145',
+      'enforce automatic state freshness across command paths',
+      'open'
+    );
+
+    const checkpointPath = path.join(tmpDir, 'latest.json');
+    fs.writeFileSync(
+      checkpointPath,
+      JSON.stringify(
+        {
+          checkpoint: 'pr_open',
+          metadata: {
+            issue: '#181',
+            branch: 'feat/181-quick-review-pr-autochain',
+            pr: '#187',
+          },
+          orchestration: {
+            current_state: 'pr_open',
+            review_findings: 'none',
+          },
+        },
+        null,
+        2
+      )
+    );
+    process.env.ORBIT_CHECKPOINT_PATH = checkpointPath;
+
+    const originalExecFileSync = require('child_process').execFileSync;
+    require('child_process').execFileSync = () => 'fix/145-state-freshness\n';
+
+    try {
+      const output = loadMinimal(db);
+
+      expect(output).toContain('- Issue: #145');
+      expect(output).not.toContain('#187');
+      expect(output).not.toContain('- Workflow: pr_open');
     } finally {
       require('child_process').execFileSync = originalExecFileSync;
     }

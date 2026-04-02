@@ -31,6 +31,7 @@ const {
 
 const ROOT = path.resolve(__dirname, '..');
 const STATE_PATH = path.join(ROOT, '.orbit', 'state', 'STATE.md');
+const DEFAULT_CHECKPOINT_PATH = path.join(ROOT, '.orbit', 'state', 'checkpoints', 'latest.json');
 const ARGS = process.argv.slice(2);
 
 function currentGitBranch() {
@@ -73,6 +74,33 @@ function milestonePrefix(value) {
   const normalized = String(value || '').trim();
   const match = normalized.match(/^(v[0-9]+(?:\.[0-9]+){1,2})\b/i);
   return match ? match[1] : normalized;
+}
+
+function latestCheckpointPath() {
+  return process.env.ORBIT_CHECKPOINT_PATH || DEFAULT_CHECKPOINT_PATH;
+}
+
+function readLatestCheckpoint() {
+  const checkpointPath = latestCheckpointPath();
+  try {
+    if (!fs.existsSync(checkpointPath)) return null;
+    return JSON.parse(fs.readFileSync(checkpointPath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function checkpointForBranch(checkpoint, branch) {
+  if (!checkpoint || !branch) return null;
+  return checkpoint?.metadata?.branch === branch ? checkpoint : null;
+}
+
+function activeTitleForIssue(db, issueRef, fallbackTitle = '') {
+  if (!issueRef) return fallbackTitle;
+  const task = db
+    .prepare('SELECT title FROM tasks WHERE issue_ref = ? ORDER BY id DESC LIMIT 1')
+    .get(issueRef);
+  return task?.title || fallbackTitle;
 }
 
 function selectMinimalTasks(db, { activeIssue, activeMilestone }) {
@@ -149,11 +177,22 @@ function loadMinimal(db) {
   const liveBranch = currentGitBranch();
   const branch = liveBranch || factMap.branch || '(not set)';
   const branchMatchesState = !liveBranch || !factMap.branch || liveBranch === factMap.branch;
-  const activeIssue = branchMatchesState
-    ? factMap.active_issue || issueRefFromBranch(branch)
-    : issueRefFromBranch(branch);
-  const activeTitle = branchMatchesState ? factMap.active_title || '' : '';
-  const activePr = branchMatchesState ? factMap.active_pr || '' : '';
+  const checkpoint = checkpointForBranch(readLatestCheckpoint(), branch);
+  const checkpointIssue = checkpoint?.metadata?.issue || '';
+  const checkpointPr = checkpoint?.metadata?.pr || '';
+  const checkpointState = checkpoint?.orchestration?.current_state || checkpoint?.checkpoint || '';
+  const checkpointFindings = checkpoint?.orchestration?.review_findings || '';
+  const activeIssue =
+    checkpointIssue ||
+    (branchMatchesState
+      ? factMap.active_issue || issueRefFromBranch(branch)
+      : issueRefFromBranch(branch));
+  const activeTitle = activeTitleForIssue(
+    db,
+    activeIssue,
+    checkpointIssue ? '' : branchMatchesState ? factMap.active_title || '' : ''
+  );
+  const activePr = checkpointPr || (branchMatchesState ? factMap.active_pr || '' : '');
   const activeMilestone = milestonePrefix(factMap.milestone || '');
   const tasks = selectMinimalTasks(db, { activeIssue, activeMilestone });
 
@@ -172,6 +211,12 @@ function loadMinimal(db) {
     }
     if (activePr) {
       lines.push(`- PR: ${activePr}`);
+    }
+    if (checkpointState) {
+      lines.push(`- Workflow: ${checkpointState}`);
+    }
+    if (checkpointFindings && checkpointFindings !== 'none') {
+      lines.push(`- Review findings: ${checkpointFindings}`);
     }
   }
 
