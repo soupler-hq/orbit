@@ -562,14 +562,26 @@ integrityResults.push(
     check: 'agent contract: launch-planner includes GTM template triggers',
     pass:
       Array.isArray(launchPlannerAgent?.triggers) &&
-      ['launch plan', 'go-to-market', 'gtm', 'positioning', 'launch checklist', 'product launch', 'release strategy'].every(
-        (trigger) => launchPlannerAgent.triggers.includes(trigger)
-      ),
+      [
+        'launch plan',
+        'go-to-market',
+        'gtm',
+        'positioning',
+        'launch checklist',
+        'product launch',
+        'release strategy',
+      ].every((trigger) => launchPlannerAgent.triggers.includes(trigger)),
     reason:
       Array.isArray(launchPlannerAgent?.triggers) &&
-      ['launch plan', 'go-to-market', 'gtm', 'positioning', 'launch checklist', 'product launch', 'release strategy'].every(
-        (trigger) => launchPlannerAgent.triggers.includes(trigger)
-      )
+      [
+        'launch plan',
+        'go-to-market',
+        'gtm',
+        'positioning',
+        'launch checklist',
+        'product launch',
+        'release strategy',
+      ].every((trigger) => launchPlannerAgent.triggers.includes(trigger))
         ? 'ok'
         : 'launch-planner must include the Issue #68 GTM triggers',
   },
