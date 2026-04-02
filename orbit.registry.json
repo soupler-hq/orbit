@@ -79,7 +79,13 @@
         "backlog",
         "product requirements"
       ],
-      "skills": ["skills/planning.md", "skills/brainstorming.md", "skills/riper.md"],
+      "skills": [
+        "skills/planning.md",
+        "skills/brainstorming.md",
+        "skills/riper.md",
+        "skills/user-onboarding.md",
+        "skills/compliance-checklist.md"
+      ],
       "outputs": [
         "PRD.md",
         "USER-STORIES.md",

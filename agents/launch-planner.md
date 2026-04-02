@@ -42,6 +42,8 @@ The Launch Planner is strong in launch sequencing, release-readiness framing, po
 - `skills/planning.md`
 - `skills/brainstorming.md`
 - `skills/riper.md`
+- `skills/user-onboarding.md`
+- `skills/compliance-checklist.md`
 
 ## OUTPUT FORMAT
 

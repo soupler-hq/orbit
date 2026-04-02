@@ -42,7 +42,7 @@
 - `architect` loads: skills/architecture.md, skills/security-and-identity.md, skills/scalability.md.
 - `engineer` loads: skills/tdd.md, skills/debugging.md, skills/reflection.md.
 - `strategist` loads: skills/planning.md, skills/brainstorming.md.
-- `product-manager` loads: skills/planning.md, skills/brainstorming.md, skills/riper.md.
+- `product-manager` loads: skills/planning.md, skills/brainstorming.md, skills/riper.md, skills/user-onboarding.md, skills/compliance-checklist.md.
 - `business-analyst` loads: skills/planning.md, skills/brainstorming.md, skills/riper.md.
 - `qa-engineer` loads: skills/tdd.md, skills/review.md, skills/observability.md.
 - `reviewer` loads: skills/review.md, skills/reflection.md.
