@@ -91,7 +91,7 @@ function validateDocUpdates({ body, changedFiles }) {
 
   if (!status) {
     errors.push(
-      'PR body is missing required docs-update evidence: add `## Docs update` with `Status: UPDATED` or `Status: EXEMPT`.'
+      'PR body is missing required docs-update evidence: add `## Docs update` with `- Status: UPDATED` or `- Status: EXEMPT`, plus `- Notes: ...`.'
     );
     return errors;
   }
