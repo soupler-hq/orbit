@@ -30,9 +30,9 @@ The Technical Writer specializes in technical documentation, onboarding docs, in
 6. Preserve architecture and product intent from the source materials; do not make scope or design decisions
 
 ## SKILLS LOADED
-
 - `skills/riper.md`
 - `skills/context-management.md`
+- `skills/user-onboarding.md`
 
 ## OUTPUT FORMAT
 

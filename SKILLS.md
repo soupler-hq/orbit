@@ -28,6 +28,7 @@
 - `skills/nexus.md` — multi-repo workspace coordination.
 - `skills/sota-architecture.md` — kernel vs userland management and bloat prevention.
 - `skills/workflow-audit.md` — CI/CD pipeline architecture review — release step ordering, trigger hygiene, idempotency.
+- `skills/user-onboarding.md` — onboarding journeys, adoption milestones, and first-success guidance.
 <!-- GENERATED:END skills_list -->
 
 ## Registry Discipline

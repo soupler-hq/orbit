@@ -325,7 +325,11 @@ const REQUIRED_AGENT_SECTIONS = [
   'OUTPUT FORMAT',
   'ANTI-PATTERNS',
 ];
-const REQUIRED_V29_SKILLS = ['skills/instructor.md', 'skills/workflow-audit.md'];
+const REQUIRED_V29_SKILLS = [
+  'skills/instructor.md',
+  'skills/workflow-audit.md',
+  'skills/user-onboarding.md',
+];
 const REQUIRED_V29_WORKFLOWS = [
   { command: '/orbit:ask', doc: 'commands/orbit/ask.md' },
   { command: '/orbit:clarify', doc: 'commands/orbit/clarify.md' },
@@ -521,10 +525,35 @@ for (const skillFile of REQUIRED_V29_SKILLS) {
   });
 }
 
+const userOnboardingSkill = registry.skills.find(
+  (skill) => skill.file === 'skills/user-onboarding.md'
+);
 const shipWorkflow = registry.workflows.find((entry) => entry.command === '/orbit:ship');
 const wave15DocStubText = readFile(WAVE_15_DOC_STUB_PATH) || '';
 
 integrityResults.push(
+  {
+    check: 'skill contract: skills/user-onboarding.md loaded_by technical-writer',
+    pass:
+      Array.isArray(userOnboardingSkill?.loaded_by) &&
+      userOnboardingSkill.loaded_by.includes('technical-writer'),
+    reason:
+      Array.isArray(userOnboardingSkill?.loaded_by) &&
+      userOnboardingSkill.loaded_by.includes('technical-writer')
+        ? 'ok'
+        : 'skills/user-onboarding.md must be loaded by technical-writer',
+  },
+  {
+    check: 'skill contract: skills/user-onboarding.md loaded_by launch-planner',
+    pass:
+      Array.isArray(userOnboardingSkill?.loaded_by) &&
+      userOnboardingSkill.loaded_by.includes('launch-planner'),
+    reason:
+      Array.isArray(userOnboardingSkill?.loaded_by) &&
+      userOnboardingSkill.loaded_by.includes('launch-planner')
+        ? 'ok'
+        : 'skills/user-onboarding.md must be loaded by launch-planner',
+  },
   {
     check: 'workflow contract: /orbit:ship references agents',
     pass: Array.isArray(shipWorkflow?.agents) && shipWorkflow.agents.length > 0,
