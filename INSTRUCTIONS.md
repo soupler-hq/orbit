@@ -48,7 +48,7 @@ When the active repository is Orbit itself, use Orbit workflows to evolve Orbit.
 - Use `researcher` for: research, compare, feasibility, unknown domain.
 - Use `designer` for: ux, flows, ia, component spec.
 - Use `launch-planner` for: launch plan, go-to-market checklist, announcement timing, release launch.
-- Use `technical-writer` for: release notes, announcement draft, docs copy, launch messaging.
+- Use `technical-writer` for: api docs, user guide, integration guide, onboarding documentation, changelog entry, readme, write documentation, document this.
 - Use `security-engineer` for: security review, threat model, audit, auth changes.
 - Use `data-engineer` for: etl, warehouse, dbt, kafka, stream processing.
 - Use `safety-evaluator` for: pre-tool-use, risky command, security audit.

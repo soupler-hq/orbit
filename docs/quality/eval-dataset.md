@@ -21,21 +21,22 @@ Each entry should be evaluated for:
 
 ## Cases
 
-| ID | Prompt | Expected Domain | Expected Agent | Expected Workflow | Notes |
-|---|---|---|---|---|---|
-| E01 | Add rate limiting to auth endpoints | ENGINEERING | engineer | `/orbit:quick` | Code change with TDD and security skill |
-| E02 | Design a multi-region active-active architecture | SYNTHESIS | architect | `/orbit:plan` then `/orbit:build` | Needs architecture and scalability analysis |
-| E03 | Review this React auth component for bugs | REVIEW | reviewer | `/orbit:review` | Language-specific review (TypeScript axes activated) |
-| E04 | Create a CI/CD rollback plan for production | OPERATIONS | devops | `/orbit:plan` | Deployment and observability coverage |
-| E05 | Unknown domain with high uncertainty | RESEARCH | researcher | `/orbit:plan` or `/orbit:forge` | Research first, forge if needed |
-| E06 | Build an ML inference monitoring loop | SYNTHESIS | forge | `/orbit:forge` | Routes to forge; forge creates a domain-specific ml-engineer agent on demand |
-| E07 | Audit prompt injection risks in the workflow docs | REVIEW | security-engineer | `/orbit:audit` | Security plus prompt-safety |
-| E08 | Resume a compacted session and continue phase work | OPERATIONS | strategist or engineer | `/orbit:resume` | State recovery test |
-| E09 | Write the product requirements, PRD, user stories, and acceptance criteria for this feature | PRODUCT | product-manager | `/orbit:plan` | Product requirement lifecycle should route to product-manager instead of strategist |
-| E10 | Turn this PRD into a functional spec with use cases, edge cases, and a process map for Wave 2 checkout work | PRODUCT | business-analyst | `/orbit:plan` | Graduation test for engineer-ready specification work |
-| E11 | Create milestone OKRs and a roadmap for the next release phase | PRODUCT | strategist | `/orbit:plan` | Strategic planning should still route to strategist after the split |
-| E12 | Create a QA test strategy and regression suite for the release gate on issues #72 and #73 | REVIEW | qa-engineer | `/orbit:plan` | Test-strategy work should route to qa-engineer rather than reviewer |
-| E13 | Review this PR for bugs, security issues, and architectural regressions | REVIEW | reviewer | `/orbit:review` | Code-review work should stay with reviewer after the QA split |
+| ID  | Prompt                                                                                                      | Expected Domain | Expected Agent         | Expected Workflow                 | Notes                                                                               |
+| --- | ----------------------------------------------------------------------------------------------------------- | --------------- | ---------------------- | --------------------------------- | ----------------------------------------------------------------------------------- |
+| E01 | Add rate limiting to auth endpoints                                                                         | ENGINEERING     | engineer               | `/orbit:quick`                    | Code change with TDD and security skill                                             |
+| E02 | Design a multi-region active-active architecture                                                            | SYNTHESIS       | architect              | `/orbit:plan` then `/orbit:build` | Needs architecture and scalability analysis                                         |
+| E03 | Review this React auth component for bugs                                                                   | REVIEW          | reviewer               | `/orbit:review`                   | Language-specific review (TypeScript axes activated)                                |
+| E04 | Create a CI/CD rollback plan for production                                                                 | OPERATIONS      | devops                 | `/orbit:plan`                     | Deployment and observability coverage                                               |
+| E05 | Unknown domain with high uncertainty                                                                        | RESEARCH        | researcher             | `/orbit:plan` or `/orbit:forge`   | Research first, forge if needed                                                     |
+| E06 | Build an ML inference monitoring loop                                                                       | SYNTHESIS       | forge                  | `/orbit:forge`                    | Routes to forge; forge creates a domain-specific ml-engineer agent on demand        |
+| E07 | Audit prompt injection risks in the workflow docs                                                           | REVIEW          | security-engineer      | `/orbit:audit`                    | Security plus prompt-safety                                                         |
+| E08 | Resume a compacted session and continue phase work                                                          | OPERATIONS      | strategist or engineer | `/orbit:resume`                   | State recovery test                                                                 |
+| E09 | Write the product requirements, PRD, user stories, and acceptance criteria for this feature                 | PRODUCT         | product-manager        | `/orbit:plan`                     | Product requirement lifecycle should route to product-manager instead of strategist |
+| E10 | Turn this PRD into a functional spec with use cases, edge cases, and a process map for Wave 2 checkout work | PRODUCT         | business-analyst       | `/orbit:plan`                     | Graduation test for engineer-ready specification work                               |
+| E11 | Create milestone OKRs and a roadmap for the next release phase                                              | PRODUCT         | strategist             | `/orbit:plan`                     | Strategic planning should still route to strategist after the split                 |
+| E12 | Create a QA test strategy and regression suite for the release gate on issues #72 and #73                   | REVIEW          | qa-engineer            | `/orbit:plan`                     | Test-strategy work should route to qa-engineer rather than reviewer                 |
+| E13 | Review this PR for bugs, security issues, and architectural regressions                                     | REVIEW          | reviewer               | `/orbit:review`                   | Code-review work should stay with reviewer after the QA split                       |
+| E14 | Write the API docs, onboarding guide, README updates, and changelog entry for this shipped release          | PRODUCT         | technical-writer       | `/orbit:ship`                     | Documentation and changelog work should route to technical-writer during ship       |
 
 ## Expected Signals
 
