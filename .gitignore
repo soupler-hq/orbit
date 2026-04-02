@@ -1,6 +1,9 @@
 # Orbit Ignore
 .orbit/state/*
+!.orbit/
+!.orbit/state/
 !.orbit/state/.gitkeep
+!.orbit/state/STATE.md
 .orbit/hooks/*
 !.orbit/hooks/.gitkeep
 .orbit/errors/

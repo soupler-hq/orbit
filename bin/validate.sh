@@ -33,6 +33,7 @@ required_files=(
   "orbit.config.json"
   "templates/STATE.md"
   "templates/OPERATIONAL-RULES.json"
+  ".orbit/state/STATE.md"
   "bin/recovery-loop.js"
   "bin/install.js"
   "bin/eval-contract.js"
