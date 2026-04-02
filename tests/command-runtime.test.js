@@ -6,7 +6,7 @@ import { renderVerify } from '../bin/verify.js';
 import { renderNext } from '../bin/next.js';
 import { renderRiper } from '../bin/riper.js';
 import { renderClarify } from '../bin/clarify.js';
-import { classifyPromptDispatch } from '../bin/prompt-dispatch.js';
+import { classifyPromptDispatch, dispatchPrompt } from '../bin/prompt-dispatch.js';
 import { findOperationalRule, loadOperationalRules } from '../bin/operational-rules.js';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -232,7 +232,9 @@ describe('runtime command status parity', () => {
     expect(output).toContain('State:    context_switch_required');
     expect(output).toContain('Next:     branch_aligned');
     expect(output).toContain('**Primary**: /orbit:quick #148');
-    expect(output).toContain('Requested issue #148 does not match active branch feat/150-executable-next-runtime (#150)');
+    expect(output).toContain(
+      'Requested issue #148 does not match active branch feat/150-executable-next-runtime (#150)'
+    );
     expect(output).toContain('Working target: Issue #148');
     expect(output).toContain('Branch:     feat/150-executable-next-runtime');
     expect(output).toContain('PR:         not opened yet');
@@ -425,7 +427,9 @@ describe('runtime command status parity', () => {
       stateFile,
     });
 
-    expect(output).toContain('**Primary**: /orbit:quick #150 feat(workflow): implement `/orbit:next` as an executable runtime command');
+    expect(output).toContain(
+      '**Primary**: /orbit:quick #150 feat(workflow): implement `/orbit:next` as an executable runtime command'
+    );
     expect(output).toContain('State:    issue_ready');
     expect(output).toContain('Working target: Issue #150');
     expect(output).toContain('Branch:     develop');
@@ -455,7 +459,9 @@ describe('runtime command status parity', () => {
       stateFile,
     });
 
-    expect(output).toContain('**Primary**: /orbit:quick #151 feat(governance): enforce documentation updates for behavior changes');
+    expect(output).toContain(
+      '**Primary**: /orbit:quick #151 feat(governance): enforce documentation updates for behavior changes'
+    );
     expect(output).toContain('Working target: Issue #151');
     expect(output).toContain('Branch:     develop');
   });
@@ -541,7 +547,8 @@ describe('runtime command status parity', () => {
       command: '/orbit:quick',
       raw: 'orbit:quick #145',
       remainder: '#145',
-      reason: 'Explicit Orbit command detected; inferred routing and freeform handling are disabled.',
+      reason:
+        'Explicit Orbit command detected; inferred routing and freeform handling are disabled.',
     });
   });
 
@@ -556,7 +563,8 @@ describe('runtime command status parity', () => {
       command: '/orbit:review',
       raw: 'orbit:review on PR #189',
       remainder: 'on PR #189',
-      reason: 'Explicit Orbit command detected; inferred routing and freeform handling are disabled.',
+      reason:
+        'Explicit Orbit command detected; inferred routing and freeform handling are disabled.',
     });
   });
 
@@ -569,6 +577,77 @@ describe('runtime command status parity', () => {
     expect(result.type).toBe('inferred_workflow');
     expect(result.command).toBe('/orbit:next');
     expect(result.reason).toContain('Next-task prompt detected');
+  });
+
+  it('prompt dispatch executes explicit orbit:quick through the repo-local runtime path', () => {
+    const result = dispatchPrompt(
+      'orbit:quick #145',
+      {
+        issue: '#181',
+        workflowState: 'pr_open',
+      },
+      {
+        runQuick: (args) => ({
+          output: `executed quick for ${args.issue}`,
+        }),
+      }
+    );
+
+    expect(result.executed).toBe(true);
+    expect(result.error).toBe(null);
+    expect(result.dispatch.command).toBe('/orbit:quick');
+    expect(result.args.issue).toBe('#145');
+    expect(result.output).toBe('executed quick for #145');
+  });
+
+  it('prompt dispatch executes explicit orbit:review through the repo-local runtime path', () => {
+    const result = dispatchPrompt(
+      'orbit:review on PR #189',
+      {
+        issue: '#145',
+        workflowState: 'implementation_done',
+      },
+      {
+        renderReview: (args) => `executed review for ${args.pr}`,
+      }
+    );
+
+    expect(result.executed).toBe(true);
+    expect(result.error).toBe(null);
+    expect(result.dispatch.command).toBe('/orbit:review');
+    expect(result.args.pr).toBe('#189');
+    expect(result.output).toBe('executed review for #189');
+  });
+
+  it('prompt dispatch executes pick next task through orbit:next instead of staying in the current PR lane', () => {
+    const result = dispatchPrompt(
+      'pick next task',
+      {
+        issue: '#181',
+        workflowState: 'pr_open',
+      },
+      {
+        renderNext: () => 'executed next-task routing',
+      }
+    );
+
+    expect(result.executed).toBe(true);
+    expect(result.error).toBe(null);
+    expect(result.dispatch.command).toBe('/orbit:next');
+    expect(result.output).toBe('executed next-task routing');
+  });
+
+  it('prompt dispatch hard-fails unsupported explicit Orbit commands instead of falling back to manual handling', () => {
+    const result = dispatchPrompt('orbit:ship', {
+      issue: '#181',
+      workflowState: 'pr_ready',
+    });
+
+    expect(result.executed).toBe(false);
+    expect(result.dispatch.command).toBe('/orbit:ship');
+    expect(result.error).toContain(
+      'Explicit Orbit command /orbit:ship is not executable through the repo-local dispatcher yet.'
+    );
   });
 
   it('early-stage runtime output uses the concrete issue and avoids premature PR blockers', () => {
