@@ -155,6 +155,10 @@ That lifecycle is reflected in the current agent roster:
 
 Orbit is especially strong when you want one system to carry the product from rough concept to shipped release without switching process every time the work type changes.
 
+### IDP and Auth-Heavy Teams
+
+Orbit is also a strong fit for IDP, auth, and identity-sensitive products where workflow discipline matters as much as code generation. Those teams typically need architecture review, QA gates, docs updates, and security-aware release handling to stay explicit rather than conversational.
+
 ## Agent Roster
 
 | Agent | Best used for |
