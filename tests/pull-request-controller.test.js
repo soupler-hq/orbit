@@ -5,6 +5,8 @@ import {
   deriveDocsUpdate,
   syncPullRequest,
 } from '../bin/pull-request-controller.js';
+const { validateBody } = require('../bin/validate-pr-governance');
+const { validateDocUpdates } = require('../bin/validate-doc-updates');
 
 describe('pull-request controller', () => {
   it('derives UPDATED docs status when command docs changed', () => {
@@ -30,6 +32,30 @@ describe('pull-request controller', () => {
     expect(body).toContain('## Test plan');
     expect(body).toContain('## Docs update');
     expect(body).toContain('## Orbit Self-Review');
+  });
+
+  it('emits a PR body that passes local governance validators', () => {
+    const body = buildPullRequestBody({
+      issue: '#181',
+      headSha: 'abc1234',
+      summaryLines: ['auto-chain PR sync for #181'],
+      verificationCommands: ['bash bin/validate.sh', 'npm run format:check'],
+      changedFiles: ['bin/runtime-command.js', 'commands/commands.md'],
+      reviewCommand: '/orbit:review on PR #184',
+      reviewAgents: 'reviewer',
+      shipDecision: 'APPROVED',
+      findingsAddressed: 'none',
+      residualRisks: ['Waived: narrow auto-chain slice only; broader orchestration remains out of scope.'],
+    });
+
+    expect(validateBody(body, 'abc1234')).toEqual([]);
+    expect(
+      validateDocUpdates({
+        body,
+        changedFiles: ['bin/runtime-command.js', 'commands/commands.md'],
+      })
+    ).toEqual([]);
+    expect(body).not.toContain('```text');
   });
 
   it('creates a PR when none exists for the branch', () => {
