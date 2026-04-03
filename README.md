@@ -214,21 +214,33 @@ Read more in [docs/architecture/token-optimization.md](docs/architecture/token-o
 
 ## Documentation
 
-| Doc | Contents |
-| --- | --- |
-| [docs/architecture/overview.md](docs/architecture/overview.md) | control plane, wave execution, repo layout, Nexus, Sentinel CI |
-| [docs/architecture/core-concepts.md](docs/architecture/core-concepts.md) | agents, skills, workflows, `STATE.md`, hooks, Agent Forge |
-| [docs/architecture/security-model.md](docs/architecture/security-model.md) | integrity verification, hook safety, prompt injection defense, SCA |
-| [docs/architecture/runtime-adapters.md](docs/architecture/runtime-adapters.md) | Claude, Codex, and Antigravity runtime contracts |
-| [docs/operations/playbooks.md](docs/operations/playbooks.md) | runtime runbooks and operator procedures |
-| [docs/quality/evaluation-framework.md](docs/quality/evaluation-framework.md) | eval framework and scoring methodology |
-| [docs/quality/eval-dataset.md](docs/quality/eval-dataset.md) | regression prompt set |
-| [docs/integrations/mcp-guide.md](docs/integrations/mcp-guide.md) | MCP server integration |
-| [docs/operations/error-codes.md](docs/operations/error-codes.md) | error registry and runbooks |
+| Doc                                                                                                    | Contents                                                                            |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| [docs/architecture/overview.md](docs/architecture/overview.md)                                         | Control plane, wave execution model, model routing, repo layout, Nexus, Sentinel CI |
+| [docs/architecture/core-concepts.md](docs/architecture/core-concepts.md)                               | Agents, skills, workflows, STATE.md, hooks, Agent Forge                             |
+| [docs/architecture/token-optimization.md](docs/architecture/token-optimization.md)                     | Six-layer token strategy, cost estimates, model profiles                            |
+| [docs/architecture/security-model.md](docs/architecture/security-model.md)                             | Integrity verification, hook safety, prompt injection defense, SCA                  |
+| [docs/architecture/runtime-adapters.md](docs/architecture/runtime-adapters.md)                         | Claude (native), Codex (stable), Antigravity (experimental) adapter contracts       |
+| [docs/operations/playbooks.md](docs/operations/playbooks.md)                                           | Runbooks for common scenarios                                                       |
+| [docs/playbooks/self-orchestration.md](docs/playbooks/self-orchestration.md)                           | How Orbit uses Orbit to evolve itself across issues, waves, and review loops        |
+| [docs/quality/evaluation-framework.md](docs/quality/evaluation-framework.md)                           | Eval framework and scoring methodology                                              |
+| [docs/quality/eval-dataset.md](docs/quality/eval-dataset.md)                                           | Representative prompt set for regression testing                                    |
+| [docs/plans/issue-125-provenance-driven-context-synthesis.md](docs/plans/issue-125-provenance-driven-context-synthesis.md) | Detailed recovery-engine plan and implementation waves |
+| [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md)                       | Naming, placement, and traceability rules for plans, releases, and issue docs       |
+| [docs/integrations/mcp-guide.md](docs/integrations/mcp-guide.md)                                       | MCP server integration                                                              |
+| [docs/operations/error-codes.md](docs/operations/error-codes.md)                                       | ERR-ORBIT-NNN registry with runbooks                                                |
+| [docs/governance/contributing.md](docs/governance/contributing.md)                                     | How to add skills, agents, or patterns                                              |
+| [docs/governance/code-of-conduct.md](docs/governance/code-of-conduct.md)                               | Community behavior and enforcement expectations                                     |
+| [docs/releases/release-notes.md](docs/releases/release-notes.md)                                       | Top-level release notes used for GitHub releases                                    |
+| [SECURITY.md](SECURITY.md)                                                                             | Vulnerability reporting and threat model                                            |
 
 ## Contributing
 
 Contributors should treat Orbit as a self-hosted framework:
+
+For contributors working on Orbit itself, start with [docs/playbooks/self-orchestration.md](docs/playbooks/self-orchestration.md). It explains the issue-backed, state-backed workflow Orbit uses to build Orbit with Orbit.
+
+---
 
 - create or identify the issue first
 - branch from freshly pulled `develop`
