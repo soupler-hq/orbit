@@ -13,6 +13,10 @@
 
 Orbit is a repo-native control plane for teams who want more than "one assistant in one chat." It turns Claude, Codex, or other compatible coding agents into a coordinated product-delivery system with specialist routing, workflow boundaries, durable memory, and Git-native review discipline. If you want to go from rough idea to researched plan, implementation, QA, launch prep, and shipped release without rebuilding process from scratch in every repo, Orbit is built for that path.
 
+## What is Orbit?
+
+Orbit is a tool-agnostic orchestration layer that turns compatible coding agents into a structured delivery system. It adds specialist routing, workflow boundaries, durable project memory, and repo-native review discipline so teams can move from idea to shipped product with less prompt drift and less process rebuilding.
+
 ## Who Is This For?
 
 Orbit is built for teams who:
@@ -48,6 +52,22 @@ Three practical differences matter most:
 1. Orbit is workflow-first, not prompt-first. It gives you `/orbit:discover`, `/orbit:plan`, `/orbit:build`, `/orbit:verify`, `/orbit:ship`, and `/orbit:launch` instead of expecting one prompt to carry everything.
 2. Orbit is repo-native. Branch naming, PR evidence, validation, docs updates, and review gates live inside the repository, not as sidecar habits.
 3. Orbit covers the full idea-to-market path. It does not stop at "generate code"; it includes product-definition agents, QA, technical writing, launch planning, and release support.
+
+## Why Use This Framework
+
+### With Orbit
+
+- Requests route through explicit workflows and specialist agents instead of one long undifferentiated chat
+- Teams get continuity across sessions, branches, worktrees, and review cycles
+- Launch, QA, docs, and release work are part of the same system as implementation
+- Git-native governance keeps evidence, docs updates, and review state close to the code
+
+### Without Orbit
+
+- Work tends to collapse into one assistant thread with fuzzy ownership boundaries
+- Review, docs, and release handling become habits instead of enforced surfaces
+- Cross-session continuity is weaker and harder to recover
+- Idea-to-market work usually gets split across tools and ad-hoc prompt conventions
 
 ## Quick Start
 
@@ -252,6 +272,10 @@ Further guidance:
 
 - [docs/governance/contributing.md](docs/governance/contributing.md)
 - [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md)
+
+## Sample Eval Set
+
+Use [docs/quality/eval-dataset.md](docs/quality/eval-dataset.md) to verify routing, workflow, and portability claims after changes. Representative prompts include product requirements, QA strategy, launch messaging, security reviews, and unknown-domain research.
 
 ## License
 
