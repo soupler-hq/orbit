@@ -20,6 +20,8 @@
 - Status: `<!-- UPDATED or EXEMPT -->`
 - Notes: <!-- list updated docs or explain the exemption -->
 
+> Keep the exact `- Status:` / `- Notes:` bullet format. CI parses these lines literally.
+
 ---
 
 ## Orbit Self-Review
@@ -46,6 +48,8 @@
 ```
 (residual risks here)
 ```
+
+> Use plain triple backticks exactly as shown above. Do not use fenced info strings like ```text here; the governance parser treats them as content.
 
 ---
 
