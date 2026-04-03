@@ -4,7 +4,7 @@
 > Version 2.0 | Soupler Engineering Standard
 
 Canonical machine-readable control plane: `orbit.registry.json` and `orbit.config.json`.
-Human operator views: `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md`, `{{INSTRUCTION_FILE}}`.
+Human operator views: `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md`, `CLAUDE.md`.
 
 ## PRIME DIRECTIVE
 
@@ -118,7 +118,7 @@ WAVE 3 (sequential): integration → verify → atomic commit → STATE.md updat
 2. Use STATE.md as persistent memory across sessions
 3. Skills are lazy-loaded — only load SKILL.md relevant to current task
 4. Subagents carry only: task PLAN.md + directly referenced files
-5. All task definitions use XML structure — {{RUNTIME_NAME}} processes XML with higher fidelity
+5. All task definitions use XML structure — Claude processes XML with higher fidelity
 6. Route to minimum sufficient model (see MODEL ROUTING below)
 7. Main session stays under 50k tokens — everything else in subagents
 
@@ -140,7 +140,7 @@ Override model IDs via: `orbit.config.json` → `models.routing` or `models.prof
 
 ## MANDATORY WORKFLOW
 
-{{IMPLICIT_ROUTING_RULE}}
+This runtime supports Orbit workflow inference for plain prompts via native instruction orchestration. If the user does not explicitly prefix a request with an Orbit command, infer the nearest workflow and continue through that boundary. Explicit `/orbit:*` commands still take precedence.
 
 **QUICK**: classify → select → execute → verify → commit
 
@@ -166,7 +166,7 @@ Repeat PHASE per phase until milestone complete
 **SELF-HOSTING RULE**:
 
 - Orbit develops Orbit. If the repo being changed is Orbit itself, start from an Orbit command boundary instead of freeform execution.
-- {{IMPLICIT_ROUTING_BULLET}}
+- If the user gives a plain prompt instead of a slash command, infer the correct Orbit workflow and act through that workflow boundary.
 - Use plain prompts as direct Q&A only when the user is clearly asking for explanation, feedback, or lightweight guidance rather than requesting tracked work.
 - If no issue exists for framework work, create or identify the issue before implementation and carry that issue number through branch, commit, PR, and STATE updates.
 - If ambiguity blocks safe execution, emit a `CLARIFICATION_REQUESTED` event in `.orbit/state/STATE.md`, stop autonomous tool use, and resume only after `/orbit:clarify` resolves the request.
@@ -312,7 +312,7 @@ When no agent fits >60%:
 2. Forge analyzes required domain knowledge
 3. Defines agent: name, role, triggers, skills, constraints, examples
 4. Writes to `agents/{name}.md`
-5. Registers in this `{{INSTRUCTION_FILE}}`
+5. Registers in this `CLAUDE.md`
 6. Dispatches task to new agent
 7. Agent persists for all future project tasks
 8. **Promotion**: If the forged agent is a generalizable "Pillar of Standardization," tag with `promotion_candidate: true` and run `/orbit:promote`.

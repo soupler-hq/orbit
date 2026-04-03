@@ -93,6 +93,7 @@ In CI or other distributed runner setups, Orbit's `.orbit.lock` mutex remains lo
 | [docs/architecture/security-model.md](docs/architecture/security-model.md)                             | Integrity verification, hook safety, prompt injection defense, SCA                  |
 | [docs/architecture/runtime-adapters.md](docs/architecture/runtime-adapters.md)                         | Claude (native), Codex (stable), Antigravity (experimental) adapter contracts       |
 | [docs/operations/playbooks.md](docs/operations/playbooks.md)                                           | Runbooks for common scenarios                                                       |
+| [docs/playbooks/self-orchestration.md](docs/playbooks/self-orchestration.md)                           | How Orbit uses Orbit to evolve itself across issues, waves, and review loops        |
 | [docs/quality/evaluation-framework.md](docs/quality/evaluation-framework.md)                           | Eval framework and scoring methodology                                              |
 | [docs/quality/eval-dataset.md](docs/quality/eval-dataset.md)                                           | Representative prompt set for regression testing                                    |
 | [docs/plans/issue-125-provenance-driven-context-synthesis.md](docs/plans/issue-125-provenance-driven-context-synthesis.md) | Detailed recovery-engine plan and implementation waves |
@@ -106,6 +107,8 @@ In CI or other distributed runner setups, Orbit's `.orbit.lock` mutex remains lo
 
 Planning artifacts belong in `docs/plans/`. Release support artifacts belong in `docs/releases/`. Durable issue briefs belong in `docs/issues/` only when needed. Canonical documentation is grouped by intent under `docs/architecture/`, `docs/operations/`, `docs/quality/`, `docs/integrations/`, and `docs/governance/`. Naming and ordering rules live in `docs/standards/artifact-conventions.md`.
 The repo root is intentionally a thin contract: public entrypoints, generated runtime-facing artifacts, and top-level metadata stay in root; new durable docs should default to `docs/`.
+
+For contributors working on Orbit itself, start with [docs/playbooks/self-orchestration.md](docs/playbooks/self-orchestration.md). It explains the issue-backed, state-backed workflow Orbit uses to build Orbit with Orbit.
 
 ---
 
