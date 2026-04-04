@@ -24,14 +24,14 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
-const { openDb, DB_PATH } = require('./db');
+const { openDb, DB_PATH, ROOT_DIR } = require('./db');
 const {
   DECISIONS_LOG_PATH,
   parseDecisionLogFile,
   parseStateDecisionTable,
 } = require('./decision-log');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = ROOT_DIR;
 const STATE_PATH = path.join(ROOT, '.orbit', 'state', 'STATE.md');
 const ARGS = process.argv.slice(2);
 const FORCE = ARGS.includes('--force');

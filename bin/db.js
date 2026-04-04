@@ -16,7 +16,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, '..', '.orbit', 'context.db');
+const ROOT_DIR = path.resolve(process.env.ORBIT_ROOT_DIR || path.join(__dirname, '..'));
+const DB_PATH = path.join(ROOT_DIR, '.orbit', 'context.db');
 
 /**
  * Open (or create) the Orbit SQLite database.
@@ -124,4 +125,4 @@ function normalizeTaskRows(db) {
   `);
 }
 
-module.exports = { openDb, initSchema, normalizeTaskRows, DB_PATH };
+module.exports = { openDb, initSchema, normalizeTaskRows, DB_PATH, ROOT_DIR };

@@ -227,7 +227,12 @@ describe('enforcement end-to-end command paths', () => {
       expect(implementation.status).toBe(0);
       expect(implementation.stdout).toContain('State:    implementation_in_progress');
 
-      const reviewGate = runCli('progress.js', reviewRuntime, ['--agent', 'engineer', '--wave', '1']);
+      const reviewGate = runCli('progress.js', reviewRuntime, [
+        '--agent',
+        'engineer',
+        '--wave',
+        '1',
+      ]);
       expect(reviewGate.status).toBe(0);
       expect(reviewGate.stdout).toContain('State:    review_required');
       expect(reviewGate.stdout).toContain('Command:  /orbit:review');
@@ -250,7 +255,7 @@ describe('enforcement end-to-end command paths', () => {
 });
 
 describe('runtime capability generation', () => {
-  it('renders different plain-prompt guidance for supported and unsupported runtimes', () => {
+  it('renders plain-prompt guidance for stable cross-runtime adapters', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-routing-e2e-'));
     const codexOut = path.join(tmpDir, 'codex.md');
     const antigravityOut = path.join(tmpDir, 'antigravity.md');
@@ -258,7 +263,13 @@ describe('runtime capability generation', () => {
     try {
       execFileSync(
         'node',
-        [path.join(ROOT, 'bin', 'generate-instructions.js'), '--runtime', 'codex', '--output', codexOut],
+        [
+          path.join(ROOT, 'bin', 'generate-instructions.js'),
+          '--runtime',
+          'codex',
+          '--output',
+          codexOut,
+        ],
         { cwd: ROOT, encoding: 'utf8' }
       );
       execFileSync(
@@ -278,14 +289,14 @@ describe('runtime capability generation', () => {
 
       expect(codexText).toContain('supports Orbit workflow inference for plain prompts');
       expect(codexText).toContain('infer the correct Orbit workflow');
-      expect(antigravityText).toContain('does not provide reliable plain-prompt interception');
-      expect(antigravityText).toContain("prefer the runtime's documented explicit Orbit command path");
+      expect(antigravityText).toContain('supports Orbit workflow inference for plain prompts');
+      expect(antigravityText).toContain('infer the correct Orbit workflow');
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 
-  it('writes different adapter contracts for supported and unsupported runtimes', () => {
+  it('writes adapter contracts that keep Codex and Antigravity on the supported path', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-contract-e2e-'));
     const codexOut = path.join(tmpDir, 'codex.contract.json');
     const antigravityOut = path.join(tmpDir, 'antigravity.contract.json');
@@ -315,8 +326,8 @@ describe('runtime capability generation', () => {
       expect(codexContract.policy_file).toBe('policy.md');
       expect(codexContract.required_files).toContain('policy.md');
 
-      expect(antigravityContract.capabilities.implicit_prompt_routing).toBe(false);
-      expect(antigravityContract.capabilities.explicit_command_preferred).toBe(true);
+      expect(antigravityContract.capabilities.implicit_prompt_routing).toBe(true);
+      expect(antigravityContract.capabilities.explicit_command_preferred).toBe(false);
       expect(antigravityContract.policy_file).toBe(null);
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -383,11 +394,15 @@ describe('install and setup enforcement paths', () => {
     initGitRepo(projectDir);
 
     try {
-      execFileSync('bash', [path.join(ROOT, 'install.sh'), '--local', '--skip-verify', '--tool', 'claude'], {
-        cwd: projectDir,
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
+      execFileSync(
+        'bash',
+        [path.join(ROOT, 'install.sh'), '--local', '--skip-verify', '--tool', 'claude'],
+        {
+          cwd: projectDir,
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'pipe'],
+        }
+      );
 
       const hooksDir = resolveHooksDir(projectDir);
       expect(fs.lstatSync(path.join(hooksDir, 'pre-commit')).isSymbolicLink()).toBe(true);
@@ -410,11 +425,15 @@ describe('install and setup enforcement paths', () => {
         encoding: 'utf8',
       });
 
-      execFileSync('bash', [path.join(ROOT, 'install.sh'), '--local', '--skip-verify', '--tool', 'claude'], {
-        cwd: worktreeRepo,
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
+      execFileSync(
+        'bash',
+        [path.join(ROOT, 'install.sh'), '--local', '--skip-verify', '--tool', 'claude'],
+        {
+          cwd: worktreeRepo,
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'pipe'],
+        }
+      );
 
       const hooksDir = resolveHooksDir(worktreeRepo);
       expect(fs.lstatSync(path.join(hooksDir, 'pre-commit')).isSymbolicLink()).toBe(true);
@@ -441,6 +460,33 @@ describe('install and setup enforcement paths', () => {
       expect(fs.lstatSync(path.join(hooksDir, 'pre-commit')).isSymbolicLink()).toBe(true);
       expect(fs.lstatSync(path.join(hooksDir, 'pre-push')).isSymbolicLink()).toBe(true);
       expect(fs.lstatSync(path.join(hooksDir, 'post-commit')).isSymbolicLink()).toBe(true);
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('setup path bootstraps shared context for Antigravity installs too', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-setup-antigravity-e2e-'));
+    const projectDir = path.join(tmpDir, 'repo');
+    initGitRepo(projectDir);
+
+    try {
+      execFileSync('bash', [path.join(ROOT, 'bin', 'setup.sh'), '--tool', 'antigravity'], {
+        cwd: projectDir,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+
+      expect(fs.existsSync(path.join(projectDir, '.antigravity', 'CLAUDE.md'))).toBe(true);
+      expect(fs.existsSync(path.join(projectDir, '.antigravity', 'adapter.contract.json'))).toBe(
+        true
+      );
+      expect(fs.existsSync(path.join(projectDir, '.orbit', 'context.db'))).toBe(true);
+
+      const contract = JSON.parse(
+        fs.readFileSync(path.join(projectDir, '.antigravity', 'adapter.contract.json'), 'utf8')
+      );
+      expect(contract.capabilities.implicit_prompt_routing).toBe(true);
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }

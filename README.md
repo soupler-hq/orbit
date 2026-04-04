@@ -39,13 +39,13 @@ Common fits:
 
 Orbit is not trying to replace your preferred coding agent. It gives that agent a control plane.
 
-| Capability | Claude/Codex alone | DeerFlow | Orbit |
-| --- | --- | --- | --- |
-| Specialist agent topology | ✗ | ✗ | ✓ |
-| Git-native workflow boundaries | ✗ | ✗ | ✓ |
-| Idea-to-market lifecycle coverage | ✗ | ✗ | ✓ |
-| Cost-optimized model routing | ✗ | ✗ | ✓ |
-| Project memory across sessions | ✗ | Partial | ✓ |
+| Capability                        | Claude/Codex alone | DeerFlow | Orbit |
+| --------------------------------- | ------------------ | -------- | ----- |
+| Specialist agent topology         | ✗                  | ✗        | ✓     |
+| Git-native workflow boundaries    | ✗                  | ✗        | ✓     |
+| Idea-to-market lifecycle coverage | ✗                  | ✗        | ✓     |
+| Cost-optimized model routing      | ✗                  | ✗        | ✓     |
+| Project memory across sessions    | ✗                  | Partial  | ✓     |
 
 Three practical differences matter most:
 
@@ -181,20 +181,20 @@ Orbit is also a strong fit for IDP, auth, and identity-sensitive products where 
 
 ## Agent Roster
 
-| Agent | Best used for |
-| --- | --- |
-| `architect` | system design, tradeoffs, scalability, architecture reviews |
-| `engineer` | coding, debugging, refactoring, implementation |
-| `strategist` | milestones, sequencing, roadmaps, OKRs |
-| `product-manager` | PRDs, requirements, user stories, feature specs |
-| `business-analyst` | functional specs, use cases, process maps, edge cases |
-| `qa-engineer` | QA strategy, regression suites, release gates |
-| `reviewer` | code review, audit, quality gate |
-| `devops` | CI/CD, deployment, monitoring, infrastructure |
-| `researcher` | feasibility, comparison, unknown domains |
-| `designer` | flows, IA, UX direction |
-| `technical-writer` | API docs, onboarding docs, changelogs, README updates |
-| `launch-planner` | launch planning, GTM support, rollout messaging |
+| Agent              | Best used for                                               |
+| ------------------ | ----------------------------------------------------------- |
+| `architect`        | system design, tradeoffs, scalability, architecture reviews |
+| `engineer`         | coding, debugging, refactoring, implementation              |
+| `strategist`       | milestones, sequencing, roadmaps, OKRs                      |
+| `product-manager`  | PRDs, requirements, user stories, feature specs             |
+| `business-analyst` | functional specs, use cases, process maps, edge cases       |
+| `qa-engineer`      | QA strategy, regression suites, release gates               |
+| `reviewer`         | code review, audit, quality gate                            |
+| `devops`           | CI/CD, deployment, monitoring, infrastructure               |
+| `researcher`       | feasibility, comparison, unknown domains                    |
+| `designer`         | flows, IA, UX direction                                     |
+| `technical-writer` | API docs, onboarding docs, changelogs, README updates       |
+| `launch-planner`   | launch planning, GTM support, rollout messaging             |
 
 See the broader contract surfaces in [docs/architecture/core-concepts.md](docs/architecture/core-concepts.md).
 
@@ -234,25 +234,25 @@ Read more in [docs/architecture/token-optimization.md](docs/architecture/token-o
 
 ## Documentation
 
-| Doc                                                                                                    | Contents                                                                            |
-| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| [docs/architecture/overview.md](docs/architecture/overview.md)                                         | Control plane, wave execution model, model routing, repo layout, Nexus, Sentinel CI |
-| [docs/architecture/core-concepts.md](docs/architecture/core-concepts.md)                               | Agents, skills, workflows, STATE.md, hooks, Agent Forge                             |
-| [docs/architecture/token-optimization.md](docs/architecture/token-optimization.md)                     | Six-layer token strategy, cost estimates, model profiles                            |
-| [docs/architecture/security-model.md](docs/architecture/security-model.md)                             | Integrity verification, hook safety, prompt injection defense, SCA                  |
-| [docs/architecture/runtime-adapters.md](docs/architecture/runtime-adapters.md)                         | Claude (native), Codex (stable), Antigravity (experimental) adapter contracts       |
-| [docs/operations/playbooks.md](docs/operations/playbooks.md)                                           | Runbooks for common scenarios                                                       |
-| [docs/playbooks/self-orchestration.md](docs/playbooks/self-orchestration.md)                           | How Orbit uses Orbit to evolve itself across issues, waves, and review loops        |
-| [docs/quality/evaluation-framework.md](docs/quality/evaluation-framework.md)                           | Eval framework and scoring methodology                                              |
-| [docs/quality/eval-dataset.md](docs/quality/eval-dataset.md)                                           | Representative prompt set for regression testing                                    |
-| [docs/plans/issue-125-provenance-driven-context-synthesis.md](docs/plans/issue-125-provenance-driven-context-synthesis.md) | Detailed recovery-engine plan and implementation waves |
-| [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md)                       | Naming, placement, and traceability rules for plans, releases, and issue docs       |
-| [docs/integrations/mcp-guide.md](docs/integrations/mcp-guide.md)                                       | MCP server integration                                                              |
-| [docs/operations/error-codes.md](docs/operations/error-codes.md)                                       | ERR-ORBIT-NNN registry with runbooks                                                |
-| [docs/governance/contributing.md](docs/governance/contributing.md)                                     | How to add skills, agents, or patterns                                              |
-| [docs/governance/code-of-conduct.md](docs/governance/code-of-conduct.md)                               | Community behavior and enforcement expectations                                     |
-| [docs/releases/release-notes.md](docs/releases/release-notes.md)                                       | Top-level release notes used for GitHub releases                                    |
-| [SECURITY.md](SECURITY.md)                                                                             | Vulnerability reporting and threat model                                            |
+| Doc                                                                                                                        | Contents                                                                            |
+| -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| [docs/architecture/overview.md](docs/architecture/overview.md)                                                             | Control plane, wave execution model, model routing, repo layout, Nexus, Sentinel CI |
+| [docs/architecture/core-concepts.md](docs/architecture/core-concepts.md)                                                   | Agents, skills, workflows, STATE.md, hooks, Agent Forge                             |
+| [docs/architecture/token-optimization.md](docs/architecture/token-optimization.md)                                         | Six-layer token strategy, cost estimates, model profiles                            |
+| [docs/architecture/security-model.md](docs/architecture/security-model.md)                                                 | Integrity verification, hook safety, prompt injection defense, SCA                  |
+| [docs/architecture/runtime-adapters.md](docs/architecture/runtime-adapters.md)                                             | Claude (native), Codex (stable), Antigravity (stable) adapter contracts             |
+| [docs/operations/playbooks.md](docs/operations/playbooks.md)                                                               | Runbooks for common scenarios                                                       |
+| [docs/playbooks/self-orchestration.md](docs/playbooks/self-orchestration.md)                                               | How Orbit uses Orbit to evolve itself across issues, waves, and review loops        |
+| [docs/quality/evaluation-framework.md](docs/quality/evaluation-framework.md)                                               | Eval framework and scoring methodology                                              |
+| [docs/quality/eval-dataset.md](docs/quality/eval-dataset.md)                                                               | Representative prompt set for regression testing                                    |
+| [docs/plans/issue-125-provenance-driven-context-synthesis.md](docs/plans/issue-125-provenance-driven-context-synthesis.md) | Detailed recovery-engine plan and implementation waves                              |
+| [docs/standards/artifact-conventions.md](docs/standards/artifact-conventions.md)                                           | Naming, placement, and traceability rules for plans, releases, and issue docs       |
+| [docs/integrations/mcp-guide.md](docs/integrations/mcp-guide.md)                                                           | MCP server integration                                                              |
+| [docs/operations/error-codes.md](docs/operations/error-codes.md)                                                           | ERR-ORBIT-NNN registry with runbooks                                                |
+| [docs/governance/contributing.md](docs/governance/contributing.md)                                                         | How to add skills, agents, or patterns                                              |
+| [docs/governance/code-of-conduct.md](docs/governance/code-of-conduct.md)                                                   | Community behavior and enforcement expectations                                     |
+| [docs/releases/release-notes.md](docs/releases/release-notes.md)                                                           | Top-level release notes used for GitHub releases                                    |
+| [SECURITY.md](SECURITY.md)                                                                                                 | Vulnerability reporting and threat model                                            |
 
 ## Contributing
 

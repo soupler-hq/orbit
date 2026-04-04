@@ -1116,7 +1116,7 @@ if (forgeIntegrityResults.length === 0) {
 }
 
 // ── Metric 5: Portability ──────────────────────────────────────────────────
-// Claude (native), Codex (stable), Antigravity (experimental or better) are all documented.
+// Claude (native), Codex (stable), and Antigravity (stable) are all documented.
 
 const REQUIRED_RUNTIMES = [
   { name: 'claude', adapterKeyword: 'claude' },
@@ -1177,15 +1177,15 @@ const promptRoutingCapabilityResults = [
         : 'installed codex adapter contract must require policy.md for implicit prompt routing',
   },
   {
-    check: 'installed antigravity adapter contract declares explicit command routing only',
+    check: 'installed antigravity adapter contract declares implicit prompt routing support',
     pass:
-      installedAntigravityAdapterContract.capabilities.implicit_prompt_routing === false &&
-      installedAntigravityAdapterContract.capabilities.explicit_command_preferred === true,
+      installedAntigravityAdapterContract.capabilities.implicit_prompt_routing === true &&
+      installedAntigravityAdapterContract.capabilities.explicit_command_preferred === false,
     reason:
-      installedAntigravityAdapterContract.capabilities.implicit_prompt_routing === false &&
-      installedAntigravityAdapterContract.capabilities.explicit_command_preferred === true
+      installedAntigravityAdapterContract.capabilities.implicit_prompt_routing === true &&
+      installedAntigravityAdapterContract.capabilities.explicit_command_preferred === false
         ? 'ok'
-        : 'installed antigravity adapter contract must prefer explicit commands',
+        : 'installed antigravity adapter contract must support implicit prompt routing',
   },
   {
     check: 'runtime adapter docs describe Codex prompt routing support',
@@ -1195,11 +1195,11 @@ const promptRoutingCapabilityResults = [
       : 'docs/architecture/runtime-adapters.md missing Codex prompt-routing support note',
   },
   {
-    check: 'runtime adapter docs describe Antigravity prompt routing limitation',
-    pass: adapterText.includes('Plain-prompt Orbit workflow routing is not currently supported'),
-    reason: adapterText.includes('Plain-prompt Orbit workflow routing is not currently supported')
+    check: 'runtime adapter docs describe Antigravity prompt routing support',
+    pass: adapterText.includes('Antigravity infers the nearest Orbit workflow from plain prompts'),
+    reason: adapterText.includes('Antigravity infers the nearest Orbit workflow from plain prompts')
       ? 'ok'
-      : 'docs/architecture/runtime-adapters.md missing Antigravity prompt-routing limitation',
+      : 'docs/architecture/runtime-adapters.md missing Antigravity prompt-routing support note',
   },
   {
     check: 'install path teaches Codex policy to infer tracked plain prompts',
@@ -1514,7 +1514,8 @@ const runtimeEnforcementResults = [
     })(),
   },
   {
-    check: 'instruction generator enforces supported vs unsupported plain-prompt routing',
+    check:
+      'instruction generator enforces stable plain-prompt routing across Codex and Antigravity',
     ...(() => {
       const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-eval-routing-'));
       const codexOut = path.join(tmpDir, 'codex.md');
@@ -1531,7 +1532,7 @@ const runtimeEnforcementResults = [
         const antigravityText = fs.readFileSync(antigravityOut, 'utf8');
         const pass =
           codexText.includes('supports Orbit workflow inference for plain prompts') &&
-          antigravityText.includes('does not provide reliable plain-prompt interception');
+          antigravityText.includes('supports Orbit workflow inference for plain prompts');
         return {
           pass,
           reason: pass

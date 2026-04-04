@@ -142,9 +142,10 @@ run_install "$PROJECT3C" --tool antigravity
 
 assert_file "Antigravity CLAUDE.md installed" "$PROJECT3C/.antigravity/CLAUDE.md"
 assert_file "Antigravity adapter contract installed" "$PROJECT3C/.antigravity/adapter.contract.json"
-assert_contains "Antigravity instructions mention unsupported plain-prompt interception" "$PROJECT3C/.antigravity/CLAUDE.md" "does not provide reliable plain-prompt interception"
-assert_contains "Antigravity contract marks implicit prompt routing unsupported" "$PROJECT3C/.antigravity/adapter.contract.json" '"implicit_prompt_routing": false'
-assert_contains "Antigravity contract prefers explicit commands" "$PROJECT3C/.antigravity/adapter.contract.json" '"explicit_command_preferred": true'
+assert_contains "Antigravity instructions mention supported plain-prompt routing" "$PROJECT3C/.antigravity/CLAUDE.md" "supports Orbit workflow inference for plain prompts"
+assert_contains "Antigravity contract marks implicit prompt routing supported" "$PROJECT3C/.antigravity/adapter.contract.json" '"implicit_prompt_routing": true'
+assert_file "Antigravity shared STATE.md created" "$PROJECT3C/.orbit/state/STATE.md"
+assert_file "Antigravity shared decisions log created" "$PROJECT3C/.orbit/state/DECISIONS-LOG.md"
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Node wrapper smoke test: bin/install.js delegates to install.sh"
