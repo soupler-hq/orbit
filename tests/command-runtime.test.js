@@ -240,6 +240,23 @@ describe('runtime command status parity', () => {
     expect(output).toContain('PR:         not opened yet');
   });
 
+  it('quick runtime preserves the issue-boundary block even when tests and review are green', () => {
+    const output = renderQuick({
+      issue: '#148',
+      branch: 'feat/150-executable-next-runtime',
+      testsStatus: 'passed',
+      testEvidenceStatus: 'present',
+      reviewStatus: 'approved',
+      reviewEvidenceStatus: 'present',
+      shipDecisionStatus: 'approved',
+    });
+
+    expect(output).toContain('State:    context_switch_required');
+    expect(output).toContain('Next:     branch_aligned');
+    expect(output).toContain('**Primary**: /orbit:quick #148');
+    expect(output).not.toContain('Orbit Auto-Chain');
+  });
+
   it('quick runtime consults operational rules and blocks the wrong route before execution', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-op-rules-'));
     const rulesFile = path.join(tmpDir, 'OPERATIONAL-RULES.json');
@@ -286,6 +303,60 @@ describe('runtime command status parity', () => {
     expect(output).toContain('State:    operational_rule_required');
     expect(output).toContain('Next:     approved_route');
     expect(output).toContain('requires route approved');
+    expect(output).toContain('**Primary**: /orbit:quick');
+  });
+
+  it('quick runtime preserves the operational-rule block even when tests and review are green', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-op-rules-'));
+    const rulesFile = path.join(tmpDir, 'OPERATIONAL-RULES.json');
+    fs.writeFileSync(
+      rulesFile,
+      JSON.stringify(
+        {
+          version: 1,
+          rules: [
+            {
+              id: 'gh-approved-route',
+              status: 'active',
+              summary: 'Use the approved route first for GitHub CLI network and mutation commands.',
+              scope: {
+                environment: ['codex-sandbox'],
+                tool: ['gh'],
+                operation: ['network_mutation'],
+              },
+              guidance: {
+                preferred_route: 'approved',
+                why: 'Sandboxed gh network and mutation calls are unstable in this environment.',
+              },
+            },
+          ],
+        },
+        null,
+        2
+      )
+    );
+
+    const output = renderQuick({
+      issue: '#172',
+      branch: 'feat/172-operational-rules',
+      testsStatus: 'passed',
+      testEvidenceStatus: 'present',
+      reviewStatus: 'approved',
+      reviewEvidenceStatus: 'present',
+      shipDecisionStatus: 'approved',
+      tool: 'gh',
+      operation: 'network_mutation',
+      environment: 'codex-sandbox',
+      route: 'sandbox',
+      rulesFile,
+    });
+
+    expect(output).toContain('Operational Rule');
+    expect(output).toContain('State:    operational_rule_required');
+    expect(output).toContain('Next:     approved_route');
+    expect(output).toContain('requires route approved');
+    expect(output).toContain('**Primary**: /orbit:quick');
+    expect(output).not.toContain('Orbit Auto-Chain');
   });
 
   it('operational rules match by environment, tool, and operation specificity', () => {

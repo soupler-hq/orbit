@@ -1,3 +1,22 @@
+## [2.9.0]
+
+### Added
+- **Universal context support**: Orbit now ships a shared `context.db` runtime with bootstrap, partial loads, checkpoint-aware recovery, and durable decision logging so sessions can resume from structured project state instead of raw transcript memory alone.
+- **Executable tracked-workflow control plane**: lifecycle gates, quick auto-chain, PR evidence validation, explicit Orbit command dispatch, clarification gating, operational-route enforcement, recovery loop execution, and checkpoint manifests now run through repo-local commands instead of living only in documentation.
+- **New command and role coverage**: `/orbit:ask`, `/orbit:clarify`, `/orbit:discover`, `/orbit:launch`, and `/orbit:riper` are added alongside new agents and skills for product, launch, onboarding, compliance, QA, and technical-writing work.
+- **Eval artifact pipeline**: `/orbit:eval` now emits both `EVAL-REPORT.md` and `eval-report.json`, with expanded metric coverage for prompt routing, runtime enforcement, observability, registry integrity, and portability.
+
+### Changed
+- **Documentation architecture**: the docs set is reorganized into architecture, governance, integrations, operations, playbooks, plans, quality, and releases sections, while README is rewritten around Orbit’s Idea-to-Market positioning.
+- **Runtime adapter contract**: Claude, Codex, and Antigravity now share a clearer adapter model with generated instruction surfaces, common state artifacts, and tested install/setup flows.
+- **Governance enforcement**: Sentinel and release workflows now require fresher PR metadata, docs-update accountability, residual-risk labeling, and stronger release artifact discipline before publish.
+
+### Fixed
+- **Quick blocker handling**: `/orbit:quick` no longer drops issue-boundary or operational-route blockers after tests/review become green, and blocked approved-route flows keep recommending `/orbit:quick` instead of a misleading review handoff.
+- **Eval contract reliability**: the eval artifact test budget now matches the executable eval flow, preventing false timeouts while keeping the end-to-end contract under test.
+
+---
+
 ## [2.7.0]
 
 ### Added

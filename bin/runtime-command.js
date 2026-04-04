@@ -106,6 +106,10 @@ function buildQuickAutoChain(evidence, workflow, args = {}) {
     return null;
   }
 
+  if (['context_switch_required', 'operational_rule_required'].includes(workflow?.state)) {
+    return null;
+  }
+
   let verification = 'waiting_on_implementation';
   if (evidence.testsStatus === 'passed') verification = 'passed';
   else if (evidence.testsStatus === 'failed') verification = 'failed';
@@ -161,8 +165,10 @@ function buildRuntimeCommandOutput(args, profile) {
   const autoChain =
     profile.autoChain === true ? buildQuickAutoChain(evidence, workflow, args) : null;
   const effectiveWorkflow = autoChain?.finalWorkflow || workflow;
+  const preserveWorkflowCommand = ['operational_rule_required'].includes(effectiveWorkflow.state);
   const primary =
-    effectiveWorkflow.nextCommand && effectiveWorkflow.nextCommand !== profile.command
+    effectiveWorkflow.nextCommand &&
+    (effectiveWorkflow.nextCommand !== profile.command || preserveWorkflowCommand)
       ? effectiveWorkflow.nextCommand
       : profile.defaultPrimary;
   const why =

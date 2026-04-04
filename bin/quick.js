@@ -4,7 +4,13 @@
 const { buildEvidence } = require('./progress');
 const { syncPullRequest } = require('./pull-request-controller');
 const { renderReview } = require('./review');
-const { buildQuickAutoChain, buildRuntimeCommandOutput, parseArgs } = require('./runtime-command');
+const {
+  buildOperationalRuleWorkflow,
+  buildQuickAutoChain,
+  buildRuntimeCommandOutput,
+  buildTaskBoundaryWorkflow,
+  parseArgs,
+} = require('./runtime-command');
 const { evaluateWorkflowState } = require('./workflow-state');
 
 function renderQuick(args = {}) {
@@ -48,7 +54,15 @@ function executeReviewPhase(args = {}, deps = {}) {
 function runQuick(args = {}, deps = {}) {
   const runtimeArgs = { ...args };
   let evidence = buildEvidence(runtimeArgs, deps.runtimeDeps);
-  let workflow = evaluateWorkflowState(evidence);
+  const resolveWorkflow = (currentEvidence) => {
+    const operational = buildOperationalRuleWorkflow(runtimeArgs, {
+      command: '/orbit:quick',
+    });
+    const boundaryWorkflow = buildTaskBoundaryWorkflow(runtimeArgs, currentEvidence);
+    return operational.workflow || boundaryWorkflow || evaluateWorkflowState(currentEvidence);
+  };
+
+  let workflow = resolveWorkflow(evidence);
   let autoChain = buildQuickAutoChain(evidence, workflow, runtimeArgs);
   const approvedRoute = runtimeArgs.route === 'approved';
   const reviewExecutionEnabled =
@@ -70,7 +84,7 @@ function runQuick(args = {}, deps = {}) {
     }
     if (reviewResult.reviewFindings) runtimeArgs.reviewFindings = reviewResult.reviewFindings;
     evidence = buildEvidence(runtimeArgs, deps.runtimeDeps);
-    workflow = evaluateWorkflowState(evidence);
+    workflow = resolveWorkflow(evidence);
     autoChain = buildQuickAutoChain(evidence, workflow, runtimeArgs);
   }
 
