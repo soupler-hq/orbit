@@ -5,6 +5,8 @@ const { execFileSync } = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { validateBody, validateBranchName } = require('./validate-pr-governance');
+const { validateDocUpdates } = require('./validate-doc-updates');
 
 function runGh(args) {
   return execFileSync('gh', args, {
@@ -75,6 +77,8 @@ function deriveDocsUpdate(changedFiles = [], args = {}) {
 
 function buildPullRequestBody({
   issue,
+  branch = '',
+  prNumber = '#TBD',
   headSha,
   summaryLines,
   verificationCommands,
@@ -141,7 +145,25 @@ function buildPullRequestBody({
     '```',
     ...residualLines,
     '```',
+    '',
+    '## PR Metadata',
+    `- Issue: ${issue}`,
+    `- Branch: ${branch}`,
+    `- PR: ${prNumber}`,
+    `- Head SHA: ${headSha}`,
   ].join('\n');
+}
+
+function validatePullRequestArtifacts({ body, branch, baseRef = 'develop', headSha, changedFiles }) {
+  const errors = [
+    ...validateBranchName(branch || '', baseRef),
+    ...validateBody(body, headSha),
+    ...validateDocUpdates({ body, changedFiles }),
+  ];
+
+  if (errors.length > 0) {
+    throw new Error(`PR preflight failed:\n- ${errors.join('\n- ')}`);
+  }
 }
 
 function syncPullRequest(
@@ -158,21 +180,32 @@ function syncPullRequest(
 ) {
   const gh = deps.ghRunner || runGh;
   const resolvedTitle = title || latestCommitSubject() || `Tracked work for ${issue}`;
-  const body = buildPullRequestBody({
+  const headSha = shortHeadSha();
+  const baseRef = args.baseRef || 'develop';
+  const summaryLines = [
+    `auto-chain PR sync for ${issue}`,
+    'refreshes the PR body from clean review + verification state',
+  ];
+  const initialBody = buildPullRequestBody({
     issue,
-    headSha: shortHeadSha(),
-    summaryLines: [
-      `auto-chain PR sync for ${issue}`,
-      'refreshes the PR body from clean review + verification state',
-    ],
+    branch,
+    headSha,
+    summaryLines,
     verificationCommands,
     changedFiles,
     args,
   });
+  validatePullRequestArtifacts({
+    body: initialBody,
+    branch,
+    baseRef,
+    headSha,
+    changedFiles,
+  });
 
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orbit-pr-body-'));
   const bodyFile = path.join(tmpDir, 'pr.md');
-  fs.writeFileSync(bodyFile, body);
+  fs.writeFileSync(bodyFile, initialBody);
 
   try {
     const existing = JSON.parse(
@@ -181,6 +214,24 @@ function syncPullRequest(
 
     if (existing.length > 0) {
       const pr = existing[0];
+      const updateBody = buildPullRequestBody({
+        issue,
+        branch,
+        prNumber: `#${pr.number}`,
+        headSha,
+        summaryLines,
+        verificationCommands,
+        changedFiles,
+        args,
+      });
+      validatePullRequestArtifacts({
+        body: updateBody,
+        branch,
+        baseRef,
+        headSha,
+        changedFiles,
+      });
+      fs.writeFileSync(bodyFile, updateBody);
       gh(['pr', 'edit', String(pr.number), '--title', resolvedTitle, '--body-file', bodyFile]);
       return { action: 'updated', number: pr.number, url: pr.url };
     }
@@ -198,6 +249,27 @@ function syncPullRequest(
       bodyFile,
     ]);
     const match = url.match(/\/pull\/(\d+)$/);
+    if (match) {
+      const createdBody = buildPullRequestBody({
+        issue,
+        branch,
+        prNumber: `#${match[1]}`,
+        headSha,
+        summaryLines,
+        verificationCommands,
+        changedFiles,
+        args,
+      });
+      validatePullRequestArtifacts({
+        body: createdBody,
+        branch,
+        baseRef,
+        headSha,
+        changedFiles,
+      });
+      fs.writeFileSync(bodyFile, createdBody);
+      gh(['pr', 'edit', String(match[1]), '--title', resolvedTitle, '--body-file', bodyFile]);
+    }
     return {
       action: prAction === 'update_existing_pr' ? 'updated' : 'created',
       number: match ? Number(match[1]) : null,
@@ -213,4 +285,5 @@ module.exports = {
   deriveDocsUpdate,
   splitCommands,
   syncPullRequest,
+  validatePullRequestArtifacts,
 };
