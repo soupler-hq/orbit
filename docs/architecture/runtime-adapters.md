@@ -61,15 +61,15 @@ Support level: `stable`
 
 Codex does not read `CLAUDE.md`. Instead, Orbit maps the control plane to Codex's operator surface:
 
-| Orbit concept        | Claude mapping            | Codex mapping                                           |
-| :------------------- | :------------------------ | :------------------------------------------------------ |
-| Session orchestrator | `CLAUDE.md`               | `INSTRUCTIONS.md` + `policy.md`                         |
-| Agent registry       | `orbit.registry.json`     | `orbit.registry.json` (same)                            |
-| Workflow definitions | `WORKFLOWS.md`            | `WORKFLOWS.md` (same)                                   |
-| Slash commands       | `/orbit:` via `commands/` | Follow matching `WORKFLOWS.md` section                  |
-| Plain prompt routing | Native via `CLAUDE.md`    | Supported via generated `INSTRUCTIONS.md` + `policy.md` |
-| Lifecycle hooks      | `settings.json` hooks     | Not mapped (Codex has no hook API)                      |
-| State persistence    | `.orbit/state/STATE.md`   | `.codex/state/STATE.md`                                 |
+| Orbit concept        | Claude mapping                                | Codex mapping                                           |
+| :------------------- | :-------------------------------------------- | :------------------------------------------------------ |
+| Session orchestrator | `CLAUDE.md`                                   | `INSTRUCTIONS.md` + `policy.md`                         |
+| Agent registry       | `orbit.registry.json`                         | `orbit.registry.json` (same)                            |
+| Workflow definitions | `WORKFLOWS.md`                                | `WORKFLOWS.md` (same)                                   |
+| Slash commands       | `/orbit:` via `commands/`                     | Follow matching `WORKFLOWS.md` section                  |
+| Plain prompt routing | Native via `CLAUDE.md`                        | Supported via generated `INSTRUCTIONS.md` + `policy.md` |
+| Lifecycle hooks      | `settings.json` hooks                         | Not mapped (Codex has no hook API)                      |
+| State persistence    | `.orbit/context.db` + `.orbit/state/STATE.md` | `.orbit/context.db` + `.orbit/state/STATE.md`           |
 
 **Install:** `bash install.sh --tool codex`
 
@@ -88,30 +88,35 @@ This installs to `.codex/` (local) or `~/.codex/` (global) with:
 2. **Agent selection**: Codex reads `orbit.registry.json` to select the appropriate agent for the task.
 3. **Workflow execution**: Codex follows the matching section in `WORKFLOWS.md` (e.g. for a multi-step task, follow the `plan → build → verify → ship` lifecycle).
 4. **Plain prompts**: Codex infers the nearest Orbit workflow from plain prompts via `INSTRUCTIONS.md` and `policy.md`; explicit `/orbit:*` commands still take precedence.
-5. **State persistence**: Codex writes session state to `.codex/state/STATE.md` at session end.
+5. **State persistence**: Codex resumes against the shared `.orbit/context.db` and `.orbit/state/STATE.md` surfaces used by the rest of the framework.
 6. **Hooks**: Codex has no lifecycle hook API. Safety checks from `hooks/scripts/pre-tool-use.sh` are NOT enforced. Use Codex only in trusted environments.
 
 ---
 
 ## Antigravity
 
-Support level: `experimental`
+Support level: `stable`
 
-Antigravity can follow the Orbit control plane if it can read markdown instructions and execute repo-local workflows, but no stable hook or lifecycle API has been published. Orbit now installs a best-effort adapter package, but plain-prompt routing still remains unsupported.
+Antigravity uses the same generated `CLAUDE.md` operator surface as Claude and the same shared `.orbit/` state directory as the rest of the framework. Orbit supports the tracked-workflow path end to end here: install, bootstrap the shared `context.db`, resume with `/orbit:resume`, and infer Orbit workflows from plain prompts through the generated instruction surface.
 
-**Current constraints:**
+**Install:** `bash install.sh --tool antigravity`
 
-- Best-effort `install_for_antigravity()` exists in `install.sh`, but the runtime contract still prefers explicit Orbit commands
-- Hook injection mechanism is unspecified in Antigravity's public docs
-- State persistence pathway is untested
-- Plain-prompt Orbit workflow routing is not currently supported as a reliable runtime capability
+This installs to `.antigravity/` (local) or `~/.antigravity/` (global) with:
 
-**Manual setup (best-effort):**
+- `CLAUDE.md` — generated operator surface for Antigravity
+- `adapter.contract.json` — executable capability contract for routing and hook support
+- `orbit.registry.json`, `orbit.config.json` — registry and config
+- `agents/`, `skills/` — full agent and skill library
+- `templates/STATE.md` — source state template copied into runtime state directories during install
 
-1. Point Antigravity at `CLAUDE.md` as its operator context.
-2. Provide `orbit.registry.json` and `WORKFLOWS.md` as reference documents.
-3. Write session state manually to `.orbit/state/STATE.md`.
-4. Skip hook-based safety checks until Antigravity publishes a lifecycle API.
+**Adapter Contract:**
+
+1. **Load instructions**: Antigravity reads `CLAUDE.md` as the session operator context at start.
+2. **Agent selection**: Antigravity reads `orbit.registry.json` to select the appropriate agent for the task.
+3. **Workflow execution**: Antigravity follows the matching section in `WORKFLOWS.md`.
+4. **Plain prompts**: Antigravity infers the nearest Orbit workflow from plain prompts via generated `CLAUDE.md`; explicit `/orbit:*` commands still take precedence.
+5. **State persistence**: Antigravity resumes against the same `.orbit/context.db` and `.orbit/state/STATE.md` surfaces used by the rest of the framework.
+6. **Hooks**: Antigravity has no published lifecycle hook API today. Hook-based safety checks are unavailable, but tracked workflow execution remains supported through explicit commands and generated instructions.
 
 Every installed adapter must also ship `adapter.contract.json`, which is the machine-readable source of truth for:
 
@@ -119,8 +124,6 @@ Every installed adapter must also ship `adapter.contract.json`, which is the mac
 - plain-prompt routing support
 - explicit-command fallback requirements
 - hook support
-
-**Tracking:** Full implementation tracked in [issue #17](https://github.com/soupler-hq/orbit/issues/17). When Antigravity publishes a stable hook/lifecycle API, `install_for_antigravity()` will be added and the support level will be upgraded to `stable`.
 
 ---
 
@@ -155,8 +158,7 @@ Inspect the runtime's installed `adapter.contract.json`.
   - expect `"policy_file": "policy.md"`
 - Antigravity:
   - `.antigravity/adapter.contract.json`
-  - expect `"implicit_prompt_routing": false`
-  - expect `"explicit_command_preferred": true`
+  - expect `"implicit_prompt_routing": true`
 
 If the installed contract does not match the runtime expectation, treat that as an Orbit install/runtime bug.
 

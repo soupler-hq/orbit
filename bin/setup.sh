@@ -50,7 +50,7 @@ create_adapter_dir() {
 
   local prompt_routing
   case "$tool" in
-    claude|codex) prompt_routing="supported" ;;
+    claude|codex|antigravity) prompt_routing="supported" ;;
     *)            prompt_routing="explicit commands required" ;;
   esac
 
@@ -226,7 +226,7 @@ main() {
   # Always run after install so context.db reflects the current repo state.
   # --force overwrites any existing db so setup is always idempotent.
   echo -e "${B}Bootstrapping context.db...${N}"
-  if node "$FRAMEWORK_DIR/bin/bootstrap.js" --force 2>&1; then
+  if ORBIT_ROOT_DIR="$PWD" node "$FRAMEWORK_DIR/bin/bootstrap.js" --force 2>&1; then
     echo -e "  ${G}✓ context.db ready at .orbit/context.db${N}"
   else
     echo -e "  ${Y}⚠  bootstrap failed — context.db may be missing or stale${N}"

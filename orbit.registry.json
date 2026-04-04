@@ -29,11 +29,11 @@
     },
     {
       "name": "antigravity",
-      "support": "experimental",
-      "entrypoints": ["INSTRUCTIONS.md", "WORKFLOWS.md", "orbit.registry.json"],
+      "support": "stable",
+      "entrypoints": ["CLAUDE.md", "WORKFLOWS.md", "orbit.registry.json", "orbit.config.json"],
       "adapter": "docs/architecture/runtime-adapters.md#antigravity",
-      "install_fn": null,
-      "note": "No stable hook/lifecycle API published. Tracked in issue #17."
+      "install_fn": "install_for_antigravity",
+      "note": "Tracked workflows and shared-state resume are supported; lifecycle hooks remain unavailable until Antigravity publishes a stable hook API."
     }
   ],
   "agents": [
