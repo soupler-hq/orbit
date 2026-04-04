@@ -36,6 +36,7 @@ describe('pull-request controller', () => {
     expect(body).toContain('## Orbit Self-Review');
     expect(body).toContain('## PR Metadata');
     expect(body).toContain('- Branch: feat/181-quick-review-pr-autochain');
+    expect(body).toContain('- Head SHA: `abc1234`');
   });
 
   it('emits a PR body that passes local governance validators', () => {

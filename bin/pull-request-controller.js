@@ -150,7 +150,7 @@ function buildPullRequestBody({
     `- Issue: ${issue}`,
     `- Branch: ${branch}`,
     `- PR: ${prNumber}`,
-    `- Head SHA: ${headSha}`,
+    `- Head SHA: \`${headSha}\``,
   ].join('\n');
 }
 
