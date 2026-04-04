@@ -154,7 +154,13 @@ function buildPullRequestBody({
   ].join('\n');
 }
 
-function validatePullRequestArtifacts({ body, branch, baseRef = 'develop', headSha, changedFiles }) {
+function validatePullRequestArtifacts({
+  body,
+  branch,
+  baseRef = 'develop',
+  headSha,
+  changedFiles,
+}) {
   const errors = [
     ...validateBranchName(branch || '', baseRef),
     ...validateBody(body, headSha),
