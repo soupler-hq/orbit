@@ -18,10 +18,13 @@ runs:
   steps:
     - name: Validate commit messages
       uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+      env:
+        COMMIT_PATTERN: ${{ inputs.commit-pattern }}
+        MAX_SUBJECT_LENGTH: ${{ inputs.max-subject-length }}
       with:
         script: |
-          const pattern = new RegExp(`${{ inputs.commit-pattern }}`);
-          const maxLen = parseInt('${{ inputs.max-subject-length }}');
+          const pattern = new RegExp(process.env.COMMIT_PATTERN);
+          const maxLen = parseInt(process.env.MAX_SUBJECT_LENGTH, 10);
 
           const { data: commits } = await github.rest.pulls.listCommits({
             owner: context.repo.owner,
