@@ -292,6 +292,9 @@ const evalCases = parseEvalDataset(datasetText);
 
 const adapterText = readFile('docs/architecture/runtime-adapters.md') || '';
 const commandsText = readFile('commands/commands.md') || '';
+const readmeText = readFile('README.md') || '';
+const orbitSentinelText = readFile('.github/workflows/orbit-sentinel.yml') || '';
+const standardsEnforcementText = readFile('.github/workflows/standards-enforcement.yml') || '';
 const configText = readFile('orbit.config.json');
 const config = configText ? JSON.parse(configText) : { runtimes: {} };
 const stateTemplateText = readFile('templates/STATE.md') || '';
@@ -942,6 +945,83 @@ integrityResults.push({
     !strategist.triggers.includes('requirements')
       ? 'ok'
       : 'strategist trigger list regressed past the #69 routing split',
+});
+
+integrityResults.push({
+  check: 'issue #79 ci contract: orbit-sentinel calls engineering-standards pipeline',
+  pass: orbitSentinelText.includes(
+    'uses: soupler-hq/engineering-standards/.github/workflows/pipeline.yml@v0.1.0'
+  ),
+  reason: orbitSentinelText.includes(
+    'uses: soupler-hq/engineering-standards/.github/workflows/pipeline.yml@v0.1.0'
+  )
+    ? 'ok'
+    : 'orbit-sentinel.yml does not call the shared engineering-standards pipeline',
+});
+
+integrityResults.push({
+  check: 'issue #79 ci contract: orbit-sentinel passes metadata.yml to the shared pipeline',
+  pass:
+    orbitSentinelText.includes('execution-mode: ci') &&
+    orbitSentinelText.includes('metadata-path: metadata.yml'),
+  reason:
+    orbitSentinelText.includes('execution-mode: ci') &&
+    orbitSentinelText.includes('metadata-path: metadata.yml')
+      ? 'ok'
+      : 'orbit-sentinel.yml does not pass the required pipeline inputs',
+});
+
+integrityResults.push({
+  check:
+    'issue #79 ci contract: duplicated local lint-test boilerplate is removed from orbit-sentinel',
+  pass:
+    !orbitSentinelText.includes('name: lint\n') &&
+    !orbitSentinelText.includes('name: test\n') &&
+    !orbitSentinelText.includes('name: compliance\n') &&
+    !orbitSentinelText.includes('name: sca\n'),
+  reason:
+    !orbitSentinelText.includes('name: lint\n') &&
+    !orbitSentinelText.includes('name: test\n') &&
+    !orbitSentinelText.includes('name: compliance\n') &&
+    !orbitSentinelText.includes('name: sca\n')
+      ? 'ok'
+      : 'orbit-sentinel.yml still contains duplicated local CI pillar jobs',
+});
+
+integrityResults.push({
+  check: 'issue #79 ci contract: standards-enforcement workflow exists',
+  pass: fileExists('.github/workflows/standards-enforcement.yml'),
+  reason: fileExists('.github/workflows/standards-enforcement.yml')
+    ? 'ok'
+    : 'missing file: .github/workflows/standards-enforcement.yml',
+});
+
+integrityResults.push({
+  check: 'issue #79 ci contract: standards-enforcement reuses pr-lint and commit-lint actions',
+  pass:
+    standardsEnforcementText.includes(
+      'uses: soupler-hq/engineering-standards/.github/actions/pr-lint@v0.1.0'
+    ) &&
+    standardsEnforcementText.includes(
+      'uses: soupler-hq/engineering-standards/.github/actions/commit-lint@v0.1.0'
+    ),
+  reason:
+    standardsEnforcementText.includes(
+      'uses: soupler-hq/engineering-standards/.github/actions/pr-lint@v0.1.0'
+    ) &&
+    standardsEnforcementText.includes(
+      'uses: soupler-hq/engineering-standards/.github/actions/commit-lint@v0.1.0'
+    )
+      ? 'ok'
+      : 'standards-enforcement.yml is not wired to the shared engineering-standards actions',
+});
+
+integrityResults.push({
+  check: 'issue #79 docs contract: README documents Orbit as IDP reference implementation',
+  pass: readmeText.includes('## Orbit as IDP Reference Implementation'),
+  reason: readmeText.includes('## Orbit as IDP Reference Implementation')
+    ? 'ok'
+    : 'README.md missing Orbit as IDP Reference Implementation section',
 });
 
 integrityResults.push({

@@ -20,7 +20,7 @@ Orbit installs lifecycle hooks that execute on every agent tool call. This gives
 | Compromised hook script      | Checksum covers all `hooks/scripts/*.sh`       | `SHASUM256.txt`                                |
 | Prompt injection             | Pre-tool-use hook detects adversarial patterns | `hooks/scripts/pre-tool-use.sh`                |
 | Hardcoded secrets in commits | `secret_scan_on_commit` guard                  | `orbit.config.json`                            |
-| Unpatched transitive deps    | npm audit gate + Dependabot weekly updates     | `orbit-sentinel.yml`, `.github/dependabot.yml` |
+| Unpatched transitive deps    | shared platform policy/assurance + Dependabot  | `orbit-sentinel.yml`, `.github/dependabot.yml` |
 | Vulnerable JS patterns       | CodeQL static analysis on every PR             | `.github/workflows/codeql.yml`                 |
 | Config tampering             | Schema validation on every CI run              | `bin/validate.sh`                              |
 
@@ -95,7 +95,7 @@ See `skills/prompt-safety.md` for the full detection ruleset.
 
 ## 4. Software Composition Analysis
 
-- **npm audit**: runs at `--audit-level=high` on every PR via the `sca` Sentinel job — blocks merge on high/critical findings
+- **Shared platform policy/assurance**: the reusable `engineering-standards` pipeline now owns the generic Node and policy pillars that Orbit previously duplicated in `orbit-sentinel.yml`
 - **Dependabot**: opens weekly PRs for npm and GitHub Actions dependency updates, targeting `develop`
 - **CodeQL**: static JavaScript analysis runs on every PR and on a weekly schedule, results visible in the Security tab
 

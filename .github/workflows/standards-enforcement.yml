@@ -1,0 +1,30 @@
+name: Standards Enforcement
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  pr-lint:
+    name: pr-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Lint PR title and branch name
+        uses: soupler-hq/engineering-standards/.github/actions/pr-lint@v0.1.0
+        with:
+          pr-title-pattern: '^(?:((FUNC|TECH|INFRA)-[0-9]{3}: )|((docs|chore|fix|feat|tech|infra|refactor|test|release|hotfix)(\([^)]+\))?: )).+'
+          branch-pattern: '^(feat|fix|docs|chore|refactor|test|release|hotfix)\/(?:[0-9]+-)?[a-z0-9]+(?:-[a-z0-9]+)*$'
+          require-story-id: 'false'
+
+  commit-lint:
+    name: commit-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Lint commit messages
+        uses: soupler-hq/engineering-standards/.github/actions/commit-lint@v0.1.0

@@ -5,14 +5,13 @@ on:
     branches: [develop, main]
 
 jobs:
-  lock-check:
-    name: lock-check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
+  platform:
+    name: platform
+    uses: soupler-hq/engineering-standards/.github/workflows/pipeline.yml@v0.1.0
+    with:
+      execution-mode: ci
+      metadata-path: metadata.yml
+    secrets: inherit
 
   pr-governance:
     name: pr-governance
@@ -76,116 +75,10 @@ jobs:
       - name: 🔒 Verify package-lock.json is up to date
         run: npm ci --dry-run
 
-  lint:
-    name: lint
-    runs-on: ubuntu-latest
-    needs: [lock-check, pr-governance]
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-      - name: Install dependencies
-        run: npm ci
-      - name: 🔍 ESLint
-        run: npm run lint
-      - name: 🎨 Prettier format check
-        run: npm run format:check
-      - name: 🚫 PII scan
-        run: |
-          if git grep -r "/Users/" -- '*.json' '*.sh' '*.js' '*.ts' \
-            ':(exclude).github/workflows/orbit-sentinel.yml'; then
-            echo "❌ Hardcoded local paths detected — remove before merging"
-            exit 1
-          fi
-
-  test:
-    name: test
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-      - name: Install dependencies
-        run: npm ci
-      - name: 🧪 Unit Tests
-        run: npm test
-      - name: 📊 Coverage gate (≥60%)
-        run: npm run test:coverage
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: coverage-report
-          path: coverage/
-
-  validate:
-    name: validate
-    runs-on: ubuntu-latest
-    needs: [lint, test]
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-      - name: Install dependencies
-        run: npm ci
-      - name: 🛡️ Semantic Validation
-        run: bash bin/validate.sh
-      - name: 📝 Changelog Verification
-        run: |
-          if ! grep -q "## \[$(jq -r .version < package.json)\]" CHANGELOG.md; then
-            echo "❌ Version mismatch: Current version in package.json is not documented in CHANGELOG.md"
-            exit 1
-          fi
-
-  compliance:
-    name: compliance
-    runs-on: ubuntu-latest
-    needs: lock-check
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-      - name: Install dependencies
-        run: npm ci
-      - name: 🏅 SOTA Compliance Check
-        run: bash bin/eval.sh
-
-  safety:
-    name: safety
-    runs-on: ubuntu-latest
-    needs: lock-check
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-      - name: Install dependencies
-        run: npm ci
-      - name: 🔒 Safety & Adversarial Audit
-        run: bash bin/test-safety.sh
-
-  sca:
-    name: sca
-    runs-on: ubuntu-latest
-    needs: lock-check
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-      - name: Install dependencies
-        run: npm ci
-      - name: 🔍 npm audit (high+critical)
-        run: npm audit --audit-level=high
-
   install-test:
     name: install-test
     runs-on: ubuntu-latest
+    needs: [platform, pr-governance]
     steps:
       - uses: actions/checkout@v6
       - name: 🔧 install.sh integration tests
@@ -194,6 +87,7 @@ jobs:
   quality:
     name: quality
     runs-on: ubuntu-latest
+    needs: [platform, pr-governance]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -211,6 +105,7 @@ jobs:
   workflow-lint:
     name: workflow-lint
     runs-on: ubuntu-latest
+    needs: [platform, pr-governance]
     steps:
       - uses: actions/checkout@v6
       - name: 🔍 actionlint (workflow architecture)
@@ -221,6 +116,7 @@ jobs:
   self-audit:
     name: self-audit
     runs-on: ubuntu-latest
+    needs: [platform, pr-governance]
     steps:
       - uses: actions/checkout@v6
       - name: 🔭 Config consistency (version skew, hook flags, model IDs, kernel purity)
@@ -229,7 +125,7 @@ jobs:
   human-views-drift:
     name: human-views-drift
     runs-on: ubuntu-latest
-    needs: lock-check
+    needs: [platform, pr-governance]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -247,10 +143,55 @@ jobs:
             exit 1
           }
 
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    needs: [platform, pr-governance]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm ci
+      - name: 🛡️ Semantic Validation
+        run: bash bin/validate.sh
+      - name: 📝 Changelog Verification
+        run: |
+          if ! grep -q "## \[$(jq -r .version < package.json)\]" CHANGELOG.md; then
+            echo "❌ Version mismatch: Current version in package.json is not documented in CHANGELOG.md"
+            exit 1
+          fi
+
+  safety:
+    name: safety
+    runs-on: ubuntu-latest
+    needs: [platform, pr-governance]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm ci
+      - name: 🔒 Safety & Adversarial Audit
+        run: bash bin/test-safety.sh
+
   publish-dry-run:
     name: publish-dry-run
     runs-on: ubuntu-latest
-    needs: [lint, test, validate, self-audit, human-views-drift]
+    needs:
+      [
+        platform,
+        pr-governance,
+        install-test,
+        quality,
+        workflow-lint,
+        self-audit,
+        human-views-drift,
+        validate,
+        safety,
+      ]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6

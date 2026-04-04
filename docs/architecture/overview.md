@@ -201,17 +201,36 @@ Cross-repo queries spawn wave subagents in each repo, aggregate findings in `NEX
 
 ## Sentinel CI
 
-Every PR is guarded by `.github/workflows/orbit-sentinel.yml`:
+Orbit uses the Soupler IDP platform for generic CI pillars, then layers framework-specific gates afterward.
+
+### Shared platform caller
+
+`.github/workflows/orbit-sentinel.yml` now calls:
+
+- `soupler-hq/engineering-standards/.github/workflows/pipeline.yml@v0.1.0`
+- `execution-mode: ci`
+- `metadata-path: metadata.yml`
+
+That reusable pipeline owns the duplicated boilerplate Orbit used to carry locally:
+
+- Node install / lint / test
+- platform policy pillar
+- platform assurance pillar
+
+### Orbit-specific follow-on gates
+
+After the shared pipeline completes, Orbit still runs the checks that are specific to this framework:
 
 | Gate                | What it checks                                                          |
 | ------------------- | ----------------------------------------------------------------------- |
-| `lock-check`        | `npm ci --dry-run` — lock file freshness                                |
-| `lint`              | ESLint + Prettier                                                       |
-| `test`              | Vitest unit tests (≥60% coverage)                                       |
+| `pr-governance`     | PR body, branch naming, docs-update evidence, freshness markers         |
+| `install-test`      | `install.sh` integration behavior                                       |
+| `quality`           | `bin/eval-runner.js` structural/routing assertions                      |
 | `validate`          | `bin/validate.sh` — semantic registry consistency                       |
-| `compliance`        | `bin/eval.sh` — SOTA compliance (≥80% eval score)                       |
 | `safety`            | `bin/test-safety.sh` — adversarial / prompt injection                   |
-| `sca`               | `npm audit --audit-level=high`                                          |
+| `workflow-lint`     | GitHub workflow architecture via `actionlint`                           |
 | `self-audit`        | `bin/validate-config.sh` — version, hook, model ID, license checks      |
 | `human-views-drift` | Generated `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md` match registry |
 | `publish-dry-run`   | Package is publishable                                                  |
+
+PR title / branch / commit-message linting is split into `.github/workflows/standards-enforcement.yml`, which reuses the engineering-standards `pr-lint` and `commit-lint` composite actions so Orbit behaves like the Golden Path repo it is meant to validate.

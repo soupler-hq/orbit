@@ -154,5 +154,25 @@ describe('eval-runner issue #85 coverage', () => {
     expect(
       checks.get('issue #80 registry sync: strategist no longer claims PRD or user-story triggers')
     ).toBe(true);
+    expect(
+      checks.get('issue #79 ci contract: orbit-sentinel calls engineering-standards pipeline')
+    ).toBe(true);
+    expect(
+      checks.get('issue #79 ci contract: orbit-sentinel passes metadata.yml to the shared pipeline')
+    ).toBe(true);
+    expect(
+      checks.get(
+        'issue #79 ci contract: duplicated local lint-test boilerplate is removed from orbit-sentinel'
+      )
+    ).toBe(true);
+    expect(checks.get('issue #79 ci contract: standards-enforcement workflow exists')).toBe(true);
+    expect(
+      checks.get(
+        'issue #79 ci contract: standards-enforcement reuses pr-lint and commit-lint actions'
+      )
+    ).toBe(true);
+    expect(
+      checks.get('issue #79 docs contract: README documents Orbit as IDP reference implementation')
+    ).toBe(true);
   }, 30000);
 });
