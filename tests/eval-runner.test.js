@@ -41,9 +41,7 @@ describe('eval-runner issue #85 coverage', () => {
     expect(
       checks.get('agent contract: launch-planner uses planning, brainstorming, and riper')
     ).toBe(true);
-    expect(checks.get('agent contract: launch-planner outputs GTM template artifacts')).toBe(
-      true
-    );
+    expect(checks.get('agent contract: launch-planner outputs GTM template artifacts')).toBe(true);
     expect(
       checks.get('agent contract: launch-planner prominently documents scope constraints')
     ).toBe(true);
@@ -125,5 +123,36 @@ describe('eval-runner issue #85 coverage', () => {
     expect(checks.get('template contract: OPERATIONAL-RULES.json includes "preferred_route"')).toBe(
       true
     );
+    expect(checks.get('issue #80 registry sync: product-manager metadata is consolidated')).toBe(
+      true
+    );
+    expect(checks.get('issue #80 registry sync: business-analyst metadata is consolidated')).toBe(
+      true
+    );
+    expect(checks.get('issue #80 registry sync: qa-engineer metadata is consolidated')).toBe(true);
+    expect(checks.get('issue #80 registry sync: technical-writer metadata is consolidated')).toBe(
+      true
+    );
+    expect(checks.get('issue #80 registry sync: launch-planner metadata is consolidated')).toBe(
+      true
+    );
+    expect(
+      checks.get('issue #80 registry sync: skills/user-onboarding.md metadata is consolidated')
+    ).toBe(true);
+    expect(
+      checks.get('issue #80 registry sync: skills/compliance-checklist.md metadata is consolidated')
+    ).toBe(true);
+    expect(checks.get('issue #80 registry sync: /orbit:discover metadata is consolidated')).toBe(
+      true
+    );
+    expect(checks.get('issue #80 registry sync: /orbit:launch metadata is consolidated')).toBe(
+      true
+    );
+    expect(checks.get('issue #80 registry sync: /orbit:clarify metadata is consolidated')).toBe(
+      true
+    );
+    expect(
+      checks.get('issue #80 registry sync: strategist no longer claims PRD or user-story triggers')
+    ).toBe(true);
   }, 30000);
 });
