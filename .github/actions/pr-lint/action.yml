@@ -7,11 +7,11 @@ inputs:
   pr-title-pattern:
     description: Regex pattern PR titles must match
     required: false
-    default: '^(FUNC|TECH|INFRA|docs|chore|fix|feat)[-:]'
+    default: '^(((FUNC|TECH|INFRA)-[0-9]{3}: )|((docs|chore|fix|feat)(\([^)]+\))?: )).+'
   branch-pattern:
     description: Regex pattern branch names must match
     required: false
-    default: '^(feat|fix|tech|infra|docs|chore|hotfix)\/[a-z0-9][a-z0-9-]*$'
+    default: '^(feat|fix|tech|infra|docs|chore|hotfix)\/([0-9]+-)?[a-z0-9]+(-[a-z0-9]+)*$'
   require-story-id:
     description: Whether to require a Story ID in the PR title
     required: false

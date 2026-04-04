@@ -7,7 +7,7 @@ inputs:
   commit-pattern:
     description: Regex pattern commit messages must match
     required: false
-    default: '^((FUNC|TECH|INFRA)-[0-9]{3}|feat|fix|docs|chore|tech|infra|refactor|test|style|perf|ci): .+'
+    default: '^((FUNC|TECH|INFRA)-[0-9]{3}|(feat|fix|docs|chore|tech|infra|refactor|test|style|perf|ci)(\([^)]+\))?): .+'
   max-subject-length:
     description: Maximum character length for commit subject line
     required: false

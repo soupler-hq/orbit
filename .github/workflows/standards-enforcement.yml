@@ -17,8 +17,8 @@ jobs:
       - name: Lint PR title and branch name
         uses: ./.github/actions/pr-lint
         with:
-          pr-title-pattern: '^(?:((FUNC|TECH|INFRA)-[0-9]{3}: )|((docs|chore|fix|feat|tech|infra|refactor|test|release|hotfix)(\([^)]+\))?: )).+'
-          branch-pattern: '^(feat|fix|docs|chore|refactor|test|release|hotfix)\/(?:[0-9]+-)?[a-z0-9]+(?:-[a-z0-9]+)*$'
+          pr-title-pattern: '^(((FUNC|TECH|INFRA)-[0-9]{3}: )|((docs|chore|fix|feat|tech|infra|refactor|test|release|hotfix)(\([^)]+\))?: )).+'
+          branch-pattern: '^(feat|fix|docs|chore|refactor|test|release|hotfix)\/([0-9]+-)?[a-z0-9]+(-[a-z0-9]+)*$'
           require-story-id: 'false'
 
   commit-lint:
