@@ -485,10 +485,11 @@ If the user gives a plain prompt that implies a tracked implementation task, Orb
    ```
 4. Execute with relevant skill loaded
 5. Verify, commit, update STATE.md, and write the checkpoint manifest to `.orbit/state/checkpoints/latest.json`
-6. If the task is review-ready, push branch, refresh the PR body if the branch scope changed, update the `Head SHA` marker, and then run `/orbit:review`
+6. If the task is review-ready, push branch, generate the PR body from the repo-local controller, validate it locally against `validate-pr-governance` and `validate-doc-updates`, refresh the `Head SHA` marker, and only then create or update the PR before running `/orbit:review`
 7. Before requesting review or ship progression, refresh the PR body evidence:
    - `## Test plan` lists the commands actually run
    - `Orbit Self-Review` records the review command, dispatched agents, ship decision, and findings handled
+   - PR sync must stop locally if governance or docs-update validation fails; do not mutate GitHub until the generated body passes both checks
 
 **After completion, emit the checkpoint block and next step:**
 

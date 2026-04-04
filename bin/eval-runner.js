@@ -338,6 +338,83 @@ const REQUIRED_V29_WORKFLOWS = [
   { command: '/orbit:eval', doc: 'commands/orbit/eval.md' },
   { command: '/orbit:riper', doc: 'commands/orbit/riper.md' },
 ];
+const ISSUE_80_AGENT_EXPECTATIONS = [
+  {
+    name: 'product-manager',
+    domains: ['PRODUCT'],
+    triggers: ['prd', 'requirements', 'user story', 'feature spec', 'product requirements'],
+    skills: ['skills/planning.md', 'skills/brainstorming.md', 'skills/riper.md'],
+    outputs: ['PRD.md', 'USER-STORIES.md', 'FEATURE-SPEC.md', 'BACKLOG.md'],
+  },
+  {
+    name: 'business-analyst',
+    domains: ['PRODUCT', 'SYNTHESIS'],
+    triggers: ['functional spec', 'edge cases', 'process map', 'use case'],
+    skills: ['skills/planning.md', 'skills/brainstorming.md', 'skills/riper.md'],
+    outputs: ['FUNCTIONAL-SPEC.md', 'USE-CASES.md', 'EDGE-CASES.md', 'PROCESS-MAP.md'],
+  },
+  {
+    name: 'qa-engineer',
+    domains: ['REVIEW', 'ENGINEERING'],
+    triggers: ['test strategy', 'release gate', 'regression suite', 'qa'],
+    skills: ['skills/tdd.md', 'skills/review.md', 'skills/observability.md'],
+    outputs: ['TEST-PLAN.md', 'AUTOMATION-SPEC.md', 'QA-REPORT.md', 'RELEASE-GATE.md'],
+  },
+  {
+    name: 'technical-writer',
+    domains: ['PRODUCT', 'ENGINEERING'],
+    triggers: ['api docs', 'release notes', 'announcement draft', 'onboarding documentation'],
+    skills: ['skills/riper.md', 'skills/context-management.md', 'skills/user-onboarding.md'],
+    outputs: ['ANNOUNCEMENT-DRAFT.md', 'API-DOCS.md', 'USER-GUIDE.md', 'ONBOARDING.md'],
+  },
+  {
+    name: 'launch-planner',
+    domains: ['PRODUCT', 'RESEARCH'],
+    triggers: ['launch plan', 'go-to-market', 'launch checklist', 'release strategy'],
+    skills: ['skills/planning.md', 'skills/brainstorming.md', 'skills/riper.md'],
+    outputs: [
+      'LAUNCH-PLAN.md',
+      'GTM-CHECKLIST.md',
+      'POSITIONING-CANVAS.md',
+      'LAUNCH-ANNOUNCEMENT.md',
+    ],
+  },
+];
+const ISSUE_80_SKILL_EXPECTATIONS = [
+  {
+    file: 'skills/user-onboarding.md',
+    purposeIncludes: 'onboarding',
+    loadedBy: ['technical-writer', 'launch-planner'],
+  },
+  {
+    file: 'skills/compliance-checklist.md',
+    purposeIncludes: 'compliance',
+    loadedBy: ['security-engineer', 'launch-planner'],
+  },
+];
+const ISSUE_80_WORKFLOW_EXPECTATIONS = [
+  {
+    command: '/orbit:discover',
+    mode: 'collaborative',
+    inputs: ['problem statement', 'target user hypothesis'],
+    outputs: ['DISCOVERY.md'],
+    agents: ['researcher', 'designer'],
+  },
+  {
+    command: '/orbit:launch',
+    mode: 'collaborative',
+    inputs: ['release artifacts', 'target audience', 'launch channels'],
+    outputs: ['LAUNCH-PLAN.md', 'GTM-CHECKLIST.md', 'ANNOUNCEMENT-DRAFT.md'],
+    agents: ['launch-planner', 'technical-writer'],
+  },
+  {
+    command: '/orbit:clarify',
+    mode: 'collaborative',
+    inputs: ['pending clarification requests', 'operator answer'],
+    outputs: ['clarification queue', 'clarification resolution'],
+    agents: ['strategist'],
+  },
+];
 const WAVE_15_DOC_STUB_PATH = 'docs/issues/issue-67-wave-1-agent-doc-stubs.md';
 
 // ── Metric 1: Routing Accuracy ─────────────────────────────────────────────
@@ -786,6 +863,86 @@ for (const { command, doc } of REQUIRED_V29_WORKFLOWS) {
     reason: fileExists(doc) ? 'ok' : `missing file: ${doc}`,
   });
 }
+
+for (const expectedAgent of ISSUE_80_AGENT_EXPECTATIONS) {
+  const agent = registry.agents.find((entry) => entry.name === expectedAgent.name);
+  integrityResults.push({
+    check: `issue #80 registry sync: ${expectedAgent.name} metadata is consolidated`,
+    pass:
+      !!agent &&
+      expectedAgent.domains.every((domain) => agent.domains?.includes(domain)) &&
+      expectedAgent.triggers.every((trigger) => agent.triggers?.includes(trigger)) &&
+      expectedAgent.skills.every((skill) => agent.skills?.includes(skill)) &&
+      expectedAgent.outputs.every((output) => agent.outputs?.includes(output)),
+    reason:
+      !!agent &&
+      expectedAgent.domains.every((domain) => agent.domains?.includes(domain)) &&
+      expectedAgent.triggers.every((trigger) => agent.triggers?.includes(trigger)) &&
+      expectedAgent.skills.every((skill) => agent.skills?.includes(skill)) &&
+      expectedAgent.outputs.every((output) => agent.outputs?.includes(output))
+        ? 'ok'
+        : `registry drift detected for ${expectedAgent.name}`,
+  });
+}
+
+for (const expectedSkill of ISSUE_80_SKILL_EXPECTATIONS) {
+  const skill = registry.skills.find((entry) => entry.file === expectedSkill.file);
+  integrityResults.push({
+    check: `issue #80 registry sync: ${expectedSkill.file} metadata is consolidated`,
+    pass:
+      !!skill &&
+      typeof skill.purpose === 'string' &&
+      skill.purpose.toLowerCase().includes(expectedSkill.purposeIncludes) &&
+      expectedSkill.loadedBy.every((agent) => skill.loaded_by?.includes(agent)),
+    reason:
+      !!skill &&
+      typeof skill.purpose === 'string' &&
+      skill.purpose.toLowerCase().includes(expectedSkill.purposeIncludes) &&
+      expectedSkill.loadedBy.every((agent) => skill.loaded_by?.includes(agent))
+        ? 'ok'
+        : `registry drift detected for ${expectedSkill.file}`,
+  });
+}
+
+for (const expectedWorkflow of ISSUE_80_WORKFLOW_EXPECTATIONS) {
+  const workflow = registry.workflows.find((entry) => entry.command === expectedWorkflow.command);
+  integrityResults.push({
+    check: `issue #80 registry sync: ${expectedWorkflow.command} metadata is consolidated`,
+    pass:
+      !!workflow &&
+      workflow.mode === expectedWorkflow.mode &&
+      expectedWorkflow.inputs.every((input) => workflow.inputs?.includes(input)) &&
+      expectedWorkflow.outputs.every((output) => workflow.outputs?.includes(output)) &&
+      expectedWorkflow.agents.every((agent) => workflow.agents?.includes(agent)),
+    reason:
+      !!workflow &&
+      workflow.mode === expectedWorkflow.mode &&
+      expectedWorkflow.inputs.every((input) => workflow.inputs?.includes(input)) &&
+      expectedWorkflow.outputs.every((output) => workflow.outputs?.includes(output)) &&
+      expectedWorkflow.agents.every((agent) => workflow.agents?.includes(agent))
+        ? 'ok'
+        : `registry drift detected for ${expectedWorkflow.command}`,
+  });
+}
+
+const strategist = registry.agents.find((entry) => entry.name === 'strategist');
+integrityResults.push({
+  check: 'issue #80 registry sync: strategist no longer claims PRD or user-story triggers',
+  pass:
+    !!strategist &&
+    Array.isArray(strategist.triggers) &&
+    !strategist.triggers.includes('prd') &&
+    !strategist.triggers.includes('user story') &&
+    !strategist.triggers.includes('requirements'),
+  reason:
+    !!strategist &&
+    Array.isArray(strategist.triggers) &&
+    !strategist.triggers.includes('prd') &&
+    !strategist.triggers.includes('user story') &&
+    !strategist.triggers.includes('requirements')
+      ? 'ok'
+      : 'strategist trigger list regressed past the #69 routing split',
+});
 
 integrityResults.push({
   check: 'config contract: loop_detection.enabled exists',
