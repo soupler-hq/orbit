@@ -1,0 +1,75 @@
+name: Commit Message Lint
+description: >
+  Validates commit messages in a PR against
+  Soupler engineering standards (L0-002).
+
+inputs:
+  commit-pattern:
+    description: Regex pattern commit messages must match
+    required: false
+    default: '^((FUNC|TECH|INFRA)-[0-9]{3}|feat|fix|docs|chore|tech|infra|refactor|test|style|perf|ci): .+'
+  max-subject-length:
+    description: Maximum character length for commit subject line
+    required: false
+    default: '72'
+
+runs:
+  using: composite
+  steps:
+    - name: Validate commit messages
+      uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+      with:
+        script: |
+          const pattern = new RegExp(`${{ inputs.commit-pattern }}`);
+          const maxLen = parseInt('${{ inputs.max-subject-length }}');
+
+          const { data: commits } = await github.rest.pulls.listCommits({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number,
+          });
+
+          const failures = [];
+
+          for (const { commit, sha } of commits) {
+            const subject = commit.message.split('\n')[0];
+            const shortSha = sha.substring(0, 7);
+
+            if (subject.startsWith('Merge ')) continue;
+
+            if (!pattern.test(subject)) {
+              failures.push(
+                `  ❌ ${shortSha}: "${subject}"\n` +
+                `     Does not match required format`
+              );
+            }
+
+            if (subject.length > maxLen) {
+              failures.push(
+                `  ❌ ${shortSha}: Subject is ${subject.length} chars (max ${maxLen})\n` +
+                `     "${subject}"`
+              );
+            }
+          }
+
+          if (failures.length > 0) {
+            const message = [
+              '### ❌ Commit message validation failed',
+              '',
+              failures.join('\n'),
+              '',
+              '### Expected formats',
+              '```',
+              'FUNC-021: Add video upload flow with pre-signed URL',
+              'TECH-003: Configure OpenSearch field mappings',
+              'INFRA-001: Add GitHub Actions CI pipeline',
+              'docs(L3-002): Add ADR-009 for Redis migration',
+              'chore: Update pnpm to 9.1.0',
+              'fix: Correct empty state filter behaviour',
+              '```',
+            ].join('\n');
+
+            core.setFailed(message);
+          } else {
+            console.log('✅ All commit messages are valid');
+          }

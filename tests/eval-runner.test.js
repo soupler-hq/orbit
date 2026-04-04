@@ -167,8 +167,11 @@ describe('eval-runner issue #85 coverage', () => {
     ).toBe(true);
     expect(checks.get('issue #79 ci contract: standards-enforcement workflow exists')).toBe(true);
     expect(
+      checks.get('issue #79 ci contract: locally mirrored pr-lint and commit-lint actions exist')
+    ).toBe(true);
+    expect(
       checks.get(
-        'issue #79 ci contract: standards-enforcement reuses pr-lint and commit-lint actions'
+        'issue #79 ci contract: standards-enforcement uses the mirrored pr-lint and commit-lint actions'
       )
     ).toBe(true);
     expect(

@@ -118,7 +118,7 @@ Core development follows Orbit-on-Orbit rules: start from an issue, cut a branch
 Orbit is the reference Node package for Soupler's shared `engineering-standards` platform. We now split CI in two deliberate layers:
 
 - `.github/workflows/orbit-sentinel.yml` calls `soupler-hq/engineering-standards/.github/workflows/pipeline.yml@v0.1.0` for generic Node, policy, and assurance pillars
-- `.github/workflows/standards-enforcement.yml` reuses the platform's `pr-lint` and `commit-lint` composite actions
+- `.github/workflows/standards-enforcement.yml` uses locally mirrored `pr-lint` and `commit-lint` composite actions taken from `engineering-standards@v0.1.0`
 - Orbit keeps repo-specific checks local:
   - `pr-governance`
   - `human-views-drift`

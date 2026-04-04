@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Lint PR title and branch name
-        uses: soupler-hq/engineering-standards/.github/actions/pr-lint@v0.1.0
+        uses: ./.github/actions/pr-lint
         with:
           pr-title-pattern: '^(?:((FUNC|TECH|INFRA)-[0-9]{3}: )|((docs|chore|fix|feat|tech|infra|refactor|test|release|hotfix)(\([^)]+\))?: )).+'
           branch-pattern: '^(feat|fix|docs|chore|refactor|test|release|hotfix)\/(?:[0-9]+-)?[a-z0-9]+(?:-[a-z0-9]+)*$'
@@ -27,4 +27,4 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Lint commit messages
-        uses: soupler-hq/engineering-standards/.github/actions/commit-lint@v0.1.0
+        uses: ./.github/actions/commit-lint

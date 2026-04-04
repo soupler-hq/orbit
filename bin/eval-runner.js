@@ -997,23 +997,28 @@ integrityResults.push({
 });
 
 integrityResults.push({
-  check: 'issue #79 ci contract: standards-enforcement reuses pr-lint and commit-lint actions',
+  check: 'issue #79 ci contract: locally mirrored pr-lint and commit-lint actions exist',
   pass:
-    standardsEnforcementText.includes(
-      'uses: soupler-hq/engineering-standards/.github/actions/pr-lint@v0.1.0'
-    ) &&
-    standardsEnforcementText.includes(
-      'uses: soupler-hq/engineering-standards/.github/actions/commit-lint@v0.1.0'
-    ),
+    fileExists('.github/actions/pr-lint/action.yml') &&
+    fileExists('.github/actions/commit-lint/action.yml'),
   reason:
-    standardsEnforcementText.includes(
-      'uses: soupler-hq/engineering-standards/.github/actions/pr-lint@v0.1.0'
-    ) &&
-    standardsEnforcementText.includes(
-      'uses: soupler-hq/engineering-standards/.github/actions/commit-lint@v0.1.0'
-    )
+    fileExists('.github/actions/pr-lint/action.yml') &&
+    fileExists('.github/actions/commit-lint/action.yml')
       ? 'ok'
-      : 'standards-enforcement.yml is not wired to the shared engineering-standards actions',
+      : 'missing local pr-lint/commit-lint action mirror from engineering-standards',
+});
+
+integrityResults.push({
+  check:
+    'issue #79 ci contract: standards-enforcement uses the mirrored pr-lint and commit-lint actions',
+  pass:
+    standardsEnforcementText.includes('uses: ./.github/actions/pr-lint') &&
+    standardsEnforcementText.includes('uses: ./.github/actions/commit-lint'),
+  reason:
+    standardsEnforcementText.includes('uses: ./.github/actions/pr-lint') &&
+    standardsEnforcementText.includes('uses: ./.github/actions/commit-lint')
+      ? 'ok'
+      : 'standards-enforcement.yml is not wired to the local pr-lint/commit-lint mirrors',
 });
 
 integrityResults.push({

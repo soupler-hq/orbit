@@ -1,0 +1,92 @@
+name: PR and Branch Lint
+description: >
+  Validates PR title format and branch naming against
+  Soupler engineering standards (L0-002).
+
+inputs:
+  pr-title-pattern:
+    description: Regex pattern PR titles must match
+    required: false
+    default: '^(FUNC|TECH|INFRA|docs|chore|fix|feat)[-:]'
+  branch-pattern:
+    description: Regex pattern branch names must match
+    required: false
+    default: '^(feat|fix|tech|infra|docs|chore|hotfix)\/[a-z0-9][a-z0-9-]*$'
+  require-story-id:
+    description: Whether to require a Story ID in the PR title
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Validate PR title
+      shell: bash
+      env:
+        PR_TITLE: ${{ github.event.pull_request.title }}
+        PATTERN: ${{ inputs.pr-title-pattern }}
+      run: |
+        echo "Checking PR title: '$PR_TITLE'"
+        if ! echo "$PR_TITLE" | grep -Eq "$PATTERN"; then
+          echo ""
+          echo "[ERROR] PR title does not match required format."
+          echo ""
+          echo "Expected format examples:"
+          echo "  FUNC-021: Add video upload flow"
+          echo "  TECH-003: Configure OpenSearch field mappings"
+          echo "  INFRA-001: Set up GitHub Actions CI pipeline"
+          echo "  chore: Update pnpm lockfile"
+          echo "  docs: Update API contract"
+          echo ""
+          echo "Your title: '$PR_TITLE'"
+          echo "Required pattern: $PATTERN"
+          exit 1
+        fi
+        echo "[SUCCESS] PR title is valid: '$PR_TITLE'"
+
+    - name: Validate branch name
+      shell: bash
+      env:
+        BRANCH: ${{ github.head_ref }}
+        PATTERN: ${{ inputs.branch-pattern }}
+      run: |
+        echo "Checking branch name: '$BRANCH'"
+
+        if [[ "$BRANCH" == "main" || "$BRANCH" == "develop" || "$BRANCH" == "master" ]]; then
+          echo "[SUCCESS] Base branch - skipping validation"
+          exit 0
+        fi
+
+        if ! echo "$BRANCH" | grep -Eq "$PATTERN"; then
+          echo ""
+          echo "[ERROR] Branch name does not match required format."
+          echo ""
+          echo "Expected format examples:"
+          echo "  feat/FUNC-021-video-upload-flow"
+          echo "  fix/FUNC-006-empty-search-state"
+          echo "  tech/TECH-003-opensearch-config"
+          echo "  infra/INFRA-001-github-actions"
+          echo "  docs/L3-002-add-adr-009"
+          echo "  chore/update-dependencies"
+          echo "  hotfix/fix-ad-impression-logging"
+          echo ""
+          echo "Your branch: '$BRANCH'"
+          echo "Required pattern: $PATTERN"
+          exit 1
+        fi
+        echo "[SUCCESS] Branch name is valid: '$BRANCH'"
+
+    - name: Extract and validate story ID
+      if: inputs.require-story-id == 'true'
+      shell: bash
+      env:
+        PR_TITLE: ${{ github.event.pull_request.title }}
+      run: |
+        STORY_ID=$(echo "$PR_TITLE" | grep -oE '(FUNC|TECH|INFRA)-[0-9]{3}' | head -1 || true)
+
+        if [ -n "$STORY_ID" ]; then
+          echo "[SUCCESS] Story ID found: $STORY_ID"
+          echo "STORY_ID=$STORY_ID" >> $GITHUB_ENV
+        else
+          echo "[INFO] No Story ID found in PR title (acceptable for chore/docs commits)"
+        fi

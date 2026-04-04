@@ -233,4 +233,4 @@ After the shared pipeline completes, Orbit still runs the checks that are specif
 | `human-views-drift` | Generated `INSTRUCTIONS.md`, `SKILLS.md`, `WORKFLOWS.md` match registry |
 | `publish-dry-run`   | Package is publishable                                                  |
 
-PR title / branch / commit-message linting is split into `.github/workflows/standards-enforcement.yml`, which reuses the engineering-standards `pr-lint` and `commit-lint` composite actions so Orbit behaves like the Golden Path repo it is meant to validate.
+PR title / branch / commit-message linting is split into `.github/workflows/standards-enforcement.yml`, which uses locally mirrored `pr-lint` and `commit-lint` composite actions from `engineering-standards@v0.1.0` so Orbit still follows the Golden Path contract even when cross-repo composite action resolution is unavailable.
