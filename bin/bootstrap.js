@@ -35,6 +35,9 @@ const ROOT = ROOT_DIR;
 const STATE_PATH = path.join(ROOT, '.orbit', 'state', 'STATE.md');
 const ARGS = process.argv.slice(2);
 const FORCE = ARGS.includes('--force');
+const REPLAY = ARGS.includes('--replay');
+
+const { replayState, EVENT_LOG_PATH } = require('./event-log');
 
 // ── Colour helpers ─────────────────────────────────────────────────────────────
 const G = '\x1b[0;32m';
@@ -323,4 +326,141 @@ function main() {
   console.log('');
 }
 
-main();
+// ── Replay mode ───────────────────────────────────────────────────────────────
+
+/**
+ * Rebuild the dynamic sections of STATE.md from EVENT-LOG.jsonl.
+ *
+ * Sections patched:
+ *   - **Current Focus**: line in ## Project Context
+ *   - ## Recently Completed (last 5 tasks) code block
+ *   - ## Blockers code block
+ *
+ * Static sections (Vision, Phase Status table, Seeds, Todos) are left
+ * untouched — they are human-curated and not derivable from events alone.
+ *
+ * Usage:
+ *   node bin/bootstrap.js --replay
+ *   node bin/bootstrap.js --replay --dry-run   # print diff without writing
+ */
+function replay() {
+  const DRY_RUN = ARGS.includes('--dry-run');
+
+  console.log('');
+  console.log(`${B}───────────────────────────────────────${N}`);
+  console.log(`${B}  Orbit Bootstrap — Replay Mode${N}`);
+  console.log(`${B}───────────────────────────────────────${N}`);
+  console.log('');
+
+  if (!fs.existsSync(EVENT_LOG_PATH)) {
+    console.log(`${Y}⚠  No EVENT-LOG.jsonl found at ${EVENT_LOG_PATH.replace(ROOT + '/', '')}${N}`);
+    console.log('   Run events through the orchestrator or seed the log first.');
+    console.log('');
+    process.exit(0);
+  }
+
+  let derived;
+  try {
+    derived = replayState();
+  } catch (err) {
+    console.error(`${Y}✗  Failed to replay events: ${err.message}${N}`);
+    process.exit(1);
+  }
+
+  const eventCount = require('./event-log').readEvents().length;
+  console.log(`  Replayed ${eventCount} event(s) from EVENT-LOG.jsonl`);
+
+  if (!fs.existsSync(STATE_PATH)) {
+    console.log(`${Y}⚠  STATE.md not found — nothing to patch${N}`);
+    process.exit(0);
+  }
+
+  let text = fs.readFileSync(STATE_PATH, 'utf8');
+  let changed = false;
+
+  // 1. Patch **Current Focus**: line
+  if (derived.currentFocus) {
+    const focusRx = /(\*\*Current Focus\*\*:\s*)(.+)/;
+    const updated = text.replace(focusRx, (_, prefix) => `${prefix}${derived.currentFocus}`);
+    if (updated !== text) {
+      log(
+        `${G}✓${N}`,
+        'focus',
+        `→ ${derived.currentFocus}`,
+        'phase_transition events'
+      );
+      text = updated;
+      changed = true;
+    }
+  }
+
+  // 2. Patch ## Recently Completed block
+  if (derived.recentlyCompleted.length > 0) {
+    const completedLines = derived.recentlyCompleted
+      .map((evt) => {
+        const issuePart = evt.issue ? `${evt.issue} ` : '';
+        return `✅ ${issuePart}${evt.title || evt.note || evt.type}`;
+      })
+      .join('\n');
+
+    const recentRx =
+      /(## Recently Completed \(last 5 tasks\)\s*\n```text\s*\n)([\s\S]*?)(\n```)/;
+    const updated = text.replace(recentRx, (_, open, _old, close) => {
+      return `${open}${completedLines}${close}`;
+    });
+    if (updated !== text) {
+      log(
+        `${G}✓${N}`,
+        'completed',
+        `${derived.recentlyCompleted.length} task(s) patched`,
+        'task_complete events'
+      );
+      text = updated;
+      changed = true;
+    }
+  }
+
+  // 3. Patch ## Blockers block
+  if (derived.openBlockers.length > 0 || derived.openBlockers.length === 0) {
+    const blockerLines =
+      derived.openBlockers.length > 0
+        ? derived.openBlockers.map((b) => `[OPEN] ${b.id} — ${b.note || b.description || ''}`).join('\n')
+        : '(none)';
+
+    const blockerRx = /(## Blockers\s*\n```text\s*\n)([\s\S]*?)(\n```)/;
+    const updated = text.replace(blockerRx, (_, open, _old, close) => {
+      return `${open}${blockerLines}${close}`;
+    });
+    if (updated !== text) {
+      log(
+        `${G}✓${N}`,
+        'blockers',
+        `${derived.openBlockers.length} open`,
+        'blocker events'
+      );
+      text = updated;
+      changed = true;
+    }
+  }
+
+  if (!changed) {
+    console.log(`  ${Y}—${N} STATE.md already reflects event log — no changes needed`);
+  } else if (DRY_RUN) {
+    console.log('');
+    console.log(`${Y}  [dry-run] Changes computed but NOT written to STATE.md${N}`);
+  } else {
+    fs.writeFileSync(STATE_PATH, text, 'utf8');
+    console.log('');
+    console.log(`${G}  STATE.md updated from event log.${N}`);
+  }
+
+  console.log('');
+  console.log(`${B}───────────────────────────────────────${N}`);
+  console.log('');
+}
+
+if (REPLAY) {
+  replay();
+} else {
+  main();
+}

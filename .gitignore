@@ -4,6 +4,8 @@
 !.orbit/state/
 !.orbit/state/.gitkeep
 !.orbit/state/STATE.md
+!.orbit/state/DECISIONS-LOG.md
+!.orbit/state/EVENT-LOG.jsonl
 .orbit/hooks/*
 !.orbit/hooks/.gitkeep
 .orbit/errors/
