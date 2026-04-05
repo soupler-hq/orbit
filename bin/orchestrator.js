@@ -428,7 +428,7 @@ class OrbitOrchestrator {
         .map((d) => path.join(this.stateDir, d));
 
       let finalSummary = `# Wave Summary: ${waveId}\n\n`;
-      let foundAny = false;
+      let summaryCount = 0;
       let consensusMet = true;
 
       for (const dir of taskDirs) {
@@ -447,11 +447,11 @@ class OrbitOrchestrator {
           }
 
           finalSummary += `## Agent: ${metadata.agent}\n- Model: ${metadata.model}\n- Path: ${metadata.path}\n\n${content}\n\n---\n\n`;
-          foundAny = true;
+          summaryCount += 1;
         }
       }
 
-      if (!foundAny) {
+      if (summaryCount === 0) {
         console.warn('⚠️ No SUMMARY.md files found to aggregate.');
         return null;
       }
@@ -465,7 +465,7 @@ class OrbitOrchestrator {
       console.log(
         formatWaveComplete({
           wave: waveId,
-          completed: foundAny ? taskDirs.length : 0,
+          completed: summaryCount,
           blocked: consensusMet ? 0 : 1,
           next: 'Run /orbit:verify before shipping',
         })
