@@ -48,7 +48,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: gh pr diff "$PR_NUMBER" --name-only > /tmp/orbit-pr-files.txt
+        run: gh api "repos/${{ github.repository }}/pulls/$PR_NUMBER/files" --paginate --jq '.[].filename' > /tmp/orbit-pr-files.txt
       - name: 🧷 Load tracked residual issues
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
