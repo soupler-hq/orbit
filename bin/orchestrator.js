@@ -21,6 +21,7 @@ const {
   assertWorkflowTransition,
   evaluateWorkflowState,
 } = require('./workflow-state');
+const { appendEvent, EVENT_TYPES } = require('./event-log');
 
 class OrbitOrchestrator {
   constructor(projectRoot) {
@@ -152,6 +153,22 @@ class OrbitOrchestrator {
 
     fs.mkdirSync(this.stateDir, { recursive: true });
     fs.writeFileSync(this.stateFile, `${updated}\n`);
+
+    try {
+      appendEvent(
+        {
+          type: EVENT_TYPES.BLOCKER_ADDED,
+          id: `LOOP-${fields.wave}-${fields.session}`,
+          note: `LOOP_DETECTED wave:${fields.wave} agent:${fields.agent} pattern:${fields.pattern} repeats:${fields.repeats}`,
+          wave: fields.wave,
+          agent: fields.agent,
+          detectedAt: fields.detectedAt,
+        },
+        path.join(this.stateDir, 'EVENT-LOG.jsonl')
+      );
+    } catch (_e) {
+      // Best-effort
+    }
   }
 
   /**
@@ -294,6 +311,21 @@ class OrbitOrchestrator {
   async executeWave(tasks, waveId = Date.now().toString()) {
     console.log(formatWaveStart({ wave: waveId, taskCount: tasks.length }));
     console.log(`\n🚀 Starting Wave ${waveId} with ${tasks.length} agents...\n`);
+
+    const eventLogPath = path.join(this.stateDir, 'EVENT-LOG.jsonl');
+    try {
+      appendEvent(
+        {
+          type: EVENT_TYPES.PHASE_TRANSITION,
+          to: `Wave ${waveId}`,
+          taskCount: tasks.length,
+          actor: 'orchestrator',
+        },
+        eventLogPath
+      );
+    } catch (_e) {
+      // Event log is best-effort — never block wave execution on log failure
+    }
 
     const results = [];
     const loopHistoryBySession = new Map();
