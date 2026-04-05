@@ -18,6 +18,7 @@ Naming rules are defined in [artifact-conventions.md](../standards/artifact-conv
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 010 | Foundations | P0 | [issue-130-orbit-enforcement-remediation.md](issue-130-orbit-enforcement-remediation.md) | none | issue-125 | Active | v1 | 2026-04-01 |
 | 020 | Recovery | P1 | [issue-125-provenance-driven-context-synthesis.md](issue-125-provenance-driven-context-synthesis.md) | issue-130 | none | Active | v1 | 2026-04-01 |
+| 040 | Ship + Positioning | P0 | [v2.9.0-wave-4-ship-positioning.md](v2.9.0-wave-4-ship-positioning.md) | v2.9.0-wave-0-release-bootstrap, wave-0.5-foundation-hardening | none | Active | v1 | 2026-04-05 |
 
 ## Historical Wave And Completed Plans
 
