@@ -180,7 +180,7 @@ jobs:
         if: steps.tag_check.outputs.exists == 'false'
         run: |
           shasum -a 256 \
-            CLAUDE.md INSTRUCTIONS.md SKILLS.md WORKFLOWS.md \
+            INSTRUCTIONS.md SKILLS.md WORKFLOWS.md \
             orbit.registry.json orbit.config.json orbit.config.schema.json \
             install.sh \
             agents/*.md skills/*.md hooks/scripts/*.sh \
