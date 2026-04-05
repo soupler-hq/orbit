@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "gh-approved-route",
+      "status": "active",
+      "summary": "Use the approved route first for GitHub CLI network and mutation commands in the Codex sandbox.",
+      "scope": {
+        "environment": ["codex-sandbox"],
+        "tool": ["gh"],
+        "operation": ["network_read", "network_mutation"]
+      },
+      "guidance": {
+        "preferred_route": "approved",
+        "why": "Sandboxed GitHub CLI network and mutation calls are unstable in this environment.",
+        "fallback": "If the approved route is unavailable, stop and realign before retrying.",
+        "source_issue": "#172"
+      }
+    }
+  ]
+}

@@ -1,8 +1,26 @@
-## What
-<!-- One sentence: what does this PR do? -->
+## Summary
+- <!-- concise summary bullet -->
 
-## Why
-<!-- Why is this change needed? Link issue or audit finding if applicable. -->
+## Issues
+- Closes #<!-- issue -->
+- Relates to #<!-- optional -->
+
+## Ship Decision
+- Review: `/orbit:review`
+- Head SHA: `<!-- replace with current branch head sha; update on every follow-up commit -->`
+- Merge when checks are green
+
+## Test plan
+- `<!-- command -->`
+
+## Merge notes
+- <!-- optional notes / relevant exceptions -->
+
+## Docs update
+- Status: `<!-- UPDATED or EXEMPT -->`
+- Notes: <!-- list updated docs or explain the exemption -->
+
+> Keep the exact `- Status:` / `- Notes:` bullet format. CI parses these lines literally.
 
 ---
 
@@ -10,6 +28,8 @@
 
 > This framework reviews other projects' code. It must review its own.
 > Run the relevant agent before raising this PR. Record the verdict below.
+> If you push follow-up commits after opening the PR, refresh this body before requesting review again.
+> CI requires this section and the `## Test plan` to contain real evidence, not placeholders.
 
 ### Agent Review Verdict
 
@@ -24,13 +44,22 @@
 (findings here)
 ```
 
+**Residual risks** (use one label per item: `Tracked by #...`, `Waived: ...`, or `Operational: ...`, or `none`):
+```
+(residual risks here)
+```
+
+> Use plain triple backticks exactly as shown above. Do not use fenced info strings like ```text here; the governance parser treats them as content.
+
 ---
 
 ## Checklist
 
 ### Branch
 - [ ] This PR is from a feature branch, NOT a direct push to `develop` or `main`
-- [ ] Branch name follows convention: `fix/issue-N-description` or `feat/description`
+- [ ] Branch name follows convention: `<type>/<slug>` such as `feat/143-pr-governance-enforcement` or `fix/145-context-minimal-dedup`
+- [ ] If this PR changed after opening, the `Summary`, `Issues`, `Ship Decision`, `Test plan`, and `Merge notes` sections were refreshed before re-review
+- [ ] If review left residual risks, their disposition is recorded: linked issue, new hardening issue, or explicit waiver
 
 ### Code
 - [ ] Tests added or updated for changed behaviour
@@ -50,6 +79,7 @@
 - [ ] `CHANGELOG.md` updated with this version's entry
 - [ ] `README.md` updated if behaviour or interface changed
 - [ ] `STATE.md` anti-patterns list updated if a known issue was fixed or a new one introduced
+- [ ] `## Docs update` reflects either the updated contract docs or the explicit exemption
 
 ### Release (only for version bumps)
 - [ ] `package.json` version bumped — this is the single source of version truth

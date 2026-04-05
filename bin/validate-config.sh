@@ -23,7 +23,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 
 # ── 0. Branch convention — never commit directly to protected branches ─────────
-echo "[ 0/6 ] Branch convention"
+echo "[ 0/7 ] Branch convention"
 CURRENT_BRANCH="${GITHUB_HEAD_REF:-$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")}"
 CURRENT_EVENT="${GITHUB_EVENT_NAME:-local}"
 CURRENT_BASE_BRANCH="${GITHUB_BASE_REF:-}"
@@ -36,12 +36,15 @@ if [[ "$CURRENT_EVENT" == "pull_request" ]]; then
 elif [[ "$CURRENT_BRANCH" == "develop" || "$CURRENT_BRANCH" == "main" ]]; then
   fail "Running on protected branch '$CURRENT_BRANCH' outside pull_request context. Changes must go through a feature branch and PR."
   echo "     Convention: fix/issue-N-description or feat/description → PR → merge"
+elif [[ ! "$CURRENT_BRANCH" =~ ^(feat|fix|docs|chore|refactor|test|release|hotfix)/([0-9]+-)?[a-z0-9]+(-[a-z0-9]+)*$ ]]; then
+  fail "Branch '$CURRENT_BRANCH' does not follow Orbit branch naming convention."
+  echo "     Expected: <type>/<slug> such as feat/143-pr-governance-enforcement or fix/145-context-minimal-dedup"
 else
   pass "Branch '$CURRENT_BRANCH' is a feature branch (not a protected branch)"
 fi
 
 # ── 1. Version: orbit.config.json must NOT contain a "version" field ──────────
-echo "[ 1/6 ] Version field in orbit.config.json"
+echo "[ 1/7 ] Version field in orbit.config.json"
 if jq -e '.version' "$ROOT/orbit.config.json" > /dev/null 2>&1; then
   CONFIG_VER=$(jq -r '.version' "$ROOT/orbit.config.json")
   PKG_VER=$(jq -r '.version' "$ROOT/package.json")
@@ -54,7 +57,7 @@ fi
 
 # ── 2. Changelog entry matches package.json version ───────────────────────────
 echo ""
-echo "[ 2/6 ] CHANGELOG version alignment"
+echo "[ 2/7 ] CHANGELOG version alignment"
 PKG_VER=$(jq -r '.version' "$ROOT/package.json")
 if grep -q "## \[$PKG_VER\]" "$ROOT/CHANGELOG.md"; then
   pass "CHANGELOG.md contains entry for v$PKG_VER"
@@ -65,7 +68,7 @@ fi
 
 # ── 3. Hook flags in orbit.config.json must match what install.sh registers ───
 echo ""
-echo "[ 3/6 ] Hook config vs install.sh registration"
+echo "[ 3/7 ] Hook config vs install.sh registration"
 
 check_hook() {
   local config_key="$1"   # e.g. post_tool_use
@@ -106,7 +109,7 @@ check_hook "stop"          "Stop"
 
 # ── 4. No hardcoded model IDs in agents/ or skills/ ───────────────────────────
 echo ""
-echo "[ 4/6 ] Hardcoded model IDs in agents/ and skills/"
+echo "[ 4/7 ] Hardcoded model IDs in agents/ and skills/"
 MODEL_PATTERN="claude-haiku-[0-9]|claude-sonnet-[0-9]|claude-opus-[0-9]"
 HITS=$(grep -rn --include="*.md" -E "$MODEL_PATTERN" "$ROOT/agents/" "$ROOT/skills/" 2>/dev/null || true)
 if [ -n "$HITS" ]; then
@@ -118,7 +121,7 @@ fi
 
 # ── 5. Vertical domain skills in kernel ───────────────────────────────────────
 echo ""
-echo "[ 5/6 ] Vertical domain skills in kernel (skills/)"
+echo "[ 5/7 ] Vertical domain skills in kernel (skills/)"
 VERTICAL_SKILLS=("ecommerce")
 for skill in "${VERTICAL_SKILLS[@]}"; do
   if [ -f "$ROOT/skills/$skill.md" ]; then
@@ -131,13 +134,21 @@ done
 
 # ── 6. License: package.json must declare Apache-2.0 ─────────────────────────
 echo ""
-echo "[ 6/6 ] License declaration in package.json"
+echo "[ 6/7 ] License declaration in package.json"
 PKG_LICENSE=$(jq -r '.license // "missing"' "$ROOT/package.json")
 if [ "$PKG_LICENSE" = "Apache-2.0" ]; then
   pass "package.json license is Apache-2.0"
 else
   fail "package.json license is \"$PKG_LICENSE\" — must be \"Apache-2.0\" (LICENSE file and docs declare Apache 2.0)."
   echo "     Fix: set \"license\": \"Apache-2.0\" in package.json."
+fi
+
+# ── 7/7: Adapter presence check (warn only) ───────────────────────────────────
+echo "[ 7/7 ] Adapter presence (bin/setup.sh)"
+if [[ -d "$ROOT/.orbit/adapters" ]]; then
+  pass ".orbit/adapters/ exists — orbit setup has been run"
+else
+  note ".orbit/adapters/ absent — run: npm run setup (warn only; setup may not have been run yet)"
 fi
 
 # ── Summary ───────────────────────────────────────────────────────────────────

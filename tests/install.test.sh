@@ -27,6 +27,7 @@ assert() {
 assert_file()    { assert "$1 exists"        test -f "$2"; }
 assert_dir()     { assert "$1 exists"        test -d "$2"; }
 assert_exec()    { assert "$1 is executable" test -x "$2"; }
+assert_symlink() { assert "$1 is symlink"    test -L "$2"; }
 assert_contains(){ assert "$2 contains '$3'" grep -q "$3" "$2"; }
 assert_equal()   { assert "$1" [ "$2" = "$3" ]; }
 
@@ -43,6 +44,41 @@ run_install() {
     bash "$FRAMEWORK_DIR/install.sh" --local --skip-verify "$@" >/dev/null 2>&1 ) || true
 }
 
+run_setup() {
+  local project_dir="$1"; shift
+  mkdir -p "$project_dir"
+  (
+    cd "$project_dir" &&
+    HOME="$TMPDIR_ROOT/home" \
+    bash "$FRAMEWORK_DIR/bin/setup.sh" --tool claude >/dev/null 2>&1
+  ) || true
+}
+
+git_init_repo() {
+  local repo_dir="$1"
+  mkdir -p "$repo_dir"
+  (
+    cd "$repo_dir"
+    git init >/dev/null 2>&1
+    git config user.name "Orbit Test"
+    git config user.email "orbit-tests@example.com"
+    touch README.md
+    git add README.md
+    git commit -m "init" >/dev/null 2>&1
+  )
+}
+
+resolve_hooks_dir() {
+  local repo_dir="$1"
+  local hooks_dir
+  hooks_dir=$(git -C "$repo_dir" rev-parse --git-path hooks)
+  if [[ "$hooks_dir" = /* ]]; then
+    printf '%s\n' "$hooks_dir"
+  else
+    printf '%s/%s\n' "$repo_dir" "$hooks_dir"
+  fi
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 section "Flag matrix: --tool claude (default)"
 PROJECT1="$TMPDIR_ROOT/proj-claude"
@@ -53,12 +89,19 @@ assert_file "INSTRUCTIONS.md installed"       "$PROJECT1/.claude/INSTRUCTIONS.md
 assert_file "SKILLS.md installed"             "$PROJECT1/.claude/SKILLS.md"
 assert_file "WORKFLOWS.md installed"          "$PROJECT1/.claude/WORKFLOWS.md"
 assert_file "orbit.registry.json installed"   "$PROJECT1/.claude/orbit.registry.json"
+assert_file "adapter.contract.json installed" "$PROJECT1/.claude/adapter.contract.json"
 assert_file "orbit.config.json installed"     "$PROJECT1/orbit.config.json"
 assert_file "STATE.template.md installed"     "$PROJECT1/.claude/state/STATE.template.md"
 assert_dir  "agents/ installed"               "$PROJECT1/.claude/agents"
 assert_dir  "skills/ installed"               "$PROJECT1/.claude/skills"
 assert_dir  "hooks/ installed"                "$PROJECT1/.claude/orbit/hooks"
 assert_file ".orbit/state/STATE.md created"   "$PROJECT1/.orbit/state/STATE.md"
+assert_file ".orbit/state/DECISIONS-LOG.md created" "$PROJECT1/.orbit/state/DECISIONS-LOG.md"
+assert_file ".orbit/state/OPERATIONAL-RULES.json created" "$PROJECT1/.orbit/state/OPERATIONAL-RULES.json"
+assert_file "DECISIONS-LOG template installed" "$PROJECT1/.claude/state/DECISIONS-LOG.template.md"
+assert_file "OPERATIONAL-RULES template installed" "$PROJECT1/.claude/state/OPERATIONAL-RULES.template.json"
+assert_contains "Claude contract marks implicit prompt routing supported" "$PROJECT1/.claude/adapter.contract.json" '"implicit_prompt_routing": true'
+assert_contains "Claude contract reflects post_tool_use disabled" "$PROJECT1/.claude/adapter.contract.json" '"post_tool_use": false'
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Flag matrix: --tool codex"
@@ -68,11 +111,18 @@ run_install "$PROJECT2" --tool codex
 assert_file "INSTRUCTIONS.md installed"     "$PROJECT2/.codex/INSTRUCTIONS.md"
 assert_file "orbit.registry.json installed" "$PROJECT2/.codex/orbit.registry.json"
 assert_file "orbit.config.json installed"   "$PROJECT2/.codex/orbit.config.json"
+assert_file "adapter.contract.json installed" "$PROJECT2/.codex/adapter.contract.json"
 assert_file "policy.md installed"           "$PROJECT2/.codex/policy.md"
 assert_file "STATE.template.md installed"   "$PROJECT2/.codex/state/STATE.template.md"
+assert_file "DECISIONS-LOG.template.md installed" "$PROJECT2/.codex/state/DECISIONS-LOG.template.md"
+assert_file "OPERATIONAL-RULES.template.json installed" "$PROJECT2/.codex/state/OPERATIONAL-RULES.template.json"
 assert_dir  "agents/ installed"             "$PROJECT2/.codex/agents"
 assert_dir  "skills/ installed"             "$PROJECT2/.codex/skills"
 assert_contains "policy.md mentions INSTRUCTIONS" "$PROJECT2/.codex/policy.md" "INSTRUCTIONS.md"
+assert_contains "policy.md mentions plain prompts" "$PROJECT2/.codex/policy.md" "plain prompt"
+assert_contains "INSTRUCTIONS.md mentions supported plain-prompt routing" "$PROJECT2/.codex/INSTRUCTIONS.md" "supports Orbit workflow inference for plain prompts"
+assert_contains "Codex contract marks implicit prompt routing supported" "$PROJECT2/.codex/adapter.contract.json" '"implicit_prompt_routing": true'
+assert_contains "Codex contract requires policy.md" "$PROJECT2/.codex/adapter.contract.json" '"policy_file": "policy.md"'
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Flag matrix: --all (claude + codex)"
@@ -82,6 +132,20 @@ run_install "$PROJECT3" --all
 assert_file "Claude: CLAUDE.md"         "$PROJECT3/.claude/CLAUDE.md"
 assert_file "Codex: INSTRUCTIONS.md"    "$PROJECT3/.codex/INSTRUCTIONS.md"
 assert_file "Codex: policy.md"          "$PROJECT3/.codex/policy.md"
+assert_contains "Claude CLAUDE.md mentions supported plain-prompt routing" "$PROJECT3/.claude/CLAUDE.md" "supports Orbit workflow inference for plain prompts"
+assert_contains "Codex policy mentions plain prompts in --all" "$PROJECT3/.codex/policy.md" "plain prompt"
+
+# ─────────────────────────────────────────────────────────────────────────────
+section "Flag matrix: --tool antigravity"
+PROJECT3C="$TMPDIR_ROOT/proj-antigravity"
+run_install "$PROJECT3C" --tool antigravity
+
+assert_file "Antigravity CLAUDE.md installed" "$PROJECT3C/.antigravity/CLAUDE.md"
+assert_file "Antigravity adapter contract installed" "$PROJECT3C/.antigravity/adapter.contract.json"
+assert_contains "Antigravity instructions mention supported plain-prompt routing" "$PROJECT3C/.antigravity/CLAUDE.md" "supports Orbit workflow inference for plain prompts"
+assert_contains "Antigravity contract marks implicit prompt routing supported" "$PROJECT3C/.antigravity/adapter.contract.json" '"implicit_prompt_routing": true'
+assert_file "Antigravity shared STATE.md created" "$PROJECT3C/.orbit/state/STATE.md"
+assert_file "Antigravity shared decisions log created" "$PROJECT3C/.orbit/state/DECISIONS-LOG.md"
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Node wrapper smoke test: bin/install.js delegates to install.sh"
@@ -90,6 +154,8 @@ mkdir -p "$PROJECT3B"
 ( cd "$PROJECT3B" && HOME="$TMPDIR_ROOT/home" node "$FRAMEWORK_DIR/bin/install.js" --tool claude >/dev/null 2>&1 ) || true
 assert_file "Node wrapper CLAUDE.md installed"   "$PROJECT3B/.claude/CLAUDE.md"
 assert_file "Node wrapper STATE.md created"       "$PROJECT3B/.orbit/state/STATE.md"
+assert_file "Node wrapper DECISIONS-LOG.md created" "$PROJECT3B/.orbit/state/DECISIONS-LOG.md"
+assert_file "Node wrapper OPERATIONAL-RULES.json created" "$PROJECT3B/.orbit/state/OPERATIONAL-RULES.json"
 
 # ─────────────────────────────────────────────────────────────────────────────
 section "Idempotency: running install twice produces identical result"
@@ -118,7 +184,7 @@ assert_file "Installed despite no manifest" "$PROJECT6/.claude/CLAUDE.md"
 section "Hook scripts are executable"
 PROJECT7="$TMPDIR_ROOT/proj-hooks"
 run_install "$PROJECT7" --tool claude
-for hook in pre-tool-use post-tool-use pre-compact stop; do
+for hook in pre-tool-use post-tool-use pre-compact stop sync-context post-commit pre-push; do
   assert_exec "hooks/$hook.sh is +x" "$PROJECT7/.claude/orbit/hooks/$hook.sh"
 done
 
@@ -130,6 +196,39 @@ echo "node_modules/" > "$PROJECT8/.gitignore"
 run_install "$PROJECT8" --tool claude
 assert_contains ".gitignore has .orbit/errors/" "$PROJECT8/.gitignore" ".orbit/errors/"
 assert_contains ".gitignore has .worktrees/"    "$PROJECT8/.gitignore" ".worktrees/"
+
+# ─────────────────────────────────────────────────────────────────────────────
+section "Local install wires git hooks in a normal repo"
+PROJECT9="$TMPDIR_ROOT/proj-git-hooks"
+git_init_repo "$PROJECT9"
+run_install "$PROJECT9" --tool claude
+HOOKS_DIR_9=$(git -C "$PROJECT9" rev-parse --git-path hooks)
+HOOKS_DIR_9=$(resolve_hooks_dir "$PROJECT9")
+assert_symlink "post-commit hook linked" "$HOOKS_DIR_9/post-commit"
+assert_symlink "pre-push hook linked"    "$HOOKS_DIR_9/pre-push"
+assert_symlink "pre-commit hook linked"  "$HOOKS_DIR_9/pre-commit"
+
+# ─────────────────────────────────────────────────────────────────────────────
+section "Local install wires git hooks in a linked worktree"
+PROJECT10_ROOT="$TMPDIR_ROOT/proj-worktree-root"
+PROJECT10_WT="$TMPDIR_ROOT/proj-worktree-copy"
+git_init_repo "$PROJECT10_ROOT"
+( cd "$PROJECT10_ROOT" && git worktree add "$PROJECT10_WT" -b feat/test-hooks >/dev/null 2>&1 )
+run_install "$PROJECT10_WT" --tool claude
+HOOKS_DIR_10=$(resolve_hooks_dir "$PROJECT10_WT")
+assert_symlink "worktree post-commit hook linked" "$HOOKS_DIR_10/post-commit"
+assert_symlink "worktree pre-push hook linked"    "$HOOKS_DIR_10/pre-push"
+assert_symlink "worktree pre-commit hook linked"  "$HOOKS_DIR_10/pre-commit"
+
+# ─────────────────────────────────────────────────────────────────────────────
+section "Setup path also ensures git hooks are active"
+PROJECT11="$TMPDIR_ROOT/proj-setup-hooks"
+git_init_repo "$PROJECT11"
+run_setup "$PROJECT11"
+HOOKS_DIR_11=$(resolve_hooks_dir "$PROJECT11")
+assert_symlink "setup post-commit hook linked" "$HOOKS_DIR_11/post-commit"
+assert_symlink "setup pre-push hook linked"    "$HOOKS_DIR_11/pre-push"
+assert_symlink "setup pre-commit hook linked"  "$HOOKS_DIR_11/pre-commit"
 
 # ─────────────────────────────────────────────────────────────────────────────
 echo ""

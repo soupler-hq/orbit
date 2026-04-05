@@ -20,7 +20,8 @@
 6. Update state after completion and before compaction.
 
 ## Artifact Chain
-- Discovery produces `PROJECT.md`, `REQUIREMENTS.md`, and `ROADMAP.md`.
+- `/orbit:discover` produces `DISCOVERY.md`.
+- `/orbit:new-project` produces `PROJECT.md`, `REQUIREMENTS.md`, and `ROADMAP.md`.
 - Planning produces `PHASE-{N}-PLAN.md`.
 - Execution produces task outputs and `SUMMARY.md`.
 - Verification produces `PHASE-{N}-VERIFICATION.md` and `PHASE-{N}-UAT.md`.

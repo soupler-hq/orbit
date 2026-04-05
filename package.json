@@ -1,6 +1,6 @@
 {
   "name": "@soupler-hq/orbit",
-  "version": "2.8.1",
+  "version": "2.9.0",
   "description": "Production-grade Orbit framework — design, build, deploy, and monitor any kind of work",
   "main": "bin/install.js",
   "bin": {
@@ -10,6 +10,9 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
+    "setup": "bash bin/setup.sh",
+    "context": "node bin/context.js",
+    "bootstrap": "node bin/bootstrap.js",
     "install-local": "bash install.sh --local --tool claude",
     "install-global": "bash install.sh --global --tool claude",
     "install-all": "bash install.sh --global --all",
@@ -25,8 +28,9 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "promote": "bash bin/promote.sh",
-    "generate": "node bin/generate-instructions.js --runtime claude --output CLAUDE.md",
-    "generate:views": "node bin/generate-instructions.js --human-views"
+    "generate": "node bin/generate-instructions.js --runtime claude --output .claude/CLAUDE.md",
+    "generate:views": "node bin/generate-instructions.js --human-views",
+    "generate:plans": "node bin/generate-plan-index.js"
   },
   "keywords": [
     "ai-agents",
@@ -51,7 +55,6 @@
   },
   "homepage": "https://github.com/soupler-hq/orbit#readme",
   "files": [
-    "CLAUDE.md",
     "README.md",
     "templates/",
     "INSTRUCTIONS.md",
@@ -80,5 +83,8 @@
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.1",
     "vitest": "^4.1.2"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.8.0"
   }
 }

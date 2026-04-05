@@ -4,7 +4,7 @@
   "title": "Orbit Configuration",
   "type": "object",
   "additionalProperties": false,
-  "required": ["project", "mode", "models", "agents", "git", "skills", "hooks", "security", "notifications", "mcp"],
+  "required": ["project", "mode", "models", "agents", "git", "skills", "hooks", "security", "loop_detection", "clarification_gate", "distributed_mutex_warning", "notifications", "mcp", "adapters", "runtimes"],
   "properties": {
     "project": {
       "type": "object",
@@ -137,6 +137,22 @@
         "identity_separation": { "type": "boolean" }
       }
     },
+    "loop_detection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "window_size", "threshold"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "window_size": { "type": "integer", "minimum": 1 },
+        "threshold": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "clarification_gate": {
+      "type": "boolean"
+    },
+    "distributed_mutex_warning": {
+      "type": "boolean"
+    },
     "notifications": {
       "type": "object",
       "additionalProperties": false,
@@ -163,6 +179,37 @@
           "type": "array",
           "items": { "type": "string" },
           "minItems": 1
+        }
+      }
+    },
+    "adapters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_path", "pattern"],
+      "properties": {
+        "base_path": { "type": "string" },
+        "pattern": { "type": "string" }
+      }
+    },
+    "runtimes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "instruction_file", "install_path", "capabilities"],
+        "properties": {
+          "name": { "type": "string" },
+          "instruction_file": { "type": "string" },
+          "install_path": { "type": "string" },
+          "capabilities": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["implicit_prompt_routing", "routing_mechanism"],
+            "properties": {
+              "implicit_prompt_routing": { "type": "boolean" },
+              "routing_mechanism": { "type": "string" }
+            }
+          }
         }
       }
     }

@@ -7,26 +7,60 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 required_files=(
-  "CLAUDE.md"
   "templates/orbit.base.md"
   "README.md"
+  "docs/README.md"
+  "docs/architecture/README.md"
+  "docs/operations/README.md"
+  "docs/quality/README.md"
+  "docs/integrations/README.md"
+  "docs/governance/README.md"
   "INSTRUCTIONS.md"
   "SKILLS.md"
   "WORKFLOWS.md"
   "orbit.registry.json"
   "orbit.config.schema.json"
-  "docs/runtime-adapters.md"
-  "docs/evals.md"
-  "docs/eval-dataset.md"
+  "docs/architecture/runtime-adapters.md"
+  "docs/quality/evaluation-framework.md"
+  "docs/quality/eval-dataset.md"
   "commands/commands.md"
   "commands/orbit/eval.md"
+  "commands/orbit/clarify.md"
+  "commands/orbit/riper.md"
   "hooks/HOOKS.md"
   "install.sh"
   "package.json"
   "orbit.config.json"
-  "state/STATE.template.md"
+  "templates/STATE.md"
+  "templates/OPERATIONAL-RULES.json"
+  ".orbit/state/STATE.md"
+  "bin/recovery-loop.js"
   "bin/install.js"
+  "bin/eval-contract.js"
   "bin/eval.sh"
+  "bin/generate-plan-index.js"
+  "bin/next.js"
+  "bin/plan.js"
+  "bin/prompt-dispatch.js"
+  "bin/progress.js"
+  "bin/quick.js"
+  "bin/riper.js"
+  "bin/runtime-adapter.js"
+  "bin/operational-rules.js"
+  "bin/checkpoint-manifest.js"
+  "bin/pull-request-controller.js"
+  "bin/review-evidence.js"
+  "bin/review.js"
+  "bin/runtime-command.js"
+  "bin/ship.js"
+  "bin/collect-tracked-issues.js"
+  "bin/clarification-gate.js"
+  "bin/clarify.js"
+  "bin/validate-doc-updates.js"
+  "bin/validate-pr-governance.js"
+  "bin/verify.js"
+  "bin/workflow-state.js"
+  "hooks/scripts/on-error.sh"
 )
 
 required_dirs=(
@@ -36,7 +70,6 @@ required_dirs=(
   "hooks/scripts"
   "docs"
   "examples"
-  "state"
   "bin"
 )
 # forge/ is optional — it is userland (created on demand), not kernel
@@ -70,9 +103,9 @@ const configPath = path.join(root, 'orbit.config.json');
 const registryPath = path.join(root, 'orbit.registry.json');
 const schemaPath = path.join(root, 'orbit.config.schema.json');
 const packagePath = path.join(root, 'package.json');
-const runtimeAdaptersPath = path.join(root, 'docs', 'runtime-adapters.md');
-const evalsPath = path.join(root, 'docs', 'evals.md');
-const evalDatasetPath = path.join(root, 'docs', 'eval-dataset.md');
+const runtimeAdaptersPath = path.join(root, 'docs', 'architecture', 'runtime-adapters.md');
+const evalsPath = path.join(root, 'docs', 'quality', 'evaluation-framework.md');
+const evalDatasetPath = path.join(root, 'docs', 'quality', 'eval-dataset.md');
 const evalCommandPath = path.join(root, 'commands', 'orbit', 'eval.md');
 
 JSON.parse(fs.readFileSync(configPath, 'utf8'));
@@ -184,13 +217,53 @@ if (fs.existsSync(forgeDir)) {
 }
 NODE
 
+node "$ROOT_DIR/bin/generate-plan-index.js" --check
+
 printf 'Orbit validation passed.\n'
 
+# ── Root markdown hygiene check ──────────────────────────────────────────────
+# Warn when new root-level markdown files appear outside the approved root
+# contract. This keeps docs discoverable without breaking historical flows.
+node <<'NODE'
+const fs = require('fs');
+const path = require('path');
+
+const root = process.cwd();
+const allowedRootMarkdown = new Set([
+  'README.md',
+  'CHANGELOG.md',
+  'CLAUDE.md',
+  'INSTRUCTIONS.md',
+  'SECURITY.md',
+  'SKILLS.md',
+  'WORKFLOWS.md',
+  'LICENSE.md'
+]);
+
+const entries = fs.readdirSync(root, { withFileTypes: true });
+const unexpected = entries
+  .filter(entry => entry.isFile())
+  .map(entry => entry.name)
+  .filter(name => name.endsWith('.md'))
+  .filter(name => !allowedRootMarkdown.has(name))
+  .sort();
+
+if (unexpected.length > 0) {
+  console.warn('\n⚠️  Warning: unexpected root-level markdown files found.');
+  console.warn('   Root markdown is reserved for the root contract.');
+  console.warn('   Move durable docs into docs/ unless they are intentional public entrypoints.');
+  for (const name of unexpected) {
+    console.warn(`   - ${name}`);
+  }
+}
+NODE
+
 # ── Model ID hygiene check ────────────────────────────────────────────────────
-# Warn if CLAUDE.md contains raw Anthropic model IDs instead of routing aliases.
+# Warn if the orchestrator template contains raw Anthropic model IDs instead of routing aliases.
+# Check templates/orbit.base.md — the canonical source. CLAUDE.md is generated at install time.
 MODEL_PATTERN='claude-(haiku|sonnet|opus)-[0-9]'
-if grep -qE "$MODEL_PATTERN" "$ROOT_DIR/CLAUDE.md"; then
-  printf '\n⚠️  Warning: CLAUDE.md contains hardcoded model IDs.\n' >&2
+if grep -qE "$MODEL_PATTERN" "$ROOT_DIR/templates/orbit.base.md"; then
+  printf '\n⚠️  Warning: templates/orbit.base.md contains hardcoded model IDs.\n' >&2
   printf '   Model versions should live only in orbit.config.json → models.routing.\n' >&2
-  grep -nE "$MODEL_PATTERN" "$ROOT_DIR/CLAUDE.md" >&2 || true
+  grep -nE "$MODEL_PATTERN" "$ROOT_DIR/templates/orbit.base.md" >&2 || true
 fi

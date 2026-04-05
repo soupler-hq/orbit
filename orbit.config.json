@@ -13,16 +13,32 @@
   },
   "models": {
     "routing": {
-      "classify":  "claude-haiku-4-5-20251001",
-      "standard":  "claude-sonnet-4-6",
+      "classify": "claude-haiku-4-5-20251001",
+      "standard": "claude-sonnet-4-6",
       "reasoning": "claude-opus-4-6",
-      "security":  "claude-opus-4-6"
+      "security": "claude-opus-4-6"
     },
     "profiles": {
-      "classify":    { "model": "claude-haiku-4-5-20251001",  "max_tokens": 1024,  "use_for": ["intent classification", "context routing", "simple lookups"] },
-      "implement":   { "model": "claude-sonnet-4-6",          "max_tokens": 8192,  "use_for": ["coding", "refactoring", "debugging", "most tasks"] },
-      "architect":   { "model": "claude-opus-4-6",            "max_tokens": 16384, "use_for": ["system design", "architecture decisions", "complex reasoning"] },
-      "quick":       { "model": "claude-haiku-4-5-20251001",  "max_tokens": 2048,  "use_for": ["one-liners", "quick lookups", "format conversions"] }
+      "classify": {
+        "model": "claude-haiku-4-5-20251001",
+        "max_tokens": 1024,
+        "use_for": ["intent classification", "context routing", "simple lookups"]
+      },
+      "implement": {
+        "model": "claude-sonnet-4-6",
+        "max_tokens": 8192,
+        "use_for": ["coding", "refactoring", "debugging", "most tasks"]
+      },
+      "architect": {
+        "model": "claude-opus-4-6",
+        "max_tokens": 16384,
+        "use_for": ["system design", "architecture decisions", "complex reasoning"]
+      },
+      "quick": {
+        "model": "claude-haiku-4-5-20251001",
+        "max_tokens": 2048,
+        "use_for": ["one-liners", "quick lookups", "format conversions"]
+      }
     },
     "cost_guard": {
       "warn_at_tokens": 100000,
@@ -61,6 +77,13 @@
     "destructive_command_guard": true,
     "identity_separation": false
   },
+  "loop_detection": {
+    "enabled": true,
+    "window_size": 8,
+    "threshold": 3
+  },
+  "clarification_gate": true,
+  "distributed_mutex_warning": false,
   "notifications": {
     "slack_webhook_url": "",
     "on_phase_complete": false,
@@ -72,21 +95,37 @@
     "recommended": ["filesystem", "git", "github", "fetch"],
     "avoid_in_production": ["dangerous-tools"]
   },
+  "adapters": {
+    "base_path": ".orbit/adapters",
+    "pattern": ".orbit/adapters/{tool}/"
+  },
   "runtimes": {
     "claude": {
       "name": "Claude",
       "instruction_file": "CLAUDE.md",
-      "install_path": ".claude/CLAUDE.md"
+      "install_path": ".claude/CLAUDE.md",
+      "capabilities": {
+        "implicit_prompt_routing": true,
+        "routing_mechanism": "native instruction orchestration"
+      }
     },
     "codex": {
       "name": "Codex",
       "instruction_file": "INSTRUCTIONS.md",
-      "install_path": ".codex/INSTRUCTIONS.md"
+      "install_path": ".codex/INSTRUCTIONS.md",
+      "capabilities": {
+        "implicit_prompt_routing": true,
+        "routing_mechanism": "operator prompt and policy files"
+      }
     },
     "antigravity": {
       "name": "Antigravity",
       "instruction_file": "CLAUDE.md",
-      "install_path": ".antigravity/CLAUDE.md"
+      "install_path": ".antigravity/CLAUDE.md",
+      "capabilities": {
+        "implicit_prompt_routing": true,
+        "routing_mechanism": "generated runtime instructions"
+      }
     }
   }
 }

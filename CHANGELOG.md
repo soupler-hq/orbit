@@ -4,6 +4,28 @@ All notable changes to the Orbit framework will be documented in this file. The 
 
 ## [Unreleased]
 
+## [2.9.0] - 2026-04-05
+
+### Added
+
+- **Universal context runtime**: `bin/context.js`, `bin/db.js`, `bin/bootstrap.js`, `bin/decision-log.js`, `bin/generate-plan-index.js`, and related docs/tests establish the shared `context.db` + `STATE.md` model, partial loads, bootstrap flows, checkpoint-aware recovery, and durable decision logging.
+- **Executable workflow enforcement**: `bin/workflow-state.js`, `bin/runtime-command.js`, `bin/quick.js`, `bin/progress.js`, `bin/ship.js`, `bin/prompt-dispatch.js`, `bin/pull-request-controller.js`, `bin/review-evidence.js`, and their tests make Orbit’s tracked lifecycle, PR evidence gates, explicit command dispatch, and quick review/PR auto-chain executable instead of purely documented.
+- **Operational resilience**: `bin/clarification-gate.js`, `bin/recovery-loop.js`, loop detection in `bin/orchestrator.js`, `bin/checkpoint-manifest.js`, `bin/operational-rules.js`, new hooks, and governance validators add clarification handling, learned-route enforcement, loop termination, checkpoint manifests, and executable recovery paths.
+- **Expanded operator surface**: `/orbit:ask`, `/orbit:clarify`, `/orbit:discover`, `/orbit:launch`, and `/orbit:riper` are now documented and wired into the runtime contract, with new agents and skills for product, launch, QA, technical writing, onboarding, and compliance workflows.
+- **Executable eval artifacts**: `bin/eval-contract.js` and the expanded `bin/eval-runner.js` now generate `EVAL-REPORT.md` plus machine-readable `eval-report.json`, covering routing, workflow, registry, portability, prompt-routing, runtime-enforcement, and observability metrics.
+
+### Changed
+
+- **Repository structure and docs**: technical content is reorganized under `docs/architecture`, `docs/operations`, `docs/quality`, `docs/releases`, `docs/playbooks`, `docs/issues`, and `docs/plans`, with README repositioned around the Idea-to-Market audience and the self-orchestrated `v2.9.0` milestone.
+- **Runtime adapters and installation**: `install.sh`, `bin/setup.sh`, runtime-adapter docs, and generated views now treat Claude, Codex, and Antigravity as first-class adapter targets with shared state artifacts and consistent install/test behavior.
+- **Governance and CI**: Sentinel and main release workflows now enforce PR-body freshness, docs-update governance, residual-risk labeling, lockfile discipline, human-view drift, install coverage, and release artifact generation as part of the standard branch lifecycle.
+
+### Fixed
+
+- **Quick runtime blocker preservation**: `/orbit:quick` now keeps issue-boundary and operational-rule blockers authoritative even when tests and review evidence are green, preventing auto-chain from recommending review/ship on the wrong branch or route.
+- **Operational-rule next-command guidance**: blocked approved-route flows now continue recommending `/orbit:quick` instead of falling back to `/orbit:review`, keeping the operator-facing recommendation aligned with the workflow gate.
+- **Eval artifact contract timing**: the eval artifact test now allows the full validate + eval pipeline budget so the contract remains green under the current executable eval flow.
+
 ## [2.8.1] - 2026-03-30
 
 ### Added
